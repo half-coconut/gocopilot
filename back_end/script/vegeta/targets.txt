@@ -1,4 +1,0 @@
-GET http://localhost:3002/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjQyMzE2OTMsIlVJRCI6NCwiVXNlckFnZW50IjoiUG9zdG1hblJ1bnRpbWUvNy4zOS4wIn0.cpMGOXVa1hY42PkOvBuKAejKxsiEaSC03D-ekkEHr7M
-Content-Type: application/json
-User-Agent: PostmanRuntime/7.39.0
