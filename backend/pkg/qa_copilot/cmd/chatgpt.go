@@ -4,6 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"backend/pkg/qa_copilot/utils"
 	"bufio"
 	"context"
 	"encoding/json"
@@ -15,7 +16,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/kubectl/pkg/scheme"
-	"k8scopilot/utils"
 	"os"
 	"strings"
 

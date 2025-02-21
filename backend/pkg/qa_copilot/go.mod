@@ -1,12 +1,13 @@
-module k8scopilot
+module backend/pkg/qa_copilot
 
-go 1.23.6
+go 1.24.0
 
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sashabaranov/go-openai v1.37.0
 	github.com/spf13/cobra v1.8.1
+	k8s.io/api v0.32.2
 	k8s.io/apimachinery v0.32.2
 	k8s.io/client-go v0.32.2
 	k8s.io/kubectl v0.32.2
@@ -46,7 +47,6 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.32.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241105132330-32ad38e42d3f // indirect
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738 // indirect

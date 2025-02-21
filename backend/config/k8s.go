@@ -6,7 +6,7 @@ package config
 var Config = config{
 	DB: DBConfig{
 		// 本地连接
-		DSN: "root:root@tcp(webook-live-mysql:11309)/eggyolk",
+		DSN: "root:root@tcp(webook-live-mysql:11309)/testcopilot",
 	},
 	Redis: RedisConfig{
 		Addr: "webook-live-redis:11479",

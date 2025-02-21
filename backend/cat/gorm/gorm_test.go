@@ -10,7 +10,7 @@ import (
 )
 
 func TestGorm(t *testing.T) {
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/eggyolk"))
+	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/testcopilot"))
 	if err != nil {
 		panic(err)
 	}
