@@ -1,10 +1,24 @@
 package report
 
 import (
-	"backend/cat/work"
 	"fmt"
+	"net/http"
 	"time"
 )
+
+type Result struct {
+	Task      string        `json:"task"`
+	Code      int           `json:"code,string"`
+	Error     string        `json:"error"`
+	Body      string        `json:"body"`
+	Method    string        `json:"method"`
+	URL       string        `json:"url"`
+	Headers   http.Header   `json:"headers"`
+	Duration  time.Duration `json:"duration"`
+	Timestamp time.Time     `json:"timestamp"`
+	Seq       uint64        `json:"seq"`
+	//Assert   Assert      `json:"assert"`
+}
 
 // 如果想要输出报告，必须获取每一次的结果，以及最终的结果
 
@@ -21,7 +35,7 @@ func (r *Report) Requests(workers int, du time.Duration) {
 }
 
 // DisplayReport TODO: 记得改回 Report
-func DisplayReport(rch chan []*work.Result) {
+func DisplayReport(rch chan []*Result) {
 	for res := range rch {
 		for _, r := range res {
 			println(r)

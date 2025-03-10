@@ -4,15 +4,14 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"TestEngine/pkg/qa_scopilot/utils"
 	"bytes"
 	"context"
 	"fmt"
 	"github.com/sashabaranov/go-openai"
+	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8scopilot/utils"
-
-	"github.com/spf13/cobra"
 )
 
 // eventCmd represents the event command

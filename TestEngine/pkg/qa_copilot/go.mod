@@ -1,4 +1,4 @@
-module backend/pkg/qa_copilot
+module TestEngine/pkg/qa_scopilot
 
 go 1.24.0
 

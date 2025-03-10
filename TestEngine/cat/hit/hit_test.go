@@ -1,7 +1,7 @@
 package hit
 
 import (
-	"egg_yolk/cat/log"
+	"TestCopilot/TestEngine/cat/log"
 	"net/http"
 	"testing"
 	"time"

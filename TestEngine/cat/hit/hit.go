@@ -1,8 +1,8 @@
 package hit
 
 import (
+	"TestCopilot/TestEngine/cat/log"
 	"bytes"
-	"egg_yolk/cat/log"
 	"fmt"
 	"go.uber.org/zap"
 	"io"

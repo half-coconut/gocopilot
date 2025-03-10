@@ -22,7 +22,7 @@ THE SOFTWARE.
 package main
 
 import (
-	"k8scopilot/cmd"
+	"TestEngine/pkg/qa_scopilot/cmd"
 )
 
 func main() {
