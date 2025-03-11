@@ -40,6 +40,10 @@ const StyledRow = styled(CommonRow)`
 
 const StyledBody = styled.section`
   margin: 0.4rem 0;
+  width: 100%;
+  /* overflow: hidden; */
+  /* text-overflow: ellipsis; */
+  white-space: nowrap;
 `;
 
 const Footer = styled.footer`
@@ -88,6 +92,7 @@ function Row({ children }) {
     </StyledRow>
   );
 }
+
 function Body({ data, render }) {
   if (!data.length) return <Empty>No data to show at the moment</Empty>;
   return <StyledBody>{data.map(render)}</StyledBody>;

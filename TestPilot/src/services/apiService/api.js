@@ -33,7 +33,6 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (resp) => {
     const newToken = resp.headers["x-jwt-token"] || null;
-    console.log("newToken:", newToken);
     const newRefreshToken = resp.headers["x-refresh-token"] || null;
 
     if (newToken) {

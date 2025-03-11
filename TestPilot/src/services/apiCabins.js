@@ -1,14 +1,21 @@
+import interfaceService from "./apiService/interfaceService";
 import { supabase, supabaseUrl } from "./supabase";
 
 // 查询 cabin
-export default async function getCabins() {
-  const { data, error } = await supabase.from("cabins").select("*");
+// export default async function getCabinsV1() {
+//   const { data, error } = await supabase.from("cabins").select("*");
 
-  if (error) {
-    console.error(error);
-    throw new Error("Cabins could not be loaded");
-  }
-  return data;
+//   if (error) {
+//     console.error(error);
+//     throw new Error("Cabins could not be loaded");
+//   }
+//   return data;
+// }
+
+export default async function getCabins() {
+  const resp = await interfaceService.list();
+  console.log("====data: ", resp);
+  return resp;
 }
 
 // 创建新的 cabin

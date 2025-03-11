@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { formatCurrency } from "../../utils/helpers";
+// import { formatCurrency } from "../../utils/helpers";
 
 import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabiin } from "./useDeleteCabin";
@@ -11,40 +11,28 @@ import ConfirmDelete from "../../ui/ConfirmDelete";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
 
-// const TableRow = styled.div`
-//   display: grid;
-//   grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-//   column-gap: 2.4rem;
-//   align-items: center;
-//   padding: 1.4rem 2.4rem;
-
-//   &:not(:last-child) {
-//     border-bottom: 1px solid var(--color-grey-100);
-//   }
+// const Img = styled.img`
+//   display: block;
+//   width: 6.4rem;
+//   aspect-ratio: 3 / 2;
+//   object-fit: cover;
+//   object-position: center;
+//   transform: scale(1.5) translateX(-7px);
 // `;
 
-const Img = styled.img`
-  display: block;
-  width: 6.4rem;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-  object-position: center;
-  transform: scale(1.5) translateX(-7px);
-`;
-
-const Cabin = styled.div`
+const Interface = styled.div`
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-grey-600);
   font-family: "Sono";
 `;
 
-const Price = styled.div`
-  font-family: "Sono";
-  font-weight: 600;
-`;
+// const Price = styled.div`
+//   font-family: "Sono";
+//   font-weight: 600;
+// `;
 
-const Discount = styled.div`
+const Project = styled.div`
   font-family: "Sono";
   font-weight: 500;
   color: var(--color-green-700);
@@ -54,23 +42,27 @@ function CabinRow({ cabin }) {
   const { isCreating, createCabin } = useCreateCabiin();
 
   const {
-    id: cabinId,
+    id: interfaceId,
     name,
-    maxCapacity,
-    regularPrice,
-    discount,
-    image,
-    description,
+    project,
+    url,
+    type,
+    creator,
+    updater,
+    ctime,
+    utime,
   } = cabin;
 
   function handleDuplicate() {
     createCabin({
       name: `Copy of ${name}`,
-      maxCapacity,
-      regularPrice,
-      discount,
-      image,
-      description,
+      project,
+      url,
+      type,
+      creator,
+      updater,
+      ctime,
+      utime,
     });
   }
 
@@ -78,21 +70,21 @@ function CabinRow({ cabin }) {
 
   return (
     <Table.Row>
-      <Img src={image} />
-      <Cabin>{name}</Cabin>
-      <div>Fits up to {maxCapacity} guests</div>
-      <Price>{formatCurrency(regularPrice)}</Price>
-      {discount ? (
-        <Discount>{formatCurrency(discount)}</Discount>
-      ) : (
-        <span>&mdash;</span>
-      )}
+      {/* <Img src={image} /> */}
+      <Interface>{name}</Interface>
+      <Project>{project} </Project>
+      <div>{type} </div>
+      <div>{creator} </div>
+      <div>{updater} </div>
+      <div>{ctime} </div>
+      <div>{utime} </div>
+
       <div>
         <Modal>
           <Menus.Menu>
-            <Menus.Toggle id={cabinId} />
+            <Menus.Toggle id={interfaceId} />
 
-            <Menus.List id={cabinId}>
+            <Menus.List id={interfaceId}>
               <Menus.Button
                 icon={<HiSquare2Stack />}
                 onClick={handleDuplicate}
@@ -118,7 +110,7 @@ function CabinRow({ cabin }) {
               <ConfirmDelete
                 resourceName="cabins"
                 disabled={isDeleting}
-                onConfirm={() => deleteCabin(cabinId)}
+                onConfirm={() => deleteCabin(interfaceId)}
               />
             </Modal.Window>
           </Menus.Menu>
@@ -132,11 +124,13 @@ CabinRow.propTypes = {
   cabin: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
-    maxCapacity: PropTypes.number.isRequired,
-    regularPrice: PropTypes.number.isRequired,
-    discount: PropTypes.number.isRequired,
-    image: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
+    project: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    creator: PropTypes.string.isRequired,
+    updater: PropTypes.string.isRequired,
+    ctime: PropTypes.string.isRequired,
+    utime: PropTypes.string.isRequired,
   }).isRequired,
 };
 

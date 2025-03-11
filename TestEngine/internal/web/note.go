@@ -3,6 +3,7 @@ package web
 import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/service"
+	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/ginx"
 	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
@@ -29,13 +30,13 @@ func (n *NoteHandler) RegisterRoutes(server *gin.Engine) {
 	note.POST("/edit", n.Edit)
 	note.POST("/publish", n.Publish)
 	note.POST("/withdraw", n.Withdraw)
-	note.POST("/list", ginx.WrapBodyAndToken[ListReq, UserClaims](n.List))
-	note.GET("/detail:id", ginx.WrapToken[UserClaims](n.Detail))
+	note.POST("/list", ginx.WrapBodyAndToken[ListReq, ijwt.UserClaims](n.List))
+	note.GET("/detail:id", ginx.WrapToken[ijwt.UserClaims](n.Detail))
 
 	pub := server.Group("pub")
 	pub.GET("/:id", n.PubDetail, func(ctx *gin.Context) {})
-	pub.POST("/like", ginx.WrapBodyAndToken[LikeReq, UserClaims](n.Like))
-	pub.POST("/reward", ginx.WrapBodyAndToken[RewardReq, UserClaims](n.Reward))
+	pub.POST("/like", ginx.WrapBodyAndToken[LikeReq, ijwt.UserClaims](n.Like))
+	pub.POST("/reward", ginx.WrapBodyAndToken[RewardReq, ijwt.UserClaims](n.Reward))
 }
 
 func (n *NoteHandler) Edit(ctx *gin.Context) {
@@ -52,8 +53,8 @@ func (n *NoteHandler) Edit(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	cl, _ := ctx.Get("claims")
-	claims, ok := cl.(*UserClaims)
+	c, _ := ctx.Get("users")
+	claims, ok := c.(ijwt.UserClaims)
 	if !ok {
 		ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
 		n.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
@@ -90,8 +91,8 @@ func (n *NoteHandler) Publish(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	cl, _ := ctx.Get("claims")
-	claims, ok := cl.(*UserClaims)
+	c, _ := ctx.Get("users")
+	claims, ok := c.(ijwt.UserClaims)
 	if !ok {
 		ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
 		n.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
@@ -123,8 +124,8 @@ func (n *NoteHandler) Withdraw(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	cl := ctx.MustGet("claims")
-	claims, ok := cl.(*UserClaims)
+	c, _ := ctx.Get("users")
+	claims, ok := c.(ijwt.UserClaims)
 	if !ok {
 		ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
 		n.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
@@ -143,11 +144,11 @@ func (n *NoteHandler) Withdraw(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, Result{Code: 1, Message: "撤销成功！"})
 }
 
-func (n *NoteHandler) List(ctx *gin.Context, req ListReq, uc UserClaims) (ginx.Result, error) {
+func (n *NoteHandler) List(ctx *gin.Context, req ListReq, uc ijwt.UserClaims) (ginx.Result, error) {
 	res, err := n.svc.List(ctx, uc.Id, req.Offset, req.Limit)
 	if err != nil {
 		return ginx.Result{Code: 0,
-			Msg: "系统错误",
+			Message: "系统错误",
 		}, nil
 	}
 	return ginx.Result{
@@ -162,21 +163,21 @@ func (n *NoteHandler) List(ctx *gin.Context, req ListReq, uc UserClaims) (ginx.R
 					Utime:    src.Utime.Format(time.DateTime),
 				}
 			}),
-		Msg: "OK",
+		Message: "OK",
 	}, nil
 }
 
-func (n *NoteHandler) Detail(ctx *gin.Context, uc UserClaims) (ginx.Result, error) {
-	return ginx.Result{Msg: "OK"}, nil
+func (n *NoteHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	return ginx.Result{Message: "OK"}, nil
 }
 
 func (n *NoteHandler) PubDetail(context *gin.Context) {
 }
 
-func (n *NoteHandler) Like(ctx *gin.Context, req LikeReq, uc UserClaims) (ginx.Result, error) {
-	return ginx.Result{Msg: "OK"}, nil
+func (n *NoteHandler) Like(ctx *gin.Context, req LikeReq, uc ijwt.UserClaims) (ginx.Result, error) {
+	return ginx.Result{Message: "OK"}, nil
 }
 
-func (n *NoteHandler) Reward(ctx *gin.Context, req RewardReq, uc UserClaims) (ginx.Result, error) {
-	return ginx.Result{Msg: "OK"}, nil
+func (n *NoteHandler) Reward(ctx *gin.Context, req RewardReq, uc ijwt.UserClaims) (ginx.Result, error) {
+	return ginx.Result{Message: "OK"}, nil
 }

@@ -26,7 +26,7 @@ func Wrap(fn func(ctx *gin.Context) (Result, error)) gin.HandlerFunc {
 
 func WrapToken[C jwt.Claims](fn func(ctx *gin.Context, uc C) (Result, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		cl, ok := ctx.Get("claims")
+		cl, ok := ctx.Get("users")
 		if !ok {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
@@ -56,7 +56,7 @@ func WrapBodyAndToken[Req any, C jwt.Claims](fn func(ctx *gin.Context, req Req, 
 			return
 		}
 
-		cl, ok := ctx.Get("claims")
+		cl, ok := ctx.Get("users")
 		if !ok {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return

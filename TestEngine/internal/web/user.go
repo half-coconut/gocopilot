@@ -232,13 +232,6 @@ func (u *UserHandler) Edit(context *gin.Context) {
 }
 
 func (u *UserHandler) ProfileJWT(context *gin.Context) {
-	// 替换为 FindById
-	// 就不用传参 email了，也不用 email 校验了
-	//email := context.Query("email")
-	//if email == "" {
-	//	context.JSON(http.StatusBadRequest, Result{Code: 0, Msg: "邮箱不能为空"})
-	//	return
-	//}
 	type ProfileReq struct {
 		id int64 `json:"id"`
 	}
@@ -248,10 +241,9 @@ func (u *UserHandler) ProfileJWT(context *gin.Context) {
 		log.Printf("%v", err)
 		return
 	}
-	//cl, _ := context.Get("claims")
+
 	c, _ := context.Get("users")
 	claims, ok := c.(ijwt.UserClaims)
-	//claims, ok := cl.(*UserClaims)
 	if !ok {
 		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
 		u.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))

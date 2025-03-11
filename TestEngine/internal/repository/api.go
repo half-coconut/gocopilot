@@ -35,6 +35,7 @@ func (c *CacheAPIRepository) FindByUId(ctx context.Context, id int64) ([]domain.
 		aResp := c.entityToDomain(a)
 		apiResp = append(apiResp, aResp)
 	}
+
 	return apiResp, err
 }
 
@@ -68,6 +69,10 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 			String: api.Params,
 			Valid:  api.Params != "",
 		},
+		Type: sql.NullString{
+			String: api.Type,
+			Valid:  api.Type != "",
+		},
 		Body: sql.NullString{
 			String: api.Body,
 			Valid:  api.Body != "",
@@ -80,6 +85,10 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 			String: api.Method,
 			Valid:  api.Method != "",
 		},
+		Project: sql.NullString{
+			String: api.Project,
+			Valid:  api.Project != "",
+		},
 		Creator: api.Creator,
 		Updater: api.Updater,
 	}
@@ -91,10 +100,12 @@ func (c *CacheAPIRepository) entityToDomain(api dao.API) domain.API {
 		Name: api.Name.String,
 		URL:  api.URL.String,
 
-		Params:  api.URL.String,
+		Params:  api.Params.String,
+		Type:    api.Type.String,
 		Body:    api.Body.String,
 		Header:  jsonToHeader(api.Header.String),
 		Method:  api.Method.String,
+		Project: api.Project.String,
 		Creator: api.Creator,
 		Updater: api.Updater,
 

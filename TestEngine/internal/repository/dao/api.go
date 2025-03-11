@@ -52,6 +52,7 @@ func (dao *GORMAPIDAO) UpdateById(ctx context.Context, api API) error {
 			"body":    api.Body,
 			"header":  api.Header,
 			"method":  api.Method,
+			"project": api.Project,
 			"utime":   now,
 			"updater": api.Updater,
 		})
@@ -71,9 +72,11 @@ type API struct {
 	Name    sql.NullString
 	URL     sql.NullString
 	Params  sql.NullString
+	Type    sql.NullString
 	Body    sql.NullString
 	Header  sql.NullString
 	Method  sql.NullString
+	Project sql.NullString
 	Creator int64
 	Updater int64
 	Ctime   int64
