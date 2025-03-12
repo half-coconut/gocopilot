@@ -153,7 +153,7 @@ func displayTask(e *executionLoadRun) string {
 //		}
 //
 //		for i := uint64(0); i < worker; i++ {
-//			wg.Add(1)
+//			wg.Edit(1)
 //			go t.Run(results, &wg, s)
 //		}
 //		go func() {

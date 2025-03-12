@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import getCabins from "../../services/apiCabins";
 
 export function useCabins() {
-  let {
+  const {
     isLoading,
     data: cabins,
     error,
@@ -11,11 +11,11 @@ export function useCabins() {
     queryFn: getCabins,
   });
 
-  cabins = cabins?.data;
-  console.log("cabins: ", cabins);
-  console.log("cabins data: ", cabins?.data);
+  const cabinItems = cabins?.data?.data?.items;
+  const total = cabins?.data?.data?.total;
+  // console.log("cabins: ", cabins);
+  // console.log("cabinItems: ", cabinItems);
+  // console.log("total: ", total);
 
-  const cabinsData = cabins?.data;
-
-  return { isLoading, error, cabinsData };
+  return { isLoading, error, cabinItems, total };
 }

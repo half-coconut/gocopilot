@@ -19,8 +19,8 @@ const Profile = styled.div`
 `;
 
 function Account() {
-  const { user } = useUser();
-  const { fullName, email } = user.user_metadata;
+  const { userData } = useUser();
+
   return (
     <>
       <Heading as="h1">Profile</Heading>
@@ -28,17 +28,17 @@ function Account() {
       <Row>
         <Heading as="h3">
           <Profile>
-            <p>{fullName}</p>
+            <p>{userData.fullName}</p>
             <span>&bull;</span>
-            <p>{email}</p>
+            <p>{userData.email}</p>
           </Profile>
         </Heading>
 
-        <UpdateUserDataForm />
+        <UpdateUserDataForm userToEidt={userData} />
       </Row>
 
       <Row>
-        <Heading as="h3">Update password</Heading>
+        <Heading as="h3">Update password(Under construction)</Heading>
         <UpdatePasswordForm />
       </Row>
     </>

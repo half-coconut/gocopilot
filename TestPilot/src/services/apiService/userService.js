@@ -36,7 +36,7 @@ const userService = {
   },
 
   editUser: (data) => {
-    return instance.put(`/users/edit`, data);
+    return instance.post(`/users/edit`, data);
   },
 
   profile: () => {

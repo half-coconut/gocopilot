@@ -95,9 +95,10 @@ func (u *CacheUserRepository) entityToDomain(user dao.User) domain.User {
 		Password: user.Password,
 
 		Phone:       user.Phone.String,
-		NickName:    user.NickName.String,
+		FullName:    user.FullName.String,
 		Department:  user.Department.String,
 		Role:        user.Role.String,
+		Avatar:      user.Avatar.String,
 		Description: user.Description.String,
 
 		Ctime: time.UnixMilli(user.Ctime),
@@ -117,9 +118,9 @@ func (u *CacheUserRepository) domainToEntity(user domain.User) dao.User {
 			String: user.Phone,
 			Valid:  user.Phone != "",
 		},
-		NickName: sql.NullString{
-			String: user.NickName,
-			Valid:  user.NickName != "",
+		FullName: sql.NullString{
+			String: user.FullName,
+			Valid:  user.FullName != "",
 		},
 		Department: sql.NullString{
 			String: user.Department,
@@ -129,6 +130,11 @@ func (u *CacheUserRepository) domainToEntity(user domain.User) dao.User {
 			String: user.Role,
 			Valid:  user.Role != "",
 		},
+		Avatar: sql.NullString{
+			String: user.Avatar,
+			Valid:  user.Avatar != "",
+		},
+
 		Description: sql.NullString{
 			String: user.Description,
 			Valid:  user.Description != "",

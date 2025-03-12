@@ -24,7 +24,7 @@ function DashboardLayout() {
     numDays,
   } = useRecentStays();
 
-  const { cabins, isLoading: isCabinLoading } = useCabins();
+  const { total: cabinTotal, isLoading: isCabinLoading } = useCabins();
 
   if (isLoading || isStaysLoading || isCabinLoading) return <Spinner />;
 
@@ -34,7 +34,7 @@ function DashboardLayout() {
         bookings={bookings}
         confirmedStays={confirmedStays}
         numDays={numDays}
-        cabinCount={cabins.length}
+        cabinCount={cabinTotal}
       />
       <TodayActivity />
       <DurationChart confirmedStays={confirmedStays} />

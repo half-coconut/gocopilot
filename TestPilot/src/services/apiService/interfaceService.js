@@ -1,12 +1,12 @@
 import instance from "./api";
 
 const interfaceService = {
-  add: async (data) => {
+  edit: async (data) => {
     try {
-      const res = await instance.post("/api/add", data);
+      const res = await instance.post("/api/edit", data);
       return res;
     } catch (error) {
-      console.error("Add API error:", error);
+      console.error("Edit API error:", error);
       throw error;
     }
   },

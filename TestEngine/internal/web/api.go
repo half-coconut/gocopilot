@@ -26,22 +26,23 @@ func NewAPIHandler(svc service.APIService, l logger.LoggerV1) *APIHandler {
 }
 
 func (a *APIHandler) RegisterRoutes(server *gin.Engine) {
-	ug := server.Group("/api")
-	ug.POST("/add", ginx.WrapToken[ijwt.UserClaims](a.Add))
-	ug.GET("/list", ginx.WrapToken[ijwt.UserClaims](a.List))
+	api := server.Group("/api")
+	api.POST("/edit", ginx.WrapToken[ijwt.UserClaims](a.Edit))
+	api.GET("/list", ginx.WrapToken[ijwt.UserClaims](a.List))
+	api.GET("/detail:id", ginx.WrapToken[ijwt.UserClaims](a.Detail))
 }
 
-func (a *APIHandler) Add(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	type APIReq struct {
-		Id      int64       `json:"id"`
-		Name    string      `json:"name"`
-		URL     string      `json:"url"`
-		Params  string      `json:"params,omitempty"`
-		Type    string      `json:"type,omitempty"`
-		Body    string      `json:"data,omitempty"`
-		Header  http.Header `json:"header,omitempty"`
-		Method  string      `json:"method"`
-		Project string      `json:"project"`
+		Id      int64  `json:"id"`
+		Name    string `json:"name"`
+		URL     string `json:"url"`
+		Params  string `json:"params,omitempty"`
+		Type    string `json:"type,omitempty"`
+		Body    string `json:"body,omitempty"`
+		Header  string `json:"header,omitempty"` // 注意需要校验数据类型
+		Method  string `json:"method"`
+		Project string `json:"project"`
 	}
 	var req APIReq
 	err := ctx.Bind(&req)
@@ -53,7 +54,7 @@ func (a *APIHandler) Add(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, err
 	}
 
 	api := domain.API{
-		Id:      req.Id,
+		Id:      req.Id, // 传入了 id 就是修改，不传 id 就是新增
 		Name:    req.Name,
 		URL:     req.URL,
 		Params:  req.Params,
@@ -69,6 +70,13 @@ func (a *APIHandler) Add(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, err
 		return ginx.Result{
 			Code:    0,
 			Message: "系统错误",
+		}, err
+	}
+
+	if req.Name == "" {
+		return ginx.Result{
+			Code:    0,
+			Message: "昵称不能为空",
 		}, err
 	}
 
@@ -92,10 +100,6 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		}, err
 	}
 
-	// 要查询什么的 api
-	// 按照组织下的所有 api ，-> 查询 team_id 下的所有 api
-	// 按照项目进行分类，-> 查询 project_id 下的所有 api
-	// 这里现按照创建人ID 进行查询
 	apis, err := a.svc.List(ctx, uc.Id)
 
 	if err != nil {
@@ -126,23 +130,38 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			}
 		})
 
+	response := APIListResponse{
+		Items: api0List,
+		Total: len(apis), // apis 的长度就是 API 总数
+	}
+
 	return ginx.Result{
 		Code:    1,
 		Message: "OK",
-		Data:    api0List}, nil
+		Data:    response}, nil
+}
+
+func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	// 根据 id 查询 api
+	return ginx.Result{Message: "OK"}, nil
+}
+
+type APIListResponse struct {
+	Items []API0 `json:"items"` // API 列表
+	Total int    `json:"total"` // API 总数
 }
 
 // 前端得到的API数据
 type API0 struct {
-	Id      int64               `json:"id"`
-	Name    string              `json:"name"`
-	URL     string              `json:"url"`
-	Params  string              `json:"params,omitempty"`
-	Body    string              `json:"data,omitempty"`
-	Header  map[string][]string `json:"header,omitempty"`
-	Method  string              `json:"method"`
-	Type    string              `json:"type"` // http/websocket
-	Project string              `json:"project"`
+	Id      int64  `json:"id"`
+	Name    string `json:"name"`
+	URL     string `json:"url"`
+	Params  string `json:"params,omitempty"`
+	Body    string `json:"body,omitempty"`
+	Header  string `json:"header,omitempty"`
+	Method  string `json:"method"`
+	Type    string `json:"type"` // http/websocket
+	Project string `json:"project"`
 
 	Creator int64  `json:"creator"`
 	Updater int64  `json:"updater"`

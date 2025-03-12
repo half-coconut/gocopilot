@@ -78,8 +78,8 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 			Valid:  api.Body != "",
 		},
 		Header: sql.NullString{
-			String: headerToJSON(api.Header),
-			Valid:  headerToJSON(api.Header) != "",
+			String: api.Header,
+			Valid:  api.Header != "",
 		},
 		Method: sql.NullString{
 			String: api.Method,
@@ -103,7 +103,7 @@ func (c *CacheAPIRepository) entityToDomain(api dao.API) domain.API {
 		Params:  api.Params.String,
 		Type:    api.Type.String,
 		Body:    api.Body.String,
-		Header:  jsonToHeader(api.Header.String),
+		Header:  api.Header.String,
 		Method:  api.Method.String,
 		Project: api.Project.String,
 		Creator: api.Creator,

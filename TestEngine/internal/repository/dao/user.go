@@ -62,8 +62,9 @@ func (dao *GORMUserDAO) FindById(ctx context.Context, id int64) (User, error) {
 func (dao *GORMUserDAO) UpdateByEmail(ctx context.Context, user User) error {
 	now := time.Now().UnixMilli()
 	err := dao.db.Model(&user).WithContext(ctx).Where("email=?", user.Email).Updates(map[string]interface{}{
-		"NickName":    user.NickName,
+		"FullName":    user.FullName,
 		"Department":  user.Department,
+		"Phone":       user.Phone,
 		"Role":        user.Role,
 		"Description": user.Description,
 		"Utime":       now,
@@ -77,9 +78,10 @@ type User struct {
 	Password string
 
 	Phone       sql.NullString `gorm:"unique"`
-	NickName    sql.NullString
+	FullName    sql.NullString
 	Department  sql.NullString
 	Role        sql.NullString
+	Avatar      sql.NullString
 	Description sql.NullString
 
 	Ctime int64

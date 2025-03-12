@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentUser } from "../../services/apiAuth";
+import { getUserProfile } from "../../services/apiAuth";
 
 export function useUser() {
   const { isLoading, data: user } = useQuery({
     queryKey: ["user"],
-    queryFn: getCurrentUser,
+    queryFn: getUserProfile,
   });
 
-  // return { isLoading, user, isAuthenticated: user?.role === "authenticated" };
+  const userData = user?.data?.data;
+
   // 这里对是否为合法用户进行校验
-  return { isLoading, user, isAuthenticated: true };
+  return { isLoading, userData, isAuthenticated: user?.status === 200 };
 }

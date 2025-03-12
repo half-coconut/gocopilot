@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"time"
 )
 
 type UserHandler struct {
@@ -191,16 +192,18 @@ func (u *UserHandler) LogoutJWT(ctx *gin.Context) {
 func (u *UserHandler) Edit(context *gin.Context) {
 	type EditReq struct {
 		Email       string `json:"email"`
-		NickName    string `json:"nickName"`
+		FullName    string `json:"fullName"`
 		Department  string `json:"department"`
+		Phone       string `json:"phone"`
 		Role        string `json:"role"`
+		Avatar      string `json:"avatar"`
 		Description string `json:"description"`
 	}
 	var req EditReq
 	if err := context.Bind(&req); err != nil {
 		return
 	}
-	if req.NickName == "" {
+	if req.FullName == "" {
 		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "昵称不能为空"})
 		return
 	}
@@ -218,9 +221,11 @@ func (u *UserHandler) Edit(context *gin.Context) {
 	}
 	err := u.svc.UpdateNonSensitiveInfo(context, domain.User{
 		Email:       req.Email,
-		NickName:    req.NickName,
+		FullName:    req.FullName,
 		Department:  req.Department,
 		Role:        req.Role,
+		Phone:       req.Phone,
+		Avatar:      req.Avatar,
 		Description: req.Description,
 	})
 	if err != nil {
@@ -262,6 +267,42 @@ func (u *UserHandler) ProfileJWT(context *gin.Context) {
 		return
 	}
 
-	println(claims.Id)
-	context.JSON(http.StatusOK, Result{Code: 1, Message: "获取 Profile 成功", Data: user})
+	response := User0{
+		Id:          user.Id,
+		Email:       user.Email,
+		Phone:       maskPhoneNumber(user.Phone),
+		FullName:    user.FullName,
+		Department:  user.Department,
+		Role:        user.Role,
+		Avatar:      user.Avatar,
+		Description: user.Description,
+		Ctime:       user.Ctime.Format(time.DateTime),
+		Utime:       user.Utime.Format(time.DateTime),
+	}
+
+	context.JSON(http.StatusOK, Result{Code: 1, Message: "获取 Profile 成功", Data: response})
+}
+
+// 前端得到的API数据
+type User0 struct {
+	Id          int64  `json:"id"`
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
+	FullName    string `json:"fullName"`
+	Department  string `json:"department"`
+	Role        string `json:"role"`
+	Avatar      string `json:"avatar"`
+	Description string `json:"description"`
+	Ctime       string `json:"ctime"`
+	Utime       string `json:"utime"`
+}
+
+func maskPhoneNumber(phone string) string {
+	if len(phone) < 7 {
+		return phone
+	}
+	lastFour := phone[len(phone)-4:]
+
+	maskedPhone := "***-***-" + lastFour
+	return maskedPhone
 }

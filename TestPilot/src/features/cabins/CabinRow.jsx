@@ -37,6 +37,11 @@ const Project = styled.div`
   font-weight: 500;
   color: var(--color-green-700);
 `;
+const Type = styled.div`
+  font-family: "Sono";
+  font-weight: 500;
+  color: var(--color-grey-600);
+`;
 
 function CabinRow({ cabin }) {
   const { isCreating, createCabin } = useCreateCabiin();
@@ -46,6 +51,9 @@ function CabinRow({ cabin }) {
     name,
     project,
     url,
+    params,
+    method,
+    body,
     type,
     creator,
     updater,
@@ -58,6 +66,9 @@ function CabinRow({ cabin }) {
       name: `Copy of ${name}`,
       project,
       url,
+      params,
+      method,
+      body,
       type,
       creator,
       updater,
@@ -73,7 +84,7 @@ function CabinRow({ cabin }) {
       {/* <Img src={image} /> */}
       <Interface>{name}</Interface>
       <Project>{project} </Project>
-      <div>{type} </div>
+      <Type>{type} </Type>
       <div>{creator} </div>
       <div>{updater} </div>
       <div>{ctime} </div>
@@ -126,6 +137,9 @@ CabinRow.propTypes = {
     name: PropTypes.string.isRequired,
     project: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
+    params: PropTypes.string.isRequired,
+    method: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
     creator: PropTypes.string.isRequired,
     updater: PropTypes.string.isRequired,

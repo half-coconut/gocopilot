@@ -1,6 +1,5 @@
-import supabase from "./supabase";
+import supabase, { supabaseUrl } from "./supabase";
 import PropTypes from "prop-types";
-import { supabaseUrl } from "../services/supabase";
 import userService from "./apiService/userService";
 
 export async function signup({ fullName, email, password }) {
@@ -10,17 +9,6 @@ export async function signup({ fullName, email, password }) {
     options: {
       data: { fullName: fullName, avatar: "" },
     },
-  });
-
-  if (error) throw new Error(error.message);
-
-  return data;
-}
-// 基于 supabase
-export async function loginV1({ email, password }) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
   });
 
   if (error) throw new Error(error.message);
@@ -39,19 +27,10 @@ login.propTypes = {
   password: PropTypes.string.isRequired,
 };
 
-export async function getCurrentUser() {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session) return null;
+export async function getUserProfile() {
+  const resp = await userService.profile();
 
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) throw new Error(error.message);
-  return data?.user;
-}
-
-export async function logoutV1() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw new Error(error.message);
+  return resp;
 }
 
 // 基于后端服务
@@ -60,41 +39,61 @@ export async function logout() {
   return resp;
 }
 
-export async function updateCurrentUser({ password, fullName, avatar }) {
+// export async function updateCurrentUserV1({ password, fullName, avatar }) {
+//   // 1. Update password OR fullName
+//   let updateData;
+//   if (password) updateData = { password };
+//   if (fullName) updateData = { data: { fullName } };
+
+//   const { data, error } = await supabase.auth.updateUser(updateData);
+
+//   if (error) throw new Error(error.message);
+//   if (!avatar) return data;
+
+// 2. Upload the avatar image
+// const fileName = `avatar-${data.user.id}-${Math.random()}`;
+
+// const { error: uploadError } = await supabase.storage
+//   .from("avatars")
+//   .upload(fileName, avatar);
+
+// if (uploadError) throw new Error(uploadError.message);
+
+// // 3. Update avatar in the user
+// const { data: updatedUser, error: updatedUserError } =
+//   await supabase.auth.updateUser({
+//     data: {
+//       avatar: `${supabaseUrl}/storage/v1/object/public/avatars//${fileName}`,
+//     },
+//   });
+
+// if (updatedUserError) throw new Error(updatedUserError.message);
+
+// return updatedUser;
+// }
+
+export async function updateCurrentUser(updateData) {
   // 1. Update password OR fullName
-  let updateData;
-  if (password) updateData = { password };
-  if (fullName) updateData = { data: { fullName } };
-
-  const { data, error } = await supabase.auth.updateUser(updateData);
-
-  if (error) throw new Error(error.message);
-  if (!avatar) return data;
+  console.log("updateCurrentUser接口入参: ", updateData);
+  if (!updateData.avatar) return await userService.editUser(updateData);
 
   // 2. Upload the avatar image
-  const fileName = `avatar-${data.user.id}-${Math.random()}`;
+  const fileName = `avatar-${updateData.id}-${Math.random()}`;
 
   const { error: uploadError } = await supabase.storage
     .from("avatars")
-    .upload(fileName, avatar);
+    .upload(fileName, updateData.avatar);
 
   if (uploadError) throw new Error(uploadError.message);
 
   // 3. Update avatar in the user
-  const { data: updatedUser, error: updatedUserError } =
-    await supabase.auth.updateUser({
-      data: {
-        avatar: `${supabaseUrl}/storage/v1/object/public/avatars//${fileName}`,
-      },
-    });
 
-  if (updatedUserError) throw new Error(updatedUserError.message);
-
-  return updatedUser;
+  return await userService.editUser({
+    ...updateData,
+    avatar: `${supabaseUrl}/storage/v1/object/public/avatars//${fileName}`,
+  });
 }
 
 updateCurrentUser.propTypes = {
-  fullName: PropTypes.string,
-  password: PropTypes.string,
-  avatar: PropTypes.string,
+  updateData: PropTypes.node,
 };

@@ -49,6 +49,7 @@ func (dao *GORMAPIDAO) UpdateById(ctx context.Context, api API) error {
 			"name":    api.Name,
 			"url":     api.URL,
 			"params":  api.Params,
+			"type":    api.Type,
 			"body":    api.Body,
 			"header":  api.Header,
 			"method":  api.Method,

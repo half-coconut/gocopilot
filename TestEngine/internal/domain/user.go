@@ -8,9 +8,10 @@ type User struct {
 	Password string
 
 	Phone       string
-	NickName    string
+	FullName    string
 	Department  string
 	Role        string
+	Avatar      string
 	Description string
 
 	Ctime time.Time

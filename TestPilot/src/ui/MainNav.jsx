@@ -1,11 +1,13 @@
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import {
-  HiOutlineCalendarDays,
+  HiOutlineCalendarDateRange,
   HiOutlineCog6Tooth,
   HiOutlineHome,
+  HiOutlineChartPie,
   HiOutlineArchiveBox,
-  HiOutlineUser,
+  // HiOutlineUser,
+  HiOutlineMapPin,
   HiOutlineCommandLine,
 } from "react-icons/hi2";
 
@@ -66,7 +68,13 @@ function MainNav() {
         </li>
         <li>
           <StyledNavLink to="/bookings">
-            <HiOutlineCalendarDays />
+            <HiOutlineCalendarDateRange />
+            <span>Plans</span>
+          </StyledNavLink>
+        </li>
+        <li>
+          <StyledNavLink to="/bookings">
+            <HiOutlineChartPie />
             <span>Tasks</span>
           </StyledNavLink>
         </li>
@@ -76,6 +84,7 @@ function MainNav() {
             <span>Interfaces</span>
           </StyledNavLink>
         </li>
+
         <li>
           <StyledNavLink to="/">
             <HiOutlineCommandLine />
@@ -83,9 +92,9 @@ function MainNav() {
           </StyledNavLink>
         </li>
         <li>
-          <StyledNavLink to="/users">
-            <HiOutlineUser />
-            <span>Users</span>
+          <StyledNavLink to="/">
+            <HiOutlineMapPin />
+            <span>Environments</span>
           </StyledNavLink>
         </li>
         <li>
@@ -94,6 +103,13 @@ function MainNav() {
             <span>Settings</span>
           </StyledNavLink>
         </li>
+        {/* 用户注册的页面 */}
+        {/* <li>
+          <StyledNavLink to="/users">
+            <HiOutlineUser />
+            <span>Users</span>
+          </StyledNavLink>
+        </li> */}
       </NavList>
     </nav>
   );
