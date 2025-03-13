@@ -22,10 +22,10 @@ import AICopilot from "./pages/AICopilot";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // 数据自动刷新的时间
-      staleTime: 0,
-      // 缓存时间（这里是 5 分钟）
-      cacheTime: 1000 * 60 * 5,
+      // 数据自动刷新的时间 5min
+      staleTime: 1000 * 60 * 5,
+      // 缓存时间 1h
+      cacheTime: 1000 * 60 * 60,
     },
   },
 });

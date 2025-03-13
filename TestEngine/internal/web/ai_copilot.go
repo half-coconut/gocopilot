@@ -20,12 +20,13 @@ func NewAIHandler(l logger.LoggerV1) *AIHandler {
 
 func (ai *AIHandler) RegisterRoutes(server *gin.Engine) {
 	aisg := server.Group("/openai")
-	aisg.POST("/ask", ginx.WrapToken[ijwt.UserClaims](ai.AskChatGPT))
+	aisg.POST("/ask/deepseek", ginx.WrapToken[ijwt.UserClaims](ai.AskDeepseek))
+	aisg.POST("/ask/chatgpt", ginx.WrapToken[ijwt.UserClaims](ai.AskChatGPT))
 }
 
 func (ai *AIHandler) AskChatGPT(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	type AIReq struct {
-		//Prompt    string `json:"prompt"`
+		Prompt    string `json:"prompt"`
 		UserInput string `json:"userInput"`
 	}
 
@@ -43,8 +44,39 @@ func (ai *AIHandler) AskChatGPT(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resu
 	if err != nil {
 		return ginx.Result{Code: 0, Message: "系统错误"}, err
 	}
+	response, err := client.SendMessage(req.Prompt, req.UserInput)
+	if err != nil {
+		return ginx.Result{Code: 0, Message: "系统错误"}, err
+	}
 
-	response, err := client.SendMessage("你是一个资深的测试架构师", req.UserInput)
+	return ginx.Result{
+		Code:    1,
+		Message: "OK",
+		Data:    response,
+	}, nil
+}
+
+func (ai *AIHandler) AskDeepseek(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	type AIReq struct {
+		Prompt    string `json:"prompt"`
+		UserInput string `json:"userInput"`
+	}
+
+	var req AIReq
+	err := ctx.Bind(&req)
+	if err != nil {
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+
+	// 调用 ai
+	dhl := iopenai.NewDeepSeekHandler()
+	if err != nil {
+		return ginx.Result{Code: 0, Message: "系统错误"}, err
+	}
+	response, err := dhl.DeepseekClient("你是一个资深的测试架构师", req.UserInput)
 	if err != nil {
 		return ginx.Result{Code: 0, Message: "系统错误"}, err
 	}
