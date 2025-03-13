@@ -53,21 +53,15 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func InitWebServer(middleware []gin.HandlerFunc, userHandler *web.UserHandler, apiHandler *web.APIHandler, notehandler *web.NoteHandler) *gin.Engine {
+func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userHandler *web.UserHandler, apiHandler *web.APIHandler, notehandler *web.NoteHandler) *gin.Engine {
 	server := gin.Default()
-	//server.OPTIONS("/users/login", func(c *gin.Context) {
-	//	c.Header("Access-Control-Allow-Origin", "http://localhost:5173") // 或者 "*"
-	//	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	//	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	//	c.Header("Access-Control-Allow-Credentials", "true") // 如果需要
-	//	c.AbortWithStatus(http.StatusOK)                     // 返回 200 OK
-	//})
 	server.Use(CORSMiddleware())
 
 	server.Use(middleware...)
 	parameterExamples(server)
 	userHandler.RegisterRoutes(server)
 	apiHandler.RegisterRoutes(server)
+	aiHandler.RegisterRoutes(server)
 	notehandler.RegisterRoutes(server)
 	return server
 }

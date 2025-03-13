@@ -31,6 +31,7 @@ func InitWebServer() *gin.Engine {
 	loggerV1 := ioc.InitLogger()
 	handler := jwt.NewRedisJWTHandler(cmdable)
 	v := ioc.InitMiddleware(cmdable, loggerV1, handler)
+	aiHandler := web.NewAIHandler(loggerV1)
 	db := ioc.InitDB(loggerV1)
 	userDAO := dao.NewUserDAO(db)
 	userCache := cache.NewUserCache(cmdable)
@@ -47,6 +48,6 @@ func InitWebServer() *gin.Engine {
 	noteRepository := note2.NewNoteRepository(noteDAO, authorDAO, readerDAO, loggerV1)
 	noteService := service.NewNoteService(noteRepository, loggerV1)
 	noteHandler := web.NewNoteHandler(noteService, loggerV1)
-	engine := ioc.InitWebServer(v, userHandler, apiHandler, noteHandler)
+	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, noteHandler)
 	return engine
 }

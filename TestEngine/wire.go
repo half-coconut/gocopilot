@@ -36,6 +36,7 @@ func InitWebServer() *gin.Engine {
 		web.NewUserHandler,
 		web.NewNoteHandler,
 		web.NewAPIHandler,
+		web.NewAIHandler,
 
 		ijwt.NewRedisJWTHandler,
 

@@ -86,7 +86,7 @@ function MainNav() {
         </li>
 
         <li>
-          <StyledNavLink to="/">
+          <StyledNavLink to="/aicopilot">
             <HiOutlineCommandLine />
             <span>AI Copilot</span>
           </StyledNavLink>

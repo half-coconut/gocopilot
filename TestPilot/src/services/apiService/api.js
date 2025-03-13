@@ -46,7 +46,7 @@ instance.interceptors.response.use(
       window.location.href = "/users/login";
     }
 
-    console.log("resp: ", resp);
+    // console.log("resp: ", resp);
 
     return resp;
   },

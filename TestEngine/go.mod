@@ -15,9 +15,12 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/google/wire v0.6.0
 	github.com/gorilla/websocket v1.5.3
+	github.com/joho/godotenv v1.5.1
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/redis/go-redis/v9 v9.7.0
+	github.com/sashabaranov/go-openai v1.37.0
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.0.1102

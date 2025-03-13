@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"backend/pkg/qa_copilot/utils"
+	"TestEngine/pkg/qa_scopilot/utils"
 	"bufio"
 	"context"
 	"encoding/json"
