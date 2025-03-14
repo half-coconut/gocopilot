@@ -7,12 +7,12 @@ type API struct {
 	LoadType string           `json:"load_type"` // 接口类型：http,websocket
 	Http     HttpContent      `json:"http_content"`
 	WS       WebsocketContent `json:"ws_content"`
-	Debug    string           `json:"debug"`
+	Debug    bool             `json:"debug"`
 	Creator  string           `json:"creator"`
 	Updater  string           `json:"updater"`
 }
 
-func NewAPI(name, teamId, types, debug, email string, http HttpContent, ws WebsocketContent) API {
+func NewAPI(name, teamId, types, email string, debug bool, http HttpContent, ws WebsocketContent) API {
 	return API{
 		Name:     name,
 		TeamId:   teamId,

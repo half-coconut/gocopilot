@@ -11,7 +11,7 @@ export function useCabins() {
     queryFn: getCabins,
   });
 
-  const cabinItems = cabins?.data?.data?.items;
+  const cabinItems = cabins?.data?.data?.interfaces;
   const total = cabins?.data?.data?.total;
   // console.log("cabins: ", cabins);
   // console.log("cabinItems: ", cabinItems);

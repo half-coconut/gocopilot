@@ -89,17 +89,17 @@ func (w responseWriter) WriteHeader(statusCode int) {
 }
 
 func (w responseWriter) Write(data []byte) (int, error) {
-	if len(data) > 1024 {
-		data = data[:1024]
-	}
+	//if len(data) > 1024 {
+	//	data = data[:1024]
+	//}
 	w.al.RespBody = string(data)
 	return w.ResponseWriter.Write(data)
 }
 
 func (w responseWriter) WriteString(data string) (int, error) {
-	if len(data) > 1024 {
-		data = data[:1024]
-	}
+	//if len(data) > 1024 {
+	//	data = data[:1024]
+	//}
 	w.al.RespBody = string(data)
 	return w.ResponseWriter.WriteString(data)
 }

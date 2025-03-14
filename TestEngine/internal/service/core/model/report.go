@@ -1,8 +1,9 @@
 package model
 
 import (
-	"TestCopilot/TestEngine/cat/log"
+	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
+	"log"
 	"sort"
 	"time"
 )
@@ -25,6 +26,7 @@ type reportService struct {
 	P99           time.Duration
 	Ratio         float64
 	StatusCodes   string
+	l             logger.LoggerV1
 }
 
 type Base struct {
@@ -43,7 +45,7 @@ type Base struct {
 //}
 
 // FinalReport 生成 Report Base，并输出 Report
-func FinalReport(s *Subtask, resCh chan []*HttpResult) {
+func FinalReport(s *Subtask, resCh chan []*HttpResult) string {
 	var b Base
 	b.Codes = make([]int, 0)
 	b.SuccessRequests = make([]int, 0)
@@ -70,13 +72,14 @@ func FinalReport(s *Subtask, resCh chan []*HttpResult) {
 
 	//r.displayReportBase(b)
 	var r reportService
-	r.generateReport(&b)
+	return r.generateReport(&b)
 }
 
-func (r *reportService) generateReport(b *Base) {
+func (r *reportService) generateReport(b *Base) string {
 	r.Requests(b)
 	r.Latencies(b)
-	log.L.Info(r.displayReport())
+	log.Println(r.displayReport())
+	return r.displayReport()
 }
 
 func (r *reportService) Requests(b *Base) {
@@ -197,7 +200,7 @@ func (r *reportService) displayReport() string {
 func TaskDebugLogs(debug bool, res []*HttpResult) {
 	if debug {
 		for _, re := range res {
-			log.L.Info(fmt.Sprintf(`
+			log.Println(fmt.Sprintf(`
 +++++ Task Debug Log: +++++
 [Task: %s]
 [Code: %d]

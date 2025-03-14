@@ -2,9 +2,11 @@ package execution
 
 import (
 	model "TestCopilot/TestEngine/internal/service/core/model"
+	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"fmt"
 	rate2 "golang.org/x/time/rate"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -17,7 +19,7 @@ type ExecutionLoadRun interface {
 type executionLoadRun struct {
 	t       *model.Task
 	subtask model.Subtask
-	//l       logger.LoggerV1
+	l       logger.LoggerV1
 	//report model.ReportService
 }
 
@@ -99,8 +101,8 @@ func (e *executionLoadRun) HttpRun(duration time.Duration, rate float64) {
 	}()
 
 	model.FinalReport(s, results)
-	//e.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
-	//e.l.Info(fmt.Sprintf("当前 http_load 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
+	e.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
+	e.l.Info(fmt.Sprintf("当前 http_load 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
 
 }
 
@@ -115,52 +117,3 @@ func displayTask(e *executionLoadRun) string {
 [Timeout: %v]
 `, e.t.Name, e.t.APIs, e.t.TaskConf.Durations, e.t.TaskConf.Workers, e.t.TaskConf.MaxWorkers, e.t.TaskConf.Timeout)
 }
-
-//	func (e *executionLoadRun) RunV2(result chan []*HttpResult, wg *sync.WaitGroup, s *subtask, ctx context.Context) chan []*HttpResult {
-//		defer wg.Done()
-//
-//		res := make([]*HttpResult, 0)
-//		for _, api := range t.APIs {
-//			api_res := api.Http.Send(s)
-//			api_res.Task = t.Name
-//			res = append(res, api_res)
-//		}
-//
-//		// 一次任务的结果
-//		displayTaskDebugLogs(true, res)
-//
-//		select {
-//		case <-ctx.Done():
-//			// 压测结束，不再发送请求
-//			return result
-//		case result <- res:
-//			return result
-//		}
-//	}
-//
-//	func (e *executionLoadRun) DefaultRun(maxGoroutines int, apis []API) {
-//		var wg sync.WaitGroup
-//
-//		worker := t.TaskConf.Workers
-//		if worker > t.TaskConf.MaxWorkers {
-//			worker = t.TaskConf.MaxWorkers
-//		}
-//
-//		results := make(chan []*HttpResult)
-//
-//		s := &subtask{
-//			began: time.Now(),
-//		}
-//
-//		for i := uint64(0); i < worker; i++ {
-//			wg.Edit(1)
-//			go t.Run(results, &wg, s)
-//		}
-//		go func() {
-//			wg.Wait()
-//			close(results)
-//		}()
-//
-//		FinalReport(s, results)
-//		e.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
-//	}

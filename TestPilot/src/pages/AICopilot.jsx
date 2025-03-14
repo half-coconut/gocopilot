@@ -6,8 +6,7 @@ import Button from "../ui/Button";
 import Form from "../ui/Form.jsx";
 import Row from "../ui/Row";
 import Heading from "../ui/Heading";
-// import Textarea from "../ui/Textarea";
-import Input from "../ui/Input";
+import Textarea from "../ui/Textarea";
 
 function AICopilot() {
   const [inputText, setInputText] = useState("");
@@ -75,12 +74,18 @@ function AICopilot() {
     }
   };
 
-  // const handleKeyDown = (event) => {
-  //   if (event.key === "Enter" && !event.shiftKey) {
-  //     event.preventDefault(); // 阻止默认的换行行为
-  //     handleSubmit();
-  //   }
-  // };
+  const data = `
+  +++ Requests +++
+  [total 总请求数: 1]
+  [rate 请求速率: 2.50]
+  [throughput 吞吐量: ...]
+  +++ Duration +++
+  [total 总持续时间: 399.29ms]
+  ...
+  +++ Success +++
+  [ratio 成功率: 0.00%]
+  [status codes:  400...:1]
+  `;
 
   return (
     <>
@@ -105,16 +110,18 @@ function AICopilot() {
           <Heading as="h2">
             <HiOutlineCommandLine />{" "}
           </Heading>
-          <Input
+          <Textarea
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            // onKeyDown={handleKeyDown}
             placeholder="Type your message..."
           />
           <Button type="submit">Send</Button>
         </Form>
       </Row>
+      <div>
+        <pre>{data}</pre>
+      </div>
     </>
   );
 }

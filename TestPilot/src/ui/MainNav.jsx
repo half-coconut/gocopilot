@@ -7,6 +7,7 @@ import {
   HiOutlineChartPie,
   HiOutlineArchiveBox,
   // HiOutlineUser,
+  HiOutlineServer,
   HiOutlineMapPin,
   HiOutlineCommandLine,
 } from "react-icons/hi2";
@@ -89,6 +90,12 @@ function MainNav() {
           <StyledNavLink to="/aicopilot">
             <HiOutlineCommandLine />
             <span>AI Copilot</span>
+          </StyledNavLink>
+        </li>
+        <li>
+          <StyledNavLink to="/">
+            <HiOutlineServer />
+            <span>History</span>
           </StyledNavLink>
         </li>
         <li>

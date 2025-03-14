@@ -15,6 +15,7 @@ type API struct {
 	Method  string `json:"method"`
 	Type    string `json:"type,omitempty"` // http/websocket
 	Project string `json:"project"`
+	Debug   bool   `json:"debug"` // 判断是否调用接口 debug 开启 true 关闭 false
 
 	Creator int64 `json:"creator"`
 	Updater int64 `json:"updater"`

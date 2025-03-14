@@ -91,7 +91,7 @@ func (h *RedisJWTHandler) ExtractToken(ctx *gin.Context) string {
 func (h *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid int64, ssid string) error {
 	claims := UserClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60 * 2)), // token 2小时 失效
 		},
 		Id:        uid,
 		Ssid:      ssid,

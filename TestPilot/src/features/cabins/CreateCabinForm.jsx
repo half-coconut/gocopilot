@@ -9,6 +9,8 @@ import Textarea from "../../ui/Textarea.jsx";
 import FormRow from "../../ui/FormRow.jsx";
 import { useCreateCabiin } from "./useCreateCabin.js";
 import { useEditCabiin } from "./useEditCabin.js";
+import Switch from "../../ui/Switch.jsx";
+import { useState } from "react";
 
 function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { isCreating, createCabin } = useCreateCabiin();
@@ -24,12 +26,17 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
   const { errors } = formState;
 
+  const [isOn, setIsOn] = useState(false);
+  const handleChange = () => {
+    setIsOn(!isOn);
+  };
+
   function onSubmit(data) {
     // const image = typeof data.image === "string" ? data.image : data.image[0];
 
     if (isEditSession)
       editCabin(
-        { newCabinData: { ...data, id: editId } },
+        { newCabinData: { ...data, id: editId, debug: isOn } },
         {
           onSuccess: () => {
             reset(), onCloseModal?.();
@@ -38,7 +45,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
       );
     else
       createCabin(
-        { ...data },
+        { ...data, debug: isOn },
         {
           onSuccess: () => {
             reset(), onCloseModal?.();
@@ -50,6 +57,20 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   function onError(errors) {
     console.log(errors);
   }
+
+  const data = `
+  +++ Requests +++
+  [total 总请求数: 1]
+  [rate 请求速率: 2.50]
+  [throughput 吞吐量: ...]
+  +++ Duration +++
+  [total 总持续时间: 399.29ms]
+  ...
+  +++ Success +++
+  [ratio 成功率: 0.00%]
+  [status codes:  400...:1]
+  `;
+
   return (
     <Form
       onSubmit={handleSubmit(onSubmit, onError)}
@@ -134,6 +155,10 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
+      <FormRow label="Debug" error={errors?.discount?.message}>
+        <Switch onChange={handleChange} />
+      </FormRow>
+
       <FormRow label="Upload">
         <FileInput
           id="image"
@@ -144,6 +169,14 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
           // })}
         />
       </FormRow>
+      {/* 
+      <FormRow label="Respone" error={errors?.discount?.message}>
+        <Input disabled />
+      </FormRow> */}
+      <div>
+        Respone
+        <pre>{data}</pre>
+      </div>
 
       <FormRow>
         {/* type is an HTML attribute! */}
@@ -157,6 +190,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
         <Button disabled={isWorking}>
           {isEditSession ? "Edit interface" : "Create new interface"}
         </Button>
+        {isOn ? <Button>Debug</Button> : ""}
       </FormRow>
     </Form>
   );

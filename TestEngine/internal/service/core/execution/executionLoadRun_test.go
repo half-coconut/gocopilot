@@ -20,7 +20,7 @@ func api(body []byte) model.API {
 		h,
 	)
 	ws := model.WebsocketContent{}
-	api := model.NewAPI("core", "123", "ht", "true", "egg@123.com", *ht, ws)
+	api := model.NewAPI("core", "123", "ht", "egg@123.com", true, *ht, ws)
 	return api
 }
 
@@ -45,8 +45,6 @@ func Test_http_load(t *testing.T) {
 
 func Test_http_debug(t *testing.T) {
 	// Debug 模式运行，这是使用的正确方式
-	log.InitLogger()
-
 	apis := apisList()
 	taskConf := model.NewTaskConfig(10)
 	task := model.NewTask("Debug任务 APIs API", apis, *taskConf)
