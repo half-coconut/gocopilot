@@ -32,7 +32,7 @@ func TestMongo(t *testing.T) {
 	client, err := mongo.Connect(ctx, opts)
 	assert.NoError(t, err)
 
-	mdb := client.Database("egg_yolk")
+	mdb := client.Database("testengine")
 	col := mdb.Collection("notes")
 
 	//defer func() {
@@ -146,18 +146,6 @@ func TestMongo(t *testing.T) {
 	fmt.Println("deleted: ", deleteRes.DeletedCount)
 
 }
-
-//type Note struct {
-//	Id       int64  `bson:"id"`
-//	Title    string `bson:"title"`
-//	Content  string `bson:"content"`
-//	AuthorId int64  `bson:"author_id"`
-//	Role     string `bson:"role"`
-//	Status   uint8  `bson:"status"`
-//
-//	Ctime int64 `bson:"ctime"`
-//	Utime int64 `bson:"utime"`
-//}
 
 type Note struct {
 	Id       int64  `bson:"id,omitempty"`

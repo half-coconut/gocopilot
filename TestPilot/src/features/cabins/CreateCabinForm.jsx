@@ -11,6 +11,8 @@ import { useCreateCabiin } from "./useCreateCabin.js";
 import { useEditCabiin } from "./useEditCabin.js";
 import Switch from "../../ui/Switch.jsx";
 import { useState } from "react";
+// import Heading from "../../ui/Heading.jsx";
+// import DebugResultBox from "./DebugResultBox.jsx";
 
 function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { isCreating, createCabin } = useCreateCabiin();
@@ -71,6 +73,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   [status codes:  400...:1]
   `;
 
+  console.log(data);
   return (
     <Form
       onSubmit={handleSubmit(onSubmit, onError)}
@@ -169,14 +172,9 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
           // })}
         />
       </FormRow>
-      {/* 
-      <FormRow label="Respone" error={errors?.discount?.message}>
-        <Input disabled />
-      </FormRow> */}
-      <div>
-        Respone
-        <pre>{data}</pre>
-      </div>
+
+      {/* <Heading as="h3">Respone #</Heading> */}
+      {/* <DebugResultBox data={data} /> */}
 
       <FormRow>
         {/* type is an HTML attribute! */}
