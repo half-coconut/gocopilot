@@ -1,20 +1,20 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { createEditCabin } from "../../services/apiCabins";
+import { createEditInterface } from "../../services/apiInterfaces";
 
-export function useCreateCabiin() {
+export function useCreateInterface() {
   const queryClient = useQueryClient();
 
-  const { mutate: createCabin, isLoading: isCreating } = useMutation({
-    mutationFn: createEditCabin,
+  const { mutate: createInterface, isLoading: isCreating } = useMutation({
+    mutationFn: createEditInterface,
     onSuccess: () => {
       toast.success("New interface successfully created");
       queryClient.invalidateQueries({
-        queryKey: ["cabins"],
+        queryKey: ["interfaces"],
       });
     },
     onError: (err) => toast.error(err.message),
   });
 
-  return { isCreating, createCabin };
+  return { isCreating, createInterface };
 }

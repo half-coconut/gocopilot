@@ -1,22 +1,20 @@
 import { useForm } from "react-hook-form";
 import PropTypes from "prop-types";
 
-import Input from "../../ui/Input";
+import Input from "../../ui/Input.jsx";
 import Form from "../../ui/Form.jsx";
 import Button from "../../ui/Button.jsx";
 import FileInput from "../../ui/FileInput.jsx";
 import Textarea from "../../ui/Textarea.jsx";
 import FormRow from "../../ui/FormRow.jsx";
-import { useCreateCabiin } from "./useCreateCabin.js";
-import { useEditCabiin } from "./useEditCabin.js";
+import { useCreateInterface } from "./useCreateInterface.js";
+import { useEditInterface } from "./useEditInterface.js";
 import Switch from "../../ui/Switch.jsx";
 import { useState } from "react";
-// import Heading from "../../ui/Heading.jsx";
-// import DebugResultBox from "./DebugResultBox.jsx";
 
-function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
-  const { isCreating, createCabin } = useCreateCabiin();
-  const { isEditing, editCabin } = useEditCabiin();
+function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
+  const { isCreating, createCabin } = useCreateInterface();
+  const { isEditing, editCabin } = useEditInterface();
   const isWorking = isCreating || isEditing;
 
   const { id: editId, ...editValue } = cabinToEdit;
@@ -60,20 +58,6 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
     console.log(errors);
   }
 
-  const data = `
-  +++ Requests +++
-  [total 总请求数: 1]
-  [rate 请求速率: 2.50]
-  [throughput 吞吐量: ...]
-  +++ Duration +++
-  [total 总持续时间: 399.29ms]
-  ...
-  +++ Success +++
-  [ratio 成功率: 0.00%]
-  [status codes:  400...:1]
-  `;
-
-  console.log(data);
   return (
     <Form
       onSubmit={handleSubmit(onSubmit, onError)}
@@ -173,9 +157,6 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      {/* <Heading as="h3">Respone #</Heading> */}
-      {/* <DebugResultBox data={data} /> */}
-
       <FormRow>
         {/* type is an HTML attribute! */}
         <Button
@@ -194,7 +175,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   );
 }
 
-CreateCabinForm.propTypes = {
+CreateInterfaceForm.propTypes = {
   cabinToEdit: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
@@ -206,4 +187,4 @@ CreateCabinForm.propTypes = {
   onCloseModal: PropTypes.func,
 };
 
-export default CreateCabinForm;
+export default CreateInterfaceForm;

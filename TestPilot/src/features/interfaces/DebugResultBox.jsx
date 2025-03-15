@@ -5,7 +5,7 @@ import {
   HiOutlineChatBubbleBottomCenterText,
   HiOutlineCheckCircle,
   //   HiOutlineCurrencyDollar,
-  HiOutlineHomeModern,
+  HiOutlineClipboardDocumentList,
 } from "react-icons/hi2";
 
 import DataItem from "../../ui/DataItem.jsx";
@@ -109,7 +109,8 @@ function DebugResultBox({ data }) {
     <StyledBookingDataBox>
       <Header>
         <div>
-          <HiOutlineHomeModern />
+          <HiOutlineClipboardDocumentList />
+
           <p>
             response
             {/* {numNights} nights in Cabin <span>{cabinName}</span> */}

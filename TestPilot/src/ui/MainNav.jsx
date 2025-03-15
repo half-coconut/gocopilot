@@ -80,7 +80,7 @@ function MainNav() {
           </StyledNavLink>
         </li>
         <li>
-          <StyledNavLink to="/cabins">
+          <StyledNavLink to="/interfaces">
             <HiOutlineArchiveBox />
             <span>Interfaces</span>
           </StyledNavLink>

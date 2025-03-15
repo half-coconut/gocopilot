@@ -34,6 +34,7 @@ func (a *APIHandler) RegisterRoutes(server *gin.Engine) {
 	api := server.Group("/api")
 	api.POST("/edit", ginx.WrapToken[ijwt.UserClaims](a.Edit))
 	api.GET("/list", ginx.WrapToken[ijwt.UserClaims](a.List))
+	api.GET("/detail:id", ginx.WrapToken[ijwt.UserClaims](a.Detail))
 
 }
 
@@ -233,6 +234,25 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		Code:    1,
 		Message: "OK",
 		Data:    response}, nil
+}
+
+func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	type APIReq struct {
+		id int64 `json:"id"`
+	}
+	var req APIReq
+	err := ctx.Bind(&req)
+	if err != nil {
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+	return ginx.Result{
+		Code:    1,
+		Message: "OK",
+	}, err
+
 }
 
 type APIListResponse struct {

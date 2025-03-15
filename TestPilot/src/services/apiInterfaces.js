@@ -1,17 +1,17 @@
 import interfaceService from "./apiService/interfaceService";
 import supabase from "./supabase";
 
-export default async function getCabins() {
+export default async function getInterfaces() {
   const resp = await interfaceService.list();
   return resp;
 }
 
-export async function createEditCabin(newInterface) {
+export async function createEditInterface(newInterface) {
   return interfaceService.edit(newInterface);
 }
 
 // 删除 cabin
-export async function deleteCabin(id) {
+export async function deleteInterface(id) {
   const { data, error } = await supabase.from("cabins").delete().eq("id", id);
 
   if (error) {

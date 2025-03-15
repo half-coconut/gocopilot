@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import getCabins from "../../services/apiCabins";
+import getInterfaces from "../../services/apiInterfaces";
 
-export function useCabins() {
+export function useInterfaces() {
   const {
     isLoading,
     data: cabins,
     error,
   } = useQuery({
-    queryKey: ["cabins"],
-    queryFn: getCabins,
+    queryKey: ["interfaces"],
+    queryFn: getInterfaces,
   });
 
   const cabinItems = cabins?.data?.data?.interfaces;

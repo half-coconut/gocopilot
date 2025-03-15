@@ -2,16 +2,16 @@
 import Button from "../../ui/Button";
 import Modal from "../../ui/Modal";
 
-import CreateCabinForm from "./CreateCabinForm";
+import CreateInterfaceForm from "./CreateInterfaceForm";
 
-function AddCabin() {
+function AddInterface() {
   return (
     <Modal>
       <Modal.Open opens="cabin-form">
         <Button>Add new interface</Button>
       </Modal.Open>
       <Modal.Window name="cabin-form">
-        <CreateCabinForm />
+        <CreateInterfaceForm />
       </Modal.Window>
     </Modal>
   );
@@ -33,4 +33,4 @@ function AddCabin() {
 //   );
 // }
 
-export default AddCabin;
+export default AddInterface;

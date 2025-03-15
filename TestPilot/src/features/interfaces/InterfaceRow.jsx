@@ -2,14 +2,15 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 // import { formatCurrency } from "../../utils/helpers";
 
-import CreateCabinForm from "./CreateCabinForm";
-import { useDeleteCabiin } from "./useDeleteCabin";
-import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
-import { useCreateCabiin } from "./useCreateCabin";
+import CreateInterfaceForm from "./CreateInterfaceForm";
+import { useDeleteInterface } from "./useDeleteInterface";
+import { HiEye, HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
+import { useCreateInterface } from "./useCreateInterface";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
+import { useNavigate } from "react-router-dom";
 
 // const Img = styled.img`
 //   display: block;
@@ -43,8 +44,9 @@ const Type = styled.div`
   color: var(--color-grey-600);
 `;
 
-function CabinRow({ cabin }) {
-  const { isCreating, createCabin } = useCreateCabiin();
+function InterfaceRow({ cabin }) {
+  const navigate = useNavigate();
+  const { isCreating, createCabin } = useCreateInterface();
 
   const {
     id: interfaceId,
@@ -77,7 +79,7 @@ function CabinRow({ cabin }) {
     });
   }
 
-  const { isDeleting, deleteCabin } = useDeleteCabiin();
+  const { isDeleting, deleteCabin } = useDeleteInterface();
 
   return (
     <Table.Row>
@@ -97,6 +99,12 @@ function CabinRow({ cabin }) {
 
             <Menus.List id={interfaceId}>
               <Menus.Button
+                icon={<HiEye />}
+                onClick={() => navigate(`/interfaces/${interfaceId}`)}
+              >
+                See details
+              </Menus.Button>
+              <Menus.Button
                 icon={<HiSquare2Stack />}
                 onClick={handleDuplicate}
                 disabled={isCreating}
@@ -114,7 +122,7 @@ function CabinRow({ cabin }) {
             </Menus.List>
 
             <Modal.Window name="edit">
-              <CreateCabinForm cabinToEdit={cabin} />
+              <CreateInterfaceForm cabinToEdit={cabin} />
             </Modal.Window>
 
             <Modal.Window name="delete">
@@ -131,7 +139,7 @@ function CabinRow({ cabin }) {
   );
 }
 
-CabinRow.propTypes = {
+InterfaceRow.propTypes = {
   cabin: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
@@ -148,4 +156,4 @@ CabinRow.propTypes = {
   }).isRequired,
 };
 
-export default CabinRow;
+export default InterfaceRow;

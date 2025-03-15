@@ -1,13 +1,13 @@
 import Spinner from "../../ui/Spinner";
-import CabinRow from "./CabinRow";
-import { useCabins } from "./useCabins";
+import InterfaceRow from "./InterfaceRow";
+import { useInterfaces } from "./useInterfaces";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
 // import { useSearchParams } from "react-router-dom";
 import Empty from "../../ui/Empty";
 
-function CabinTable() {
-  const { isLoading, cabinItems, total } = useCabins();
+function InterfaceTable() {
+  const { isLoading, cabinItems, total } = useInterfaces();
   // const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
@@ -50,10 +50,10 @@ function CabinTable() {
           // data={cabins}
           // data={filteredCabins}
           data={cabinItems}
-          render={(cabin) => <CabinRow cabin={cabin} key={cabin.id} />}
+          render={(cabin) => <InterfaceRow cabin={cabin} key={cabin.id} />}
         />
       </Table>
     </Menus>
   );
 }
-export default CabinTable;
+export default InterfaceTable;
