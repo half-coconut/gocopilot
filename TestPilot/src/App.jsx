@@ -19,6 +19,8 @@ import { ProtectedRoute } from "./ui/ProtectedRoute";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import AICopilot from "./pages/AICopilot";
 import Interface from "./pages/interface";
+import History from "./pages/History";
+import Environments from "./pages/Environments";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,6 +57,8 @@ function App() {
               <Route path="interfaces" element={<Cabins />} />
               <Route path="interfaces/:interfaceId" element={<Interface />} />
               <Route path="aicopilot" element={<AICopilot />} />
+              <Route path="history" element={<History />} />
+              <Route path="environments" element={<Environments />} />
               <Route path="users" element={<Users />} />
               <Route path="settings" element={<Settings />} />
               <Route path="account" element={<Account />} />

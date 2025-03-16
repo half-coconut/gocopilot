@@ -7,7 +7,7 @@ import Menus from "../../ui/Menus";
 import Empty from "../../ui/Empty";
 
 function InterfaceTable() {
-  const { isLoading, cabinItems, total } = useInterfaces();
+  const { isLoading, interfaceItems, total } = useInterfaces();
   // const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
@@ -49,8 +49,13 @@ function InterfaceTable() {
         <Table.Body
           // data={cabins}
           // data={filteredCabins}
-          data={cabinItems}
-          render={(cabin) => <InterfaceRow cabin={cabin} key={cabin.id} />}
+          data={interfaceItems}
+          render={(interfaceItem) => (
+            <InterfaceRow
+              interfaceItem={interfaceItem}
+              key={interfaceItem.id}
+            />
+          )}
         />
       </Table>
     </Menus>

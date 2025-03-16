@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import styled from "styled-components";
 import PropTypes from "prop-types";
 
 import Input from "../../ui/Input.jsx";
@@ -12,12 +13,26 @@ import { useEditInterface } from "./useEditInterface.js";
 import Switch from "../../ui/Switch.jsx";
 import { useState } from "react";
 
-function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
-  const { isCreating, createCabin } = useCreateInterface();
-  const { isEditing, editCabin } = useEditInterface();
+const StyledSelect = styled.select`
+  font-size: 1.4rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid
+    ${(props) =>
+      props.type === "white"
+        ? "var(--color-grey-100)"
+        : "var(--color-grey-300)"};
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-grey-0);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+`;
+
+function CreateInterfaceForm({ interfaceToEdit = {}, onCloseModal }) {
+  const { isCreating, createInterface } = useCreateInterface();
+  const { isEditing, editInterface } = useEditInterface();
   const isWorking = isCreating || isEditing;
 
-  const { id: editId, ...editValue } = cabinToEdit;
+  const { id: editId, ...editValue } = interfaceToEdit;
   const isEditSession = Boolean(editId);
 
   const { register, handleSubmit, reset, formState } = useForm({
@@ -26,17 +41,54 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
 
   const { errors } = formState;
 
+  console.log("编辑状态获取的值：", editValue);
+
   const [isOn, setIsOn] = useState(false);
   const handleChange = () => {
     setIsOn(!isOn);
   };
 
+  const projectsList = [
+    { value: "BSC", label: "BSC" },
+    { value: "CORE", label: "CORE" },
+    { value: "ETH", label: "ETH" },
+    { value: "AETHER", label: "AETHER" },
+    { value: "CARV", label: "CARV" },
+    { value: "GAIA", label: "GAIA" },
+  ];
+
+  const headers = [
+    {
+      value: '{"Content-Type": "application/json"}',
+      label: "Content-Type application/json",
+    },
+    {
+      value: '{"Content-Type": "application/x-www-form-urlencoded"}',
+      label: "Content-Type application/x-www-form-urlencoded",
+    },
+    {
+      value: '{"Content-Type": "multipart/form-data"}',
+      label: "Content-Type multipart/form-data",
+    },
+    {
+      value: '{"Content-Type": "text/plain"}',
+      label: "Content-Type text/plain",
+    },
+  ];
+
   function onSubmit(data) {
     // const image = typeof data.image === "string" ? data.image : data.image[0];
+    console.log("onsubmit 的 data:", data);
 
     if (isEditSession)
-      editCabin(
-        { newCabinData: { ...data, id: editId, debug: isOn } },
+      editInterface(
+        {
+          newInterfaceData: {
+            ...data,
+            id: editId,
+            debug: isOn,
+          },
+        },
         {
           onSuccess: () => {
             reset(), onCloseModal?.();
@@ -44,7 +96,7 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
         }
       );
     else
-      createCabin(
+      createInterface(
         { ...data, debug: isOn },
         {
           onSuccess: () => {
@@ -72,7 +124,7 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="URL" error={errors?.name?.message}>
+      <FormRow label="URL" error={errors?.url?.message}>
         <Input
           type="text"
           id="url"
@@ -81,22 +133,27 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="Project" error={errors?.maxCapacity?.message}>
-        <Input
-          type="text"
-          id="project"
-          disabled={isWorking}
-          {...register("project", {
-            required: "This field is required",
-            min: {
-              value: 1,
-              message: "project should be at least one",
-            },
-          })}
-        />
+      <FormRow label="Project" error={errors?.project?.message}>
+        <StyledSelect {...register("project")} id="project">
+          {projectsList.map((project) => (
+            <option key={project.value} value={project.value}>
+              {project.label}
+            </option>
+          ))}
+        </StyledSelect>
       </FormRow>
 
-      <FormRow label="Type" error={errors?.regularPrice?.message}>
+      <FormRow label="Header" error={errors?.header?.message}>
+        <StyledSelect {...register("header")} id="header">
+          {headers.map((header) => (
+            <option key={header.value} value={header.value}>
+              {header.label}
+            </option>
+          ))}
+        </StyledSelect>
+      </FormRow>
+
+      <FormRow label="Type" error={errors?.type?.message}>
         <Input
           type="text"
           id="type"
@@ -111,7 +168,7 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="Method" error={errors?.discount?.message}>
+      <FormRow label="Method" error={errors?.method?.message}>
         <Input
           type="text"
           id="method"
@@ -122,7 +179,7 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="Params" error={errors?.discount?.message}>
+      <FormRow label="Params" error={errors?.params?.message}>
         <Input
           type="text"
           id="params"
@@ -133,7 +190,7 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="Body" error={errors?.description?.message}>
+      <FormRow label="Body" error={errors?.body?.message}>
         <Textarea
           type="text"
           id="body"
@@ -176,13 +233,16 @@ function CreateInterfaceForm({ cabinToEdit = {}, onCloseModal }) {
 }
 
 CreateInterfaceForm.propTypes = {
-  cabinToEdit: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    maxCapacity: PropTypes.number.isRequired,
-    regularPrice: PropTypes.number.isRequired,
-    discount: PropTypes.number.isRequired,
-    image: PropTypes.string.isRequired,
+  interfaceToEdit: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string,
+    url: PropTypes.string,
+    project: PropTypes.string,
+    header: PropTypes.string,
+    type: PropTypes.string,
+    method: PropTypes.string,
+    params: PropTypes.string,
+    body: PropTypes.string,
   }),
   onCloseModal: PropTypes.func,
 };

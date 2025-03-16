@@ -117,7 +117,7 @@ Row.propTypes = {
 };
 
 Body.propTypes = {
-  data: PropTypes.node.isRequired,
+  data: PropTypes.array.isRequired,
   render: PropTypes.func.isRequired,
 };
 

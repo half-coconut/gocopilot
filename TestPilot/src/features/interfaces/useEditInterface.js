@@ -5,8 +5,8 @@ import { createEditInterface } from "../../services/apiInterfaces";
 export function useEditInterface() {
   const queryClient = useQueryClient();
 
-  const { mutate: editCabin, isLoading: isEditing } = useMutation({
-    mutationFn: ({ newCabinData }) => createEditInterface(newCabinData),
+  const { mutate: editInterface, isLoading: isEditing } = useMutation({
+    mutationFn: ({ newInterfaceData }) => createEditInterface(newInterfaceData),
     onSuccess: () => {
       toast.success("Interface successfully edited");
       queryClient.invalidateQueries({
@@ -15,5 +15,5 @@ export function useEditInterface() {
     },
     onError: (err) => toast.error(err.message),
   });
-  return { isEditing, editCabin };
+  return { isEditing, editInterface };
 }

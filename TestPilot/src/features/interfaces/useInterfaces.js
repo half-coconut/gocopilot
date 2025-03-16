@@ -4,18 +4,15 @@ import getInterfaces from "../../services/apiInterfaces";
 export function useInterfaces() {
   const {
     isLoading,
-    data: cabins,
+    data: interfaceData,
     error,
   } = useQuery({
     queryKey: ["interfaces"],
     queryFn: getInterfaces,
   });
 
-  const cabinItems = cabins?.data?.data?.interfaces;
-  const total = cabins?.data?.data?.total;
-  // console.log("cabins: ", cabins);
-  // console.log("cabinItems: ", cabinItems);
-  // console.log("total: ", total);
+  const interfaceItems = interfaceData?.data?.data?.interfaces;
+  const total = interfaceData?.data?.data?.total;
 
-  return { isLoading, error, cabinItems, total };
+  return { isLoading, error, interfaceItems, total };
 }

@@ -93,13 +93,13 @@ function MainNav() {
           </StyledNavLink>
         </li>
         <li>
-          <StyledNavLink to="/">
+          <StyledNavLink to="/history">
             <HiOutlineServer />
             <span>History</span>
           </StyledNavLink>
         </li>
         <li>
-          <StyledNavLink to="/">
+          <StyledNavLink to="/environments">
             <HiOutlineMapPin />
             <span>Environments</span>
           </StyledNavLink>

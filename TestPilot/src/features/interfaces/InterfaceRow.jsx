@@ -44,9 +44,9 @@ const Type = styled.div`
   color: var(--color-grey-600);
 `;
 
-function InterfaceRow({ cabin }) {
+function InterfaceRow({ interfaceItem }) {
   const navigate = useNavigate();
-  const { isCreating, createCabin } = useCreateInterface();
+  const { isCreating, createInterface } = useCreateInterface();
 
   const {
     id: interfaceId,
@@ -55,21 +55,23 @@ function InterfaceRow({ cabin }) {
     url,
     params,
     method,
+    header,
     body,
     type,
     creator,
     updater,
     ctime,
     utime,
-  } = cabin;
+  } = interfaceItem;
 
   function handleDuplicate() {
-    createCabin({
+    createInterface({
       name: `Copy of ${name}`,
       project,
       url,
       params,
       method,
+      header,
       body,
       type,
       creator,
@@ -122,12 +124,12 @@ function InterfaceRow({ cabin }) {
             </Menus.List>
 
             <Modal.Window name="edit">
-              <CreateInterfaceForm cabinToEdit={cabin} />
+              <CreateInterfaceForm interfaceToEdit={interfaceItem} />
             </Modal.Window>
 
             <Modal.Window name="delete">
               <ConfirmDelete
-                resourceName="cabins"
+                resourceName="interfaces"
                 disabled={isDeleting}
                 onConfirm={() => deleteCabin(interfaceId)}
               />
@@ -140,7 +142,7 @@ function InterfaceRow({ cabin }) {
 }
 
 InterfaceRow.propTypes = {
-  cabin: PropTypes.shape({
+  interfaceItem: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     project: PropTypes.string.isRequired,
@@ -148,9 +150,10 @@ InterfaceRow.propTypes = {
     params: PropTypes.string.isRequired,
     method: PropTypes.string.isRequired,
     body: PropTypes.string.isRequired,
+    header: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
-    creator: PropTypes.string.isRequired,
-    updater: PropTypes.string.isRequired,
+    creator: PropTypes.number.isRequired,
+    updater: PropTypes.number.isRequired,
     ctime: PropTypes.string.isRequired,
     utime: PropTypes.string.isRequired,
   }).isRequired,
