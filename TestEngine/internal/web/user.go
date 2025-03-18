@@ -301,5 +301,5 @@ func maskPhoneNumber(phone string) string {
 	if len(phone) < 7 {
 		return phone
 	}
-	return phone[:4] + "****" + phone[7:]
+	return phone[:3] + "****" + phone[7:]
 }

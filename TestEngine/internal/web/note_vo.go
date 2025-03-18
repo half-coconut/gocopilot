@@ -1,5 +1,8 @@
 package web
 
+import "TestCopilot/TestEngine/internal/domain"
+
+// VO view object 面向前端的
 type ListReq struct {
 	Offset int `json:"offset"`
 	Limit  int `json:"limit"`
@@ -34,4 +37,21 @@ type NoteV0 struct {
 
 	Ctime string `json:"ctime"`
 	Utime string `json:"utime"`
+}
+
+type NoteReq struct {
+	Id      int64  `json:"id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
+func (req NoteReq) toDomain(uid int64) domain.Note {
+	return domain.Note{
+		Id:      req.Id,
+		Title:   req.Title,
+		Content: req.Content,
+		Author: domain.Author{
+			Id: uid,
+		},
+	}
 }

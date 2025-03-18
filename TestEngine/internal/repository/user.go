@@ -4,6 +4,7 @@ import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/repository/cache"
 	"TestCopilot/TestEngine/internal/repository/dao"
+	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"database/sql"
 	"time"
@@ -21,19 +22,27 @@ type UserRepository interface {
 	UpdateByEmail(ctx context.Context, user domain.User) error
 }
 
-func NewUserRepository(dao dao.UserDAO, cache cache.UserCache) UserRepository {
+func NewUserRepository(dao dao.UserDAO, cache cache.UserCache, l logger.LoggerV1) UserRepository {
 	return &CacheUserRepository{
 		dao:   dao,
 		cache: cache,
+		l:     l,
 	}
 }
 
 type CacheUserRepository struct {
 	dao   dao.UserDAO
 	cache cache.UserCache
+	l     logger.LoggerV1
 }
 
 func (u *CacheUserRepository) Create(ctx context.Context, user domain.User) error {
+	defer func() {
+		err := u.cache.Delete(ctx, user.Id)
+		if err != nil {
+			return
+		}
+	}()
 	err := u.dao.Insert(ctx, dao.User{
 		Email: sql.NullString{
 			String: user.Email,
@@ -84,6 +93,14 @@ func (u *CacheUserRepository) FindByEmail(ctx context.Context, email string) (do
 }
 
 func (u *CacheUserRepository) UpdateByEmail(ctx context.Context, user domain.User) error {
+	defer func() {
+		err := u.cache.Delete(ctx, user.Id)
+		if err != nil {
+			u.l.Info("User 缓存删除失败", logger.Error(err))
+			return
+		}
+		u.l.Info("User 缓存删除成功")
+	}()
 	err := u.dao.UpdateByEmail(ctx, u.domainToEntity(user))
 	return err
 }

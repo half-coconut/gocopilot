@@ -19,13 +19,13 @@ type MongoDBDAO struct {
 	node    *snowflake.Node
 }
 
-func NewMongoDBDAO(db *mongo.Database, node *snowflake.Node) NoteDAO {
-	return &MongoDBDAO{
-		col:     db.Collection("notes"),
-		liveCol: db.Collection("published_notes"),
-		node:    node,
-	}
-}
+//func NewMongoDBDAO(db *mongo.Database, node *snowflake.Node) NoteDAO {
+//	return &MongoDBDAO{
+//		col:     db.Collection("notes"),
+//		liveCol: db.Collection("published_notes"),
+//		node:    node,
+//	}
+//}
 
 func (m *MongoDBDAO) Sync(ctx context.Context, note Note) (int64, error) {
 	var (

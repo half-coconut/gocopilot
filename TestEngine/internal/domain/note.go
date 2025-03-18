@@ -3,12 +3,12 @@ package domain
 import "time"
 
 type Note struct {
-	Id       int64 // 用于鉴别是新增还是修改
-	Title    string
-	Content  string
-	AuthorId int64
-	Role     string
-	Status   NoteStatus
+	Id      int64 // 用于鉴别是新增还是修改
+	Title   string
+	Content string
+	Author  Author
+	Role    string
+	Status  NoteStatus
 
 	Ctime time.Time
 	Utime time.Time
@@ -20,7 +20,7 @@ type Role struct {
 	Viewer string // get 请求时，仅查看
 }
 
-// PublishedArticle 衍生类型，偷个懒
+// PublishedArticle 衍生类型
 type PublishedNote Note
 
 type NoteStatus uint8
@@ -46,6 +46,10 @@ const (
 
 func (a NoteStatus) ToUint8() uint8 {
 	return uint8(a)
+}
+
+func (a NoteStatus) ToInt64() int64 {
+	return int64(a)
 }
 
 func (a NoteStatus) Valid() bool {
@@ -80,3 +84,8 @@ var (
 		Val: 0, Name: "unknown",
 	}
 )
+
+type Author struct {
+	Id   int64
+	Name string
+}

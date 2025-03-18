@@ -19,7 +19,7 @@ import (
 func InitWebServer() *gin.Engine {
 	wire.Build(
 		ioc.InitDB, ioc.InitRedis,
-		ioc.InitMongoDB,
+		//ioc.InitMongoDB,
 		ioc.InitLogger,
 
 		dao.NewUserDAO,
