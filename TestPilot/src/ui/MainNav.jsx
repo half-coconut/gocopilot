@@ -10,6 +10,7 @@ import {
   HiOutlineServer,
   HiOutlineMapPin,
   HiOutlineCommandLine,
+  HiOutlinePencilSquare,
 } from "react-icons/hi2";
 
 const NavList = styled.ul`
@@ -96,6 +97,12 @@ function MainNav() {
           <StyledNavLink to="/history">
             <HiOutlineServer />
             <span>History</span>
+          </StyledNavLink>
+        </li>
+        <li>
+          <StyledNavLink to="/notes">
+            <HiOutlinePencilSquare />
+            <span>Work Notes</span>
           </StyledNavLink>
         </li>
         <li>

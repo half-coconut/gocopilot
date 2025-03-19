@@ -74,19 +74,6 @@ function AICopilot() {
     }
   };
 
-  const data = `
-  +++ Requests +++
-  [total 总请求数: 1]
-  [rate 请求速率: 2.50]
-  [throughput 吞吐量: ...]
-  +++ Duration +++
-  [total 总持续时间: 399.29ms]
-  ...
-  +++ Success +++
-  [ratio 成功率: 0.00%]
-  [status codes:  400...:1]
-  `;
-
   return (
     <>
       <Heading as="h1">Ask ChatGPT</Heading>
@@ -119,9 +106,6 @@ function AICopilot() {
           <Button type="submit">Send</Button>
         </Form>
       </Row>
-      <div>
-        <pre>{data}</pre>
-      </div>
     </>
   );
 }

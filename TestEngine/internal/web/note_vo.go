@@ -10,7 +10,7 @@ type ListReq struct {
 
 type LikeReq struct {
 	Id   int64 `json:"id"`
-	Like bool  `json:"like"`
+	Like bool  `json:"like"` // 标记位
 }
 
 type RewardReq struct {

@@ -16,14 +16,18 @@ import (
 )
 
 type NoteHandler struct {
-	l   logger.LoggerV1
-	svc service.NoteService
+	l       logger.LoggerV1
+	svc     service.NoteService
+	intrSvc service.InteractiveService
+	biz     string
 }
 
-func NewNoteHandler(svc service.NoteService, l logger.LoggerV1) *NoteHandler {
+func NewNoteHandler(svc service.NoteService, l logger.LoggerV1, intrSvc service.InteractiveService) *NoteHandler {
 	return &NoteHandler{
-		svc: svc,
-		l:   l,
+		svc:     svc,
+		l:       l,
+		intrSvc: intrSvc,
+		biz:     "notes",
 	}
 }
 
@@ -219,9 +223,9 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 
 	uc := ctx.MustGet("users").(ijwt.UserClaims)
 	var eg errgroup.Group
-	var art domain.Note
+	var note domain.Note
 	eg.Go(func() error {
-		art, err = n.svc.GetPublishedById(ctx, id, uc.Id)
+		note, err = n.svc.GetPublishedById(ctx, id, uc.Id)
 		return err
 	})
 
@@ -264,20 +268,28 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	//	}
 	//}()
 
-	// ctx.Set("art", art)
+	//ctx.Set("art", art)
 	//intr := getResp.Intr
 
-	// 这个功能是不是可以让前端，主动发一个 HTTP 请求，来增加一个计数？
+	// 增加阅读计数
+	go func() {
+		// 最好不要在gorutine 里面复用外面的 error
+		er := n.intrSvc.IncrReadCnt(ctx, n.biz, note.Id)
+		if er != nil {
+			n.l.Error("增加阅读计数失败", logger.Int64("noteId: ", note.Id), logger.Error(er))
+		}
+
+	}()
 	ctx.JSON(http.StatusOK, Result{
 		Data: NoteV0{
-			Id:      art.Id,
-			Title:   art.Title,
-			Status:  art.Status.ToUint8(),
-			Content: art.Content,
+			Id:      note.Id,
+			Title:   note.Title,
+			Status:  note.Status.ToUint8(),
+			Content: note.Content,
 			// 要把作者信息带出去
-			Author: art.Author.Name,
-			Ctime:  art.Ctime.Format(time.DateTime),
-			Utime:  art.Utime.Format(time.DateTime),
+			Author: note.Author.Name,
+			Ctime:  note.Ctime.Format(time.DateTime),
+			Utime:  note.Utime.Format(time.DateTime),
 			//Liked:      intr.Liked,
 			//Collected:  intr.Collected,
 			//LikeCnt:    intr.LikeCnt,
@@ -288,6 +300,19 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 }
 
 func (n *NoteHandler) Like(ctx *gin.Context, req LikeReq, uc ijwt.UserClaims) (ginx.Result, error) {
+	var err error
+	if req.Like {
+		err = n.intrSvc.Like(ctx, n.biz, req.Id, uc.Id)
+	} else {
+		err = n.intrSvc.CancelLike(ctx, n.biz, req.Id, uc.Id)
+	}
+
+	if err != nil {
+		return ginx.Result{
+			Code:    5,
+			Message: "系统错误",
+		}, err
+	}
 	return ginx.Result{Message: "OK"}, nil
 }
 

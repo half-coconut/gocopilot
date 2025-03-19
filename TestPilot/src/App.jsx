@@ -21,6 +21,7 @@ import AICopilot from "./pages/AICopilot";
 import Interface from "./pages/interface";
 import History from "./pages/History";
 import Environments from "./pages/Environments";
+import Notes from "./pages/Notes";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +60,7 @@ function App() {
               <Route path="aicopilot" element={<AICopilot />} />
               <Route path="history" element={<History />} />
               <Route path="environments" element={<Environments />} />
+              <Route path="notes" element={<Notes />} />
               <Route path="users" element={<Users />} />
               <Route path="settings" element={<Settings />} />
               <Route path="account" element={<Account />} />
