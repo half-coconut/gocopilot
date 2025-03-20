@@ -39,7 +39,7 @@ func InitWebServer() *gin.Engine {
 	userService := service.NewUserService(userRepository, loggerV1)
 	userHandler := web.NewUserHandler(userService, loggerV1, handler)
 	apidao := dao.NewAPIDAO(loggerV1, db)
-	apiRepository := repository.NewAPIRepository(apidao, loggerV1)
+	apiRepository := repository.NewAPIRepository(apidao, loggerV1, userRepository)
 	apiService := service.NewAPIService(apiRepository, loggerV1)
 	apiHandler := web.NewAPIHandler(apiService, loggerV1)
 	noteDAO := note.NewNoteDAO(loggerV1, db)
@@ -47,7 +47,11 @@ func InitWebServer() *gin.Engine {
 	readerDAO := note.NewNoteReaderDAO(loggerV1, db)
 	noteRepository := note2.NewNoteRepository(noteDAO, authorDAO, readerDAO, loggerV1)
 	noteService := service.NewNoteService(noteRepository, loggerV1)
-	noteHandler := web.NewNoteHandler(noteService, loggerV1)
+	interactiveDAO := dao.NewGORMInteractiveDAO(db)
+	interactiveCache := cache.NewRedisInteractiveCache(cmdable)
+	interactiveRepository := repository.NewCachedInteractiveRepository(interactiveDAO, interactiveCache, loggerV1)
+	interactiveService := service.NewInteractiveService(interactiveRepository, loggerV1)
+	noteHandler := web.NewNoteHandler(noteService, loggerV1, interactiveService)
 	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, noteHandler)
 	return engine
 }

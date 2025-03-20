@@ -221,7 +221,10 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 		return
 	}
 
+	// 读文章本体
 	uc := ctx.MustGet("users").(ijwt.UserClaims)
+
+	// 对 waitGroup 的二次开发，在业务开发中常见
 	var eg errgroup.Group
 	var note domain.Note
 	eg.Go(func() error {
@@ -244,15 +247,15 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	//})
 
 	// 在这儿等，要保证前面两个
-	err = eg.Wait()
-	if err != nil {
-		// 代表查询出错了
-		ctx.JSON(http.StatusOK, Result{
-			Code:    5,
-			Message: "系统错误",
-		})
-		return
-	}
+	//err = eg.Wait()
+	//if err != nil {
+	//	// 代表查询出错了
+	//	ctx.JSON(http.StatusOK, Result{
+	//		Code:    5,
+	//		Message: "系统错误",
+	//	})
+	//	return
+	//}
 
 	// 增加阅读计数。
 	//go func() {
@@ -271,6 +274,24 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	//ctx.Set("art", art)
 	//intr := getResp.Intr
 
+	// 获得这篇文章的全部计数
+	var intr domain.Interactive
+	eg.Go(func() error {
+		intr, err = n.intrSvc.Get(ctx, n.biz, id, uc.Id)
+		return err
+	})
+
+	// 前两个error 的返回，注意返回了 Error 是不容错的写法
+	err = eg.Wait()
+	if err != nil {
+		// 查询出错
+		ctx.JSON(http.StatusOK, Result{
+			Code:    5,
+			Message: "系统错误",
+		})
+		return
+	}
+
 	// 增加阅读计数
 	go func() {
 		// 最好不要在gorutine 里面复用外面的 error
@@ -278,23 +299,22 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 		if er != nil {
 			n.l.Error("增加阅读计数失败", logger.Int64("noteId: ", note.Id), logger.Error(er))
 		}
-
 	}()
+
 	ctx.JSON(http.StatusOK, Result{
 		Data: NoteV0{
-			Id:      note.Id,
-			Title:   note.Title,
-			Status:  note.Status.ToUint8(),
-			Content: note.Content,
-			// 要把作者信息带出去
-			Author: note.Author.Name,
-			Ctime:  note.Ctime.Format(time.DateTime),
-			Utime:  note.Utime.Format(time.DateTime),
-			//Liked:      intr.Liked,
-			//Collected:  intr.Collected,
-			//LikeCnt:    intr.LikeCnt,
-			//ReadCnt:    intr.ReadCnt,
-			//CollectCnt: intr.CollectCnt,
+			Id:         note.Id,
+			Title:      note.Title,
+			Status:     note.Status.ToUint8(),
+			Content:    note.Content,
+			Author:     note.Author.Name,
+			Ctime:      note.Ctime.Format(time.DateTime),
+			Utime:      note.Utime.Format(time.DateTime),
+			Liked:      intr.Liked,
+			Collected:  intr.Collected,
+			LikeCnt:    intr.LikeCnt,
+			ReadCnt:    intr.ReadCnt,
+			CollectCnt: intr.CollectCnt,
 		},
 	})
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -18,8 +19,9 @@ type APIRepository interface {
 }
 
 type CacheAPIRepository struct {
-	dao dao.APIDAO
-	l   logger.LoggerV1
+	dao      dao.APIDAO
+	l        logger.LoggerV1
+	userRepo UserRepository
 }
 
 func (c *CacheAPIRepository) FindByUId(ctx context.Context, id int64) ([]domain.API, error) {
@@ -32,17 +34,36 @@ func (c *CacheAPIRepository) FindByUId(ctx context.Context, id int64) ([]domain.
 	apiResp := make([]domain.API, 0)
 
 	for _, a := range api {
-		aResp := c.entityToDomain(a)
+		creator, updater := c.findUserByUId(ctx, id, a)
+		aResp := c.entityToDomain(a, creator, updater)
 		apiResp = append(apiResp, aResp)
 	}
 
 	return apiResp, err
 }
 
-func NewAPIRepository(dao dao.APIDAO, l logger.LoggerV1) APIRepository {
+func (c *CacheAPIRepository) findUserByUId(ctx context.Context, id int64, api dao.API) (domain.User, domain.User) {
+	// 适合单体应用
+	c.l.Error(fmt.Sprintf("更新人 ID : %d", api.UpdaterId))
+
+	creator, err := c.userRepo.FindById(ctx, id)
+	if err != nil {
+		c.l.Error("查询创建人失败", logger.Error(err))
+	}
+
+	updater, err := c.userRepo.FindById(ctx, api.UpdaterId)
+	if err != nil {
+		c.l.Error("查询更新人失败", logger.Error(err))
+	}
+	c.l.Info(fmt.Sprintf("创建人：%v, 更新人：%v", creator, updater))
+	return creator, updater
+}
+
+func NewAPIRepository(dao dao.APIDAO, l logger.LoggerV1, userRepo UserRepository) APIRepository {
 	return &CacheAPIRepository{
-		dao: dao,
-		l:   l,
+		dao:      dao,
+		l:        l,
+		userRepo: userRepo,
 	}
 }
 
@@ -89,12 +110,13 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 			String: api.Project,
 			Valid:  api.Project != "",
 		},
-		Creator: api.Creator,
-		Updater: api.Updater,
+		CreatorId: api.Creator.Id,
+		UpdaterId: api.Updater.Id,
 	}
 }
 
-func (c *CacheAPIRepository) entityToDomain(api dao.API) domain.API {
+func (c *CacheAPIRepository) entityToDomain(api dao.API, creator, updater domain.User) domain.API {
+
 	return domain.API{
 		Id:   api.Id,
 		Name: api.Name.String,
@@ -106,8 +128,14 @@ func (c *CacheAPIRepository) entityToDomain(api dao.API) domain.API {
 		Header:  api.Header.String,
 		Method:  api.Method.String,
 		Project: api.Project.String,
-		Creator: api.Creator,
-		Updater: api.Updater,
+		Creator: domain.Editor{
+			Id:   creator.Id,
+			Name: creator.FullName,
+		},
+		Updater: domain.Editor{
+			Id:   updater.Id,
+			Name: updater.FullName,
+		},
 
 		Ctime: time.UnixMilli(api.Ctime),
 		Utime: time.UnixMilli(api.Utime),

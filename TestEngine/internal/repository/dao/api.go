@@ -22,7 +22,7 @@ type GORMAPIDAO struct {
 
 func (dao *GORMAPIDAO) FindByUId(ctx context.Context, id int64) ([]API, error) {
 	var api []API
-	err := dao.db.WithContext(ctx).Where("creator=?", id).Find(&api).Error
+	err := dao.db.WithContext(ctx).Where("creator_id=?", id).Find(&api).Error
 	return api, err
 }
 
@@ -37,7 +37,7 @@ func (dao *GORMAPIDAO) Insert(ctx context.Context, api API) (int64, error) {
 	now := time.Now().UnixMilli()
 	api.Ctime = now
 	api.Utime = now
-	api.Updater = api.Creator
+	api.UpdaterId = api.CreatorId
 	err := dao.db.WithContext(ctx).Create(&api).Error
 	return api.Id, err
 }
@@ -46,16 +46,16 @@ func (dao *GORMAPIDAO) UpdateById(ctx context.Context, api API) error {
 	now := time.Now().UnixMilli()
 	res := dao.db.WithContext(ctx).Model(&api).Where("id=?", api.Id).
 		Updates(map[string]interface{}{
-			"name":    api.Name,
-			"url":     api.URL,
-			"params":  api.Params,
-			"type":    api.Type,
-			"body":    api.Body,
-			"header":  api.Header,
-			"method":  api.Method,
-			"project": api.Project,
-			"utime":   now,
-			"updater": api.Updater,
+			"name":       api.Name,
+			"url":        api.URL,
+			"params":     api.Params,
+			"type":       api.Type,
+			"body":       api.Body,
+			"header":     api.Header,
+			"method":     api.Method,
+			"project":    api.Project,
+			"utime":      now,
+			"updater_id": api.UpdaterId,
 		})
 	// 注意这里的处理，通过 RowsAffected==0，得知更新失败
 	err := res.Error
@@ -69,17 +69,17 @@ func (dao *GORMAPIDAO) UpdateById(ctx context.Context, api API) error {
 }
 
 type API struct {
-	Id      int64 `gorm:"primaryKey,autoIncrement"`
-	Name    sql.NullString
-	URL     sql.NullString
-	Params  sql.NullString
-	Type    sql.NullString
-	Body    sql.NullString
-	Header  sql.NullString
-	Method  sql.NullString
-	Project sql.NullString
-	Creator int64
-	Updater int64
-	Ctime   int64
-	Utime   int64
+	Id        int64 `gorm:"primaryKey,autoIncrement"`
+	Name      sql.NullString
+	URL       sql.NullString
+	Params    sql.NullString
+	Type      sql.NullString
+	Body      sql.NullString
+	Header    sql.NullString
+	Method    sql.NullString
+	Project   sql.NullString
+	CreatorId int64
+	UpdaterId int64
+	Ctime     int64
+	Utime     int64
 }

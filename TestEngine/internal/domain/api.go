@@ -17,8 +17,13 @@ type API struct {
 	Project string `json:"project"`
 	Debug   bool   `json:"debug"` // 判断是否调用接口 debug 开启 true 关闭 false
 
-	Creator int64 `json:"creator"`
-	Updater int64 `json:"updater"`
+	Creator Editor `json:"creator"`
+	Updater Editor `json:"updater"`
 	Ctime   time.Time
 	Utime   time.Time
+}
+
+type Editor struct {
+	Id   int64
+	Name string
 }

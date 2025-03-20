@@ -8,12 +8,11 @@ function Notes() {
     <>
       <Row type="horizontal">
         <Heading as="h1">Work notes</Heading>
-        {/* <InterfaceTableOperations /> */}
+        <AddNote />
       </Row>
 
       <Row>
         <NotesSummary />
-        <AddNote />
       </Row>
     </>
   );

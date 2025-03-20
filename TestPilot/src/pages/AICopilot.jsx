@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { HiOutlineCommandLine } from "react-icons/hi2";
+import styled from "styled-components";
 
 import { useOpenai } from "../features/aicopilot/useOpenaiAsk";
 import Button from "../ui/Button";
@@ -7,6 +8,15 @@ import Form from "../ui/Form.jsx";
 import Row from "../ui/Row";
 import Heading from "../ui/Heading";
 import Textarea from "../ui/Textarea";
+
+const StyledButton = styled.div`
+  &:has(button) {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+`;
 
 function AICopilot() {
   const [inputText, setInputText] = useState("");
@@ -94,16 +104,19 @@ function AICopilot() {
 
       <Row>
         <Form type="modal" onSubmit={handleSubmit} className="input-form">
-          <Heading as="h2">
-            <HiOutlineCommandLine />{" "}
-          </Heading>
-          <Textarea
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type your message..."
-          />
-          <Button type="submit">Send</Button>
+          <StyledButton>
+            <Heading as="h1">
+              <HiOutlineCommandLine />{" "}
+            </Heading>
+
+            <Textarea
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Type your message..."
+            />
+            <Button type="submit">Send</Button>
+          </StyledButton>
         </Form>
       </Row>
     </>

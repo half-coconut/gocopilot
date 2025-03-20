@@ -48,6 +48,7 @@ func (c *CachedReadCntRepository) Liked(ctx context.Context, biz string, id int6
 	case nil:
 		return true, nil
 	case dao.ErrDataNotFound:
+		// 这个 error 会吞掉了
 		return false, nil
 	default:
 		return false, err

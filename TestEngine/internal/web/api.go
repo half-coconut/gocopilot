@@ -184,22 +184,22 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		}, err
 	}
 
-	c, _ := ctx.Get("users")
-	claims, ok := c.(ijwt.UserClaims)
-	if !ok {
-		ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
-		a.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
-		return ginx.Result{
-			Code:    0,
-			Message: "系统错误",
-		}, err
-	}
+	//c, _ := ctx.Get("users")
+	//claims, ok := c.(ijwt.UserClaims)
+	//if !ok {
+	//	ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+	//	a.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
+	//	return ginx.Result{
+	//		Code:    0,
+	//		Message: "系统错误",
+	//	}, err
+	//}
 
-	apis, err := a.svc.List(ctx, claims.Id)
+	apis, err := a.svc.List(ctx, uc.Id)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
-		a.l.Info("用户校验，系统错误", logger.Error(err), logger.Int64("Id", claims.Id))
+		a.l.Info("用户校验，系统错误", logger.Error(err), logger.Int64("Id", uc.Id))
 		return ginx.Result{
 			Code:    0,
 			Message: "系统错误",
@@ -218,8 +218,8 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 				Method:  src.Method,
 				Type:    src.Type,
 				Project: src.Project,
-				Creator: src.Creator,
-				Updater: src.Updater,
+				Creator: src.Creator.Name,
+				Updater: src.Updater.Name,
 				Ctime:   src.Ctime.Format(time.DateTime),
 				Utime:   src.Utime.Format(time.DateTime),
 			}
@@ -272,8 +272,8 @@ type API0 struct {
 	Type    string `json:"type"` // http/websocket
 	Project string `json:"project"`
 
-	Creator int64  `json:"creator"`
-	Updater int64  `json:"updater"`
+	Creator string `json:"creator"`
+	Updater string `json:"updater"`
 	Ctime   string `json:"ctime"`
 	Utime   string `json:"utime"`
 }

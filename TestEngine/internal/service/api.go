@@ -24,7 +24,9 @@ func (a apiService) List(ctx context.Context, id int64) ([]domain.API, error) {
 func (a apiService) Save(ctx context.Context, api domain.API, uid int64) (int64, error) {
 	if api.Id > 0 {
 		// 这里是修改
-		api.Updater = uid
+		api.Updater = domain.Editor{
+			Id: uid,
+		}
 		err := a.repo.Update(ctx, api)
 		if err != nil {
 			a.l.Warn("修改失败", logger.Error(err))
@@ -32,8 +34,12 @@ func (a apiService) Save(ctx context.Context, api domain.API, uid int64) (int64,
 		return api.Id, err
 	}
 	// 这里是新增
-	api.Creator = uid
-	api.Updater = uid
+	api.Creator = domain.Editor{
+		Id: uid,
+	}
+	api.Updater = domain.Editor{
+		Id: uid,
+	}
 	Id, err := a.repo.Create(ctx, api)
 	if err != nil {
 		a.l.Warn("新增失败", logger.Error(err))
