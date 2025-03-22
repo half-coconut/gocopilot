@@ -71,11 +71,14 @@ Kafka 中的消息有序性保证是以分区为单位的。 也就是说，一�
   费者会被忽略。
 - 如果消费者性能很差，那么并不能通过无限增加消费者来提高消费速率。
 
-这就是典型的面试热点：消息积压问题。
+这就是典型的面试热点：<font color=red>消息积压问题</font>。
 
 进入kafka 容器，查看consumer
 
 ```shell
+docker ps
+docker exec -it 4c803237e6d9 bash
+
 find / -name "kafka-console-consumer.sh"
 
 /opt/bitnami/kafka/bin/kafka-console-consumer.sh --topic test_topic --from-beginning --bootstrap-server localhost:9094

@@ -27,3 +27,9 @@ type Editor struct {
 	Id   int64
 	Name string
 }
+
+// RecordHeader TODO: 后续把 headers 补充上
+type RecordHeader struct {
+	Key   []byte
+	Value []byte
+}
