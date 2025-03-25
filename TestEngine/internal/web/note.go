@@ -232,48 +232,6 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 		return err
 	})
 
-	//var getResp *intrv1.GetResponse
-	//eg.Go(func() error {
-	//	// 这个地方可以容忍错误
-	//	getResp, err = n.intrSvc.Get(ctx, &intrv1.GetRequest{
-	//		Biz: n.biz, BizId: id, Uid: uc.Id,
-	//	})
-	//	// 这种是容错的写法
-	//	//if err != nil {
-	//	//	// 记录日志
-	//	//}
-	//	//return nil
-	//	return err
-	//})
-
-	// 在这儿等，要保证前面两个
-	//err = eg.Wait()
-	//if err != nil {
-	//	// 代表查询出错了
-	//	ctx.JSON(http.StatusOK, Result{
-	//		Code:    5,
-	//		Message: "系统错误",
-	//	})
-	//	return
-	//}
-
-	// 增加阅读计数。
-	//go func() {
-	//	// 你都异步了，怎么还说有巨大的压力呢？
-	//	// 开一个 goroutine，异步去执行
-	//	_, er := n.intrSvc.IncrReadCnt(ctx, &intrv1.IncrReadCntRequest{
-	//		Biz: n.biz, BizId: art.Id,
-	//	})
-	//	if er != nil {
-	//		n.l.Error("增加阅读计数失败",
-	//			logger.Int64("aid", art.Id),
-	//			logger.Error(err))
-	//	}
-	//}()
-
-	//ctx.Set("art", art)
-	//intr := getResp.Intr
-
 	// 获得这篇文章的全部计数
 	var intr domain.Interactive
 	eg.Go(func() error {

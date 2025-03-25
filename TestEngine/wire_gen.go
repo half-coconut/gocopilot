@@ -7,6 +7,7 @@
 package main
 
 import (
+	note3 "TestCopilot/TestEngine/internal/events/note"
 	"TestCopilot/TestEngine/internal/repository"
 	"TestCopilot/TestEngine/internal/repository/cache"
 	"TestCopilot/TestEngine/internal/repository/dao"
@@ -16,7 +17,6 @@ import (
 	"TestCopilot/TestEngine/internal/web"
 	"TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
-	"github.com/gin-gonic/gin"
 )
 
 import (
@@ -26,7 +26,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitWebServer() *gin.Engine {
+func InitWebServer() *App {
 	cmdable := ioc.InitRedis()
 	loggerV1 := ioc.InitLogger()
 	handler := jwt.NewRedisJWTHandler(cmdable)
@@ -46,12 +46,20 @@ func InitWebServer() *gin.Engine {
 	authorDAO := note.NewNoteAuthorDAO(loggerV1, db)
 	readerDAO := note.NewNoteReaderDAO(loggerV1, db)
 	noteRepository := note2.NewNoteRepository(noteDAO, authorDAO, readerDAO, loggerV1)
-	noteService := service.NewNoteService(noteRepository, loggerV1)
+	client := ioc.InitKafka()
+	syncProducer := ioc.NewSyncProducer(client)
+	producer := note3.NewKafkaProducer(syncProducer)
+	noteService := service.NewNoteService(noteRepository, loggerV1, producer)
 	interactiveDAO := dao.NewGORMInteractiveDAO(db)
 	interactiveCache := cache.NewRedisInteractiveCache(cmdable)
 	interactiveRepository := repository.NewCachedInteractiveRepository(interactiveDAO, interactiveCache, loggerV1)
 	interactiveService := service.NewInteractiveService(interactiveRepository, loggerV1)
 	noteHandler := web.NewNoteHandler(noteService, loggerV1, interactiveService)
 	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, noteHandler)
-	return engine
+	v2 := ioc.NewConsumers()
+	app := &App{
+		Server:    engine,
+		Consumers: v2,
+	}
+	return app
 }

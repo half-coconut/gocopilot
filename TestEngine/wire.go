@@ -3,37 +3,47 @@
 package main
 
 import (
+	events "TestCopilot/TestEngine/internal/events/note"
 	"TestCopilot/TestEngine/internal/repository"
 	"TestCopilot/TestEngine/internal/repository/cache"
 	"TestCopilot/TestEngine/internal/repository/dao"
-	"TestCopilot/TestEngine/internal/repository/dao/note"
-	note2 "TestCopilot/TestEngine/internal/repository/note"
+	noteDao "TestCopilot/TestEngine/internal/repository/dao/note"
+	noteRepo "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
 	"TestCopilot/TestEngine/internal/web"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
-func InitWebServer() *gin.Engine {
+func InitWebServer() *App {
 	wire.Build(
 		ioc.InitDB, ioc.InitRedis,
 		//ioc.InitMongoDB,
 		ioc.InitLogger,
+		ioc.InitKafka,
+		ioc.NewConsumers,
+		ioc.NewSyncProducer,
+
+		// consumer
+		//events.NewKafkaConsumer,
+		events.NewKafkaProducer,
 
 		dao.NewUserDAO,
-		note.NewNoteDAO,
 		dao.NewAPIDAO,
 		dao.NewGORMInteractiveDAO,
-		note.NewNoteAuthorDAO,
-		note.NewNoteReaderDAO,
+		noteDao.NewNoteDAO,
+
+		noteDao.NewNoteAuthorDAO,
+		noteDao.NewNoteReaderDAO,
 		cache.NewUserCache,
 		cache.NewRedisInteractiveCache,
+
 		repository.NewUserRepository,
-		note2.NewNoteRepository,
+		noteRepo.NewNoteRepository,
 		repository.NewAPIRepository,
 		repository.NewCachedInteractiveRepository,
+
 		service.NewUserService,
 		service.NewNoteService,
 		service.NewAPIService,
@@ -47,6 +57,8 @@ func InitWebServer() *gin.Engine {
 
 		ioc.InitWebServer,
 		ioc.InitMiddleware,
+		// 组装这个结构体的所有字段
+		wire.Struct(new(App), "*"),
 	)
-	return new(gin.Engine)
+	return new(App)
 }

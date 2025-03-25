@@ -2,6 +2,7 @@ package sarama
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/IBM/sarama"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
@@ -19,11 +20,11 @@ func TestConsumer(t *testing.T) {
 	consumer, err := sarama.NewConsumerGroup(addrs, "test_group", cfg)
 	assert.NoError(t, err)
 
-	err = consumer.Consume(context.Background(), []string{test_topic}, &testConsumerGroupHandler{})
+	err = consumer.Consume(context.Background(), []string{test_topic}, testConsumerGroupHandler{})
 	assert.NoError(t, err)
 }
 
-func TestConsumer_with_timeout(t *testing.T) {
+func TestConsumer_With_Timeout(t *testing.T) {
 	// 5秒超时后，结束
 	cfg := sarama.NewConfig()
 	consumer, err := sarama.NewConsumerGroup(addrs, "test_group", cfg)
@@ -32,12 +33,12 @@ func TestConsumer_with_timeout(t *testing.T) {
 	begin := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	err = consumer.Consume(ctx, []string{test_topic}, &testConsumerGroupHandler{})
+	err = consumer.Consume(ctx, []string{test_topic}, testConsumerGroupHandler{})
 	assert.NoError(t, err)
 	t.Log(time.Since(begin).String())
 }
 
-func TestConsumer_with_cancel(t *testing.T) {
+func TestConsumer_With_Cancel(t *testing.T) {
 	// 30秒后，结束
 	cfg := sarama.NewConfig()
 	consumer, err := sarama.NewConsumerGroup(addrs, "test_group", cfg)
@@ -48,7 +49,7 @@ func TestConsumer_with_cancel(t *testing.T) {
 	time.AfterFunc(time.Second*30, func() {
 		cancel()
 	})
-	err = consumer.Consume(ctx, []string{test_topic}, &testConsumerGroupHandler{})
+	err = consumer.Consume(ctx, []string{test_topic}, testConsumerGroupHandler{})
 	assert.NoError(t, err)
 	t.Log(time.Since(begin).String())
 }
@@ -66,9 +67,12 @@ func (t testConsumerGroupHandler) Setup(session sarama.ConsumerGroupSession) err
 	// topic => 偏移量
 	partitions := session.Claims()[test_topic]
 
+	// 一般保留 3-7天
 	for _, part := range partitions {
+		// 从最晚的开始去消费
 		session.ResetOffset(test_topic, part,
 			sarama.OffsetOldest, "")
+		// 或者是 offset 直接填写，比如 123
 		//session.ResetOffset("test_topic", part,
 		//	123, "")
 		//session.ResetOffset("test_topic", part,
@@ -80,6 +84,23 @@ func (t testConsumerGroupHandler) Setup(session sarama.ConsumerGroupSession) err
 
 func (c testConsumerGroupHandler) Cleanup(session sarama.ConsumerGroupSession) error {
 	log2.Println("Cleanup")
+	return nil
+}
+
+type MyBizMsg struct {
+}
+
+func (c testConsumerGroupHandler) ConsumeClaimV3(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	msgCh := claim.Messages()
+	for msg := range msgCh {
+		var bisMsg MyBizMsg
+		err := json.Unmarshal(msg.Value, &bisMsg)
+		log2.Println(string(msg.Value))
+		if err != nil {
+			continue
+		}
+		session.MarkMessage(msg, "")
+	}
 	return nil
 }
 
@@ -100,6 +121,7 @@ func (c testConsumerGroupHandler) ConsumeClaim(
 
 	const batchSize = 10
 	for {
+		// 这里用于控制凑够一批的时间
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 		var (
 			eg   errgroup.Group
@@ -129,7 +151,8 @@ func (c testConsumerGroupHandler) ConsumeClaim(
 		cancel()
 		err := eg.Wait()
 		if err != nil {
-			// 记录日志，重试
+			// 记录日志
+			// 这里是一整批重试
 			continue
 		}
 		// 做实验，是否是最后一个msg 就生效
@@ -137,4 +160,19 @@ func (c testConsumerGroupHandler) ConsumeClaim(
 			session.MarkMessage(last, "")
 		}
 	}
+}
+
+// 返回只读的 channel
+func ChannelV1() <-chan struct{} {
+	panic("implement me")
+}
+
+// 返回只写的 channel
+func ChannelV2() chan<- struct{} {
+	panic("implement me")
+}
+
+// 返回可读可写的 channel
+func ChannelV3() chan struct{} {
+	panic("implement me")
 }

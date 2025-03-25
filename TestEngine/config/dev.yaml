@@ -1,0 +1,30 @@
+db:
+  dsn: "root:root@tcp(localhost:13316)/testengine"
+
+redis:
+  addr: "localhost:6379"
+
+abc: "helloabc" # v1
+# abc: "helloabcdef" # v2
+
+kafka:
+  addrs:
+    - "localhost:9094"
+
+etcd:
+  endpoints:
+    - "localhost:12379"
+
+grpc:
+  client:
+    intr:
+      name: "interactive"
+      secure: false
+
+# 这个是流量控制的 client 的配置
+#grpc:
+#  client:
+#    intr:
+#      addr: "localhost:8090"
+#      secure: false
+#      threshold: 100

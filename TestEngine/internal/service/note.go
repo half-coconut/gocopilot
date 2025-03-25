@@ -27,33 +27,34 @@ type noteService struct {
 
 func (n *noteService) GetPublishedById(ctx context.Context, id, uid int64) (domain.Note, error) {
 	// 另一个选项，在这里组装 Author，调用 UserService
-	art, err := n.repo.GetPublishedById(ctx, id)
-	//if err == nil {
-	//	// 每次打开一篇文章，就发一条消息
-	//	go func() {
-	//		// 生产者也可以通过改批量来提高性能
-	//		er := n.producer.ProduceReadEvent(
-	//			ctx,
-	//			events.ReadEvent{
-	//				// 即便你的消费者要用 art 的里面的数据，
-	//				// 让它去查询，你不要在 event 里面带
-	//				Uid: uid,
-	//				Nid: id,
-	//			})
-	//		if er != nil {
-	//			n.l.Error("发送读者阅读事件失败")
-	//		}
-	//	}()
+	note, err := n.repo.GetPublishedById(ctx, id)
+	if err == nil {
+		// 每次打开一篇文章，就发一条消息
+		go func() {
+			// 生产者也可以通过改批量来提高性能
+			er := n.producer.ProducerReadEvent(
+				ctx,
+				events.ReadEvent{
+					// 即便你的消费者要用 art 的里面的数据，
+					// 让它去查询，你不要在 event 里面带
+					// 除非是快照语义的可以加 content
+					Uid: uid,
+					Nid: id,
+				})
+			if er != nil {
+				n.l.Error("发送读者阅读事件失败")
+			}
+		}()
 
-	//go func() {
-	//	// 改批量的做法
-	//	svc.ch <- readInfo{
-	//		aid: id,
-	//		uid: uid,
-	//	}
-	//}()
-	//}
-	return art, err
+		//go func() {
+		//	// 改批量的做法
+		//	n.ch <- readInfo{
+		//		aid: id,
+		//		uid: uid,
+		//	}
+		//}()
+	}
+	return note, err
 }
 
 func (n *noteService) GetById(ctx context.Context, id int64) (domain.Note, error) {
@@ -68,10 +69,11 @@ func (n *noteService) Withdraw(ctx context.Context, note domain.Note) error {
 	return n.repo.SyncStatus(ctx, note.Id, note.Author.Id, domain.NoteStatusPrivate)
 }
 
-func NewNoteService(repo note.NoteRepository, l logger.LoggerV1) NoteService {
+func NewNoteService(repo note.NoteRepository, l logger.LoggerV1, producer events.Producer) NoteService {
 	return &noteService{
-		repo: repo,
-		l:    l,
+		repo:     repo,
+		l:        l,
+		producer: producer,
 	}
 }
 
