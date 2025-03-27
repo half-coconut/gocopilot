@@ -1,17 +1,22 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-// import { format, isToday } from "date-fns";
+
 import {
   HiOutlineChatBubbleBottomCenterText,
   HiOutlineCheckCircle,
-  //   HiOutlineCurrencyDollar,
   HiOutlineClipboardDocumentList,
+  HiOutlineArchiveBox,
+  HiOutlineUser,
 } from "react-icons/hi2";
 
-import DataItem from "../../ui/DataItem.jsx";
-// import { Flag } from "../../ui/Flag.jsx";
+import { TbReportAnalytics } from "react-icons/tb";
 
-// import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers.js";
+import {
+  MdOutlineFaceUnlock,
+  MdOutlineFaceRetouchingNatural,
+} from "react-icons/md";
+
+import DataItem from "../../ui/DataItem.jsx";
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -69,31 +74,31 @@ const Guest = styled.div`
   }
 `;
 
-// const Price = styled.div`
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-//   padding: 1.6rem 3.2rem;
-//   border-radius: var(--border-radius-sm);
-//   margin-top: 2.4rem;
+const Price = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem 3.2rem;
+  border-radius: var(--border-radius-sm);
+  margin-top: 2.4rem;
 
-//   background-color: ${(props) =>
-//     props.isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)"};
-//   color: ${(props) =>
-//     props.isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)"};
+  background-color: ${(props) =>
+    props.isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)"};
+  color: ${(props) =>
+    props.isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)"};
 
-//   & p:last-child {
-//     text-transform: uppercase;
-//     font-size: 1.4rem;
-//     font-weight: 600;
-//   }
+  & p:last-child {
+    text-transform: uppercase;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
 
-//   svg {
-//     height: 2.4rem;
-//     width: 2.4rem;
-//     color: currentColor !important;
-//   }
-// `;
+  svg {
+    height: 2.4rem;
+    width: 2.4rem;
+    color: currentColor !important;
+  }
+`;
 
 const Footer = styled.footer`
   padding: 1.6rem 4rem;
@@ -102,19 +107,49 @@ const Footer = styled.footer`
   text-align: right;
 `;
 
-// A purely presentational component
-function DebugResultBox({ data }) {
-  const observations = true;
+function DebugResultBox({ interfaceItem }) {
+  console.log("interface item: ", interfaceItem);
+
+  const {
+    id,
+    name,
+    project,
+    url,
+    params,
+    method,
+    header,
+    body,
+    type,
+    debug_result,
+    creator,
+    updater,
+    ctime,
+    utime,
+  } = interfaceItem;
+
+  console.log(
+    id,
+    name,
+    project,
+    url,
+    params,
+    method,
+    header,
+    body,
+    type,
+    debug_result,
+    creator,
+    updater,
+    ctime,
+    utime
+  );
+
   return (
     <StyledBookingDataBox>
       <Header>
         <div>
           <HiOutlineClipboardDocumentList />
-
-          <p>
-            response
-            {/* {numNights} nights in Cabin <span>{cabinName}</span> */}
-          </p>
+          <p>{project}</p>
         </div>
 
         <p></p>
@@ -122,56 +157,61 @@ function DebugResultBox({ data }) {
 
       <Section>
         <Guest>
-          response
-          {/* {countryFlag && <Flag src={countryFlag} alt={`Flag of ${country}`} />} */}
-          <p>
-            response
-            {/* {guestName} {numGuests > 1 ? `+ ${numGuests - 1} guests` : ""} */}
-          </p>
+          <HiOutlineArchiveBox />
+          <p>{name}</p>
           <span>&bull;</span>
-          <p>response</p>
+          <HiOutlineUser />
+          <p>creator</p>
           <span>&bull;</span>
-          {/* <p>National ID {nationalID}</p> */}
+          <p>{creator}</p>
         </Guest>
 
-        {observations && (
-          <DataItem
-            icon={<HiOutlineChatBubbleBottomCenterText />}
-            label="Observations"
-          >
-            {/* {observations} */}
-            response9999
-          </DataItem>
-        )}
-
-        <DataItem icon={<HiOutlineCheckCircle />} label="Breakfast included?">
-          {/* {hasBreakfast ? "Yes" : "No"} */}
-          <pre>{data}</pre>
+        <DataItem icon={<HiOutlineChatBubbleBottomCenterText />} label={method}>
+          {url}
         </DataItem>
 
-        {/* <Price isPaid={isPaid}>
-          <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
-            {formatCurrency(totalPrice)}
+        <DataItem icon={<HiOutlineCheckCircle />} label="headers">
+          <pre>{header}</pre>
+        </DataItem>
 
-            {hasBreakfast &&
-              ` (${formatCurrency(cabinPrice)} cabin + ${formatCurrency(
-                extrasPrice
-              )} breakfast)`}
-          </DataItem>
-
-          <p>{isPaid ? "Paid" : "Will pay at property"}</p>
-        </Price> */}
+        <Price isPaid="true">
+          <DataItem
+            icon={<TbReportAnalytics />}
+            label={`Total Result`}
+          ></DataItem>
+          <pre>{debug_result}</pre>
+        </Price>
       </Section>
 
       <Footer>
-        {/* <p>Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p> */}
+        <p>
+          <MdOutlineFaceUnlock /> {creator} Created on {ctime}
+        </p>
+        <p>
+          <MdOutlineFaceRetouchingNatural /> {updater} Updated on {utime}
+        </p>
       </Footer>
     </StyledBookingDataBox>
   );
 }
 
 DebugResultBox.propTypes = {
-  data: PropTypes.string,
+  interfaceItem: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    project: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    params: PropTypes.string.isRequired,
+    method: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    header: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    debug_result: PropTypes.string.isRequired,
+    creator: PropTypes.number.isRequired,
+    updater: PropTypes.number.isRequired,
+    ctime: PropTypes.string.isRequired,
+    utime: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default DebugResultBox;

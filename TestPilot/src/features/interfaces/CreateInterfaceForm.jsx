@@ -12,6 +12,7 @@ import { useCreateInterface } from "./useCreateInterface.js";
 import { useEditInterface } from "./useEditInterface.js";
 import Switch from "../../ui/Switch.jsx";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const StyledSelect = styled.select`
   font-size: 1.4rem;
@@ -40,6 +41,8 @@ function CreateInterfaceForm({ interfaceToEdit = {}, onCloseModal }) {
   });
 
   const { errors } = formState;
+
+  const navigate = useNavigate();
 
   console.log("编辑状态获取的值：", editValue);
 
@@ -91,7 +94,10 @@ function CreateInterfaceForm({ interfaceToEdit = {}, onCloseModal }) {
         },
         {
           onSuccess: () => {
-            reset(), onCloseModal?.();
+            {
+              isOn ? navigate(`/interfaces/${editId}`) : reset(),
+                onCloseModal?.();
+            }
           },
         }
       );
@@ -199,9 +205,13 @@ function CreateInterfaceForm({ interfaceToEdit = {}, onCloseModal }) {
         />
       </FormRow>
 
-      <FormRow label="Debug" error={errors?.discount?.message}>
-        <Switch onChange={handleChange} />
-      </FormRow>
+      {isEditSession ? (
+        <FormRow label="Debug" error={errors?.discount?.message}>
+          <Switch onChange={handleChange} />
+        </FormRow>
+      ) : (
+        ""
+      )}
 
       <FormRow label="Upload">
         <FileInput

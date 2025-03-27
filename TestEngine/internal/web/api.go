@@ -13,6 +13,8 @@ import (
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -34,7 +36,7 @@ func (a *APIHandler) RegisterRoutes(server *gin.Engine) {
 	api := server.Group("/api")
 	api.POST("/edit", ginx.WrapToken[ijwt.UserClaims](a.Edit))
 	api.GET("/list", ginx.WrapToken[ijwt.UserClaims](a.List))
-	api.GET("/detail:id", ginx.WrapToken[ijwt.UserClaims](a.Detail))
+	api.GET("/detail/:id", ginx.WrapToken[ijwt.UserClaims](a.Detail))
 
 }
 
@@ -71,7 +73,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		Type:    req.Type,
 		Body:    req.Body,
 		Header:  req.Header,
-		Method:  req.Method,
+		Method:  strings.ToUpper(req.Method),
 		Project: req.Project,
 		Debug:   req.Debug,
 	}
@@ -100,33 +102,35 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Data:    Id,
 		}, nil
 	} else {
-		// debug 并不需要确定是新增还是修改，只要参数正确都支持
-		// 如果 debug 为 true, 则运行 run
+		// TODO: 以后可能不会在 web 层处理这些内容
+		report := run(req, "test@123.com")
+		// 把 debug 结果写入数据库
+		api = domain.API{
+			Id:          req.Id, // 传入了 id 就是修改，不传 id 就是新增
+			Name:        req.Name,
+			URL:         req.URL,
+			Params:      req.Params,
+			Type:        req.Type,
+			Body:        req.Body,
+			Header:      req.Header,
+			Method:      strings.ToUpper(req.Method),
+			Project:     req.Project,
+			Debug:       req.Debug,
+			DebugResult: report,
+		}
 
-		//user, err := a.userSvc.Profile(ctx, uc.Id)
-		//
-		//if errors.Is(err, service.ErrInvalidUserOrPassword) {
-		//	ctx.JSON(http.StatusBadRequest, Result{Code: 0, Message: "邮箱不存在"})
-		//	a.l.Info("邮箱不存在", logger.Error(err), logger.String("email", user.Email))
-		//	return ginx.Result{
-		//		Code:    0,
-		//		Message: "邮箱不存在",
-		//	}, err
-		//}
-		//if err != nil {
-		//	ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
-		//	a.l.Info("用户校验，系统错误", logger.Error(err), logger.String("email", user.Email))
-		//	return ginx.Result{
-		//		Code:    0,
-		//		Message: "用户校验，系统错误",
-		//	}, err
-		//}
-		userEmail := "test@123.com"
-		report := run(req, userEmail)
+		Id, err = a.svc.Save(ctx, api, uc.Id)
+		if err != nil {
+			a.l.Info(fmt.Sprintf("保存笔记失败，用户 Id：%v", uc.Id), logger.Error(err))
+			return ginx.Result{
+				Code:    0,
+				Message: "系统错误",
+			}, err
+		}
 
 		return ginx.Result{
 			Code:    1,
-			Message: "OK",
+			Message: fmt.Sprintf("%d, OK", Id),
 			Data:    report,
 		}, err
 	}
@@ -134,14 +138,13 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 }
 
 func run(req APIReq, userEmail string) string {
-
 	var h = make(http.Header, 0)
 	h.Add("Content-Type", "application/json")
-	h.Add("User-Agent", "PostmanRuntime/7.39.0")
+	h.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36")
 
 	body := []byte(`{"jsonrpc": "2.0", "method": "eth_accounts", "params": [], "id": 1}`)
 
-	ht := model.NewHttpContent(req.Method,
+	ht := model.NewHttpContent(strings.ToUpper(req.Method),
 		req.URL,
 		req.Params,
 		body,
@@ -184,17 +187,6 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		}, err
 	}
 
-	//c, _ := ctx.Get("users")
-	//claims, ok := c.(ijwt.UserClaims)
-	//if !ok {
-	//	ctx.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
-	//	a.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
-	//	return ginx.Result{
-	//		Code:    0,
-	//		Message: "系统错误",
-	//	}, err
-	//}
-
 	apis, err := a.svc.List(ctx, uc.Id)
 
 	if err != nil {
@@ -209,19 +201,20 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 	api0List := slice.Map[domain.API, API0](apis,
 		func(idx int, src domain.API) API0 {
 			return API0{
-				Id:      src.Id,
-				Name:    src.Name,
-				URL:     src.URL,
-				Params:  src.Params,
-				Body:    src.Body,
-				Header:  src.Header,
-				Method:  src.Method,
-				Type:    src.Type,
-				Project: src.Project,
-				Creator: src.Creator.Name,
-				Updater: src.Updater.Name,
-				Ctime:   src.Ctime.Format(time.DateTime),
-				Utime:   src.Utime.Format(time.DateTime),
+				Id:          src.Id,
+				Name:        src.Name,
+				URL:         src.URL,
+				Params:      src.Params,
+				Body:        src.Body,
+				Header:      src.Header,
+				Method:      src.Method,
+				Type:        src.Type,
+				Project:     src.Project,
+				DebugResult: src.DebugResult,
+				Creator:     src.Creator.Name,
+				Updater:     src.Updater.Name,
+				Ctime:       src.Ctime.Format(time.DateTime),
+				Utime:       src.Utime.Format(time.DateTime),
 			}
 		})
 
@@ -237,8 +230,10 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 }
 
 func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	aid := ctx.Param("id")
+
 	type APIReq struct {
-		id int64 `json:"id"`
+		aid int64 `json:"id"`
 	}
 	var req APIReq
 	err := ctx.Bind(&req)
@@ -248,9 +243,40 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 			Message: "系统错误",
 		}, err
 	}
+	req.aid, err = strconv.ParseInt(aid, 10, 64)
+	if err != nil {
+		a.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+	detail, err := a.svc.Detail(ctx, uc.Id, req.aid)
+	if err != nil {
+		return ginx.Result{}, err
+	}
+
+	response := API0{
+		Id:          detail.Id,
+		Name:        detail.Name,
+		URL:         detail.URL,
+		Params:      detail.Params,
+		Body:        detail.Body,
+		Header:      detail.Header,
+		Method:      detail.Method,
+		Type:        detail.Type,
+		Project:     detail.Project,
+		DebugResult: detail.DebugResult,
+		Creator:     detail.Creator.Name,
+		Updater:     detail.Updater.Name,
+		Ctime:       detail.Ctime.Format(time.DateTime),
+		Utime:       detail.Utime.Format(time.DateTime),
+	}
+
 	return ginx.Result{
 		Code:    1,
 		Message: "OK",
+		Data:    response,
 	}, err
 
 }
@@ -262,15 +288,16 @@ type APIListResponse struct {
 
 // 前端得到的API数据
 type API0 struct {
-	Id      int64  `json:"id"`
-	Name    string `json:"name"`
-	URL     string `json:"url"`
-	Params  string `json:"params"`
-	Body    string `json:"body"`
-	Header  string `json:"header"`
-	Method  string `json:"method"`
-	Type    string `json:"type"` // http/websocket
-	Project string `json:"project"`
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	Params      string `json:"params"`
+	Body        string `json:"body"`
+	Header      string `json:"header"`
+	Method      string `json:"method"`
+	Type        string `json:"type"` // http/websocket
+	Project     string `json:"project"`
+	DebugResult string `json:"debug_result"`
 
 	Creator string `json:"creator"`
 	Updater string `json:"updater"`

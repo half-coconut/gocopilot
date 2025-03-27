@@ -28,6 +28,14 @@ const Slider = styled.span`
   transition: 0.4s;
   border-radius: 34px;
 
+  // 如果禁用，则改变背景色并禁止光标变为手型
+  ${({ disabled }) =>
+    disabled &&
+    `
+    background-color: var(--color-grey-200); // 更浅的灰色
+    cursor: not-allowed; // 禁止点击
+  `}
+
   &:before {
     position: absolute;
     content: "";
@@ -56,10 +64,10 @@ const SwitchStyled = styled(HiddenCheckbox)`
   }
 `;
 
-function Switch({ checked, onChange }) {
+function Switch({ checked, onChange, disabled }) {
   return (
     <SwitchContainer>
-      <SwitchStyled checked={checked} onChange={onChange} />
+      <SwitchStyled checked={checked} onChange={onChange} disabled={disabled} />
       <Slider />
     </SwitchContainer>
   );
@@ -68,6 +76,11 @@ function Switch({ checked, onChange }) {
 Switch.propTypes = {
   checked: PropTypes.node.isRequired,
   onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+};
+
+Switch.defaultProps = {
+  disabled: false, // 默认不禁用
 };
 
 export default Switch;

@@ -198,6 +198,7 @@ func (r *reportService) displayReport() string {
 // %v: 等同于 %s， 输出可读的字符串格式。
 
 func TaskDebugLogs(debug bool, res []*HttpResult) {
+
 	if debug {
 		for _, re := range res {
 			log.Println(fmt.Sprintf(`

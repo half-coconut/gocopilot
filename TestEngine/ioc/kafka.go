@@ -14,12 +14,12 @@ func InitKafka() sarama.Client {
 	saramaCfg := sarama.NewConfig()
 	saramaCfg.Producer.Return.Successes = true
 	var cfg Config
+
 	err := viper.UnmarshalKey("kafka", &cfg)
 	if err != nil {
 		panic(err)
 	}
-	//client, err := sarama.NewClient(cfg.Addrs, saramaCfg)
-	client, err := sarama.NewClient([]string{"localhost:9094"}, saramaCfg)
+	client, err := sarama.NewClient(cfg.Addrs, saramaCfg)
 	if err != nil {
 		log.Fatal(err)
 	}

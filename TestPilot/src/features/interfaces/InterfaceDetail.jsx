@@ -6,6 +6,8 @@ import DebugResultBox from "./DebugResultBox";
 import { useMoveBack } from "../../hooks/useMoveBack";
 import ButtonText from "../../ui/ButtonText";
 import Row from "../../ui/Row";
+import Spinner from "../../ui/Spinner";
+import { useInterface } from "./useInterfaces";
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -13,22 +15,13 @@ const HeadingGroup = styled.div`
   align-items: center;
 `;
 
-const data = `
-+++ Requests +++
-[total 总请求数: 1]
-[rate 请求速率: 2.50]
-[throughput 吞吐量: ...]
-+++ Duration +++
-[total 总持续时间: 399.29ms]
-...
-+++ Success +++
-[ratio 成功率: 0.00%]
-[status codes:  400...:1]
-`;
-
 function InterfaceDetail() {
   const { interfaceId } = useParams();
   const moveBack = useMoveBack();
+
+  const { isLoading, interfaceItem } = useInterface();
+
+  if (isLoading) return <Spinner />;
 
   return (
     <>
@@ -39,7 +32,7 @@ function InterfaceDetail() {
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>
 
-      <DebugResultBox data={data} />
+      <DebugResultBox interfaceItem={interfaceItem} />
     </>
   );
 }

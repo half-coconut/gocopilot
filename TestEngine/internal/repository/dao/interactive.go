@@ -165,6 +165,8 @@ func (dao *GORMInteractiveDAO) incrReadCnt(tx *gorm.DB, biz string, bizId int64)
 }
 
 func (dao *GORMInteractiveDAO) BatchIncrReadCnt(ctx context.Context, bizs []string, ids []int64) error {
+	// 为什么快？
+	// 只有一个事务
 	return dao.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 让调用者保证两者是相等的
 		for i := 0; i < len(bizs); i++ {

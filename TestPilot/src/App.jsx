@@ -26,8 +26,8 @@ import Notes from "./pages/Notes";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // 数据自动刷新的时间 1s
-      staleTime: 1000,
+      // 数据自动刷新的时间 0s
+      staleTime: 0,
       // 缓存时间 1h
       cacheTime: 1000 * 60 * 10,
     },

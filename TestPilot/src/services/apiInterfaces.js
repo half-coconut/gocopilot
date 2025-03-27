@@ -6,6 +6,11 @@ export default async function getInterfaces() {
   return resp;
 }
 
+export async function getInterfaceDetail(id) {
+  const resp = await interfaceService.detail(id);
+  return resp;
+}
+
 export async function createEditInterface(newInterface) {
   return interfaceService.edit(newInterface);
 }

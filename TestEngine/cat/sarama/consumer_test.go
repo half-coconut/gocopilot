@@ -117,6 +117,7 @@ func (c testConsumerGroupHandler) ConsumeClaim(
 	// 代表的是你和Kafka 的会话（从建立连接到连接彻底断掉的那一段时间）
 	session sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
+
 	msgCh := claim.Messages()
 
 	const batchSize = 10

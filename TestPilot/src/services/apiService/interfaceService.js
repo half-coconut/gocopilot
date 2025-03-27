@@ -20,6 +20,15 @@ const interfaceService = {
       throw error;
     }
   },
+  detail: async (id) => {
+    try {
+      const res = await instance.get("/api/detail/" + id);
+      return res;
+    } catch (error) {
+      console.error("List API error:", error);
+      throw error;
+    }
+  },
 };
 
 export default interfaceService;
