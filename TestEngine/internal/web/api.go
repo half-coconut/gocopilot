@@ -3,7 +3,6 @@ package web
 import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/internal/service/core/execution"
 	"TestCopilot/TestEngine/internal/service/core/model"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/ginx"
@@ -12,16 +11,18 @@ import (
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
 type APIHandler struct {
 	l       logger.LoggerV1
 	svc     service.APIService
+	taskSvc model.TaskService
 	userSvc service.UserService
 }
 
@@ -53,9 +54,15 @@ type APIReq struct {
 	Debug   bool   `json:"debug"` // 是否运行 debug
 }
 
+const (
+	DefaultWorkers    uint64 = 5
+	DefaultMaxWorkers uint64 = math.MaxUint64
+	DefaultDurations         = 10 * time.Minute
+	DefaultTimeout           = 30 * time.Second
+)
+
 func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	// 新增，修改 和 debug 功能
-
 	var req APIReq
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -102,8 +109,43 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Data:    Id,
 		}, nil
 	} else {
-		// TODO: 以后可能不会在 web 层处理这些内容
-		report := run(req, "test@123.com")
+
+		now := time.Now().UnixMilli()
+		// 注意这里将 domain.API 转为 domain.APIs
+		apis := &domain.APIs{
+			Name:   api.Name,
+			URL:    api.URL,
+			Params: api.Params,
+			Type:   api.Type,
+			Body:   api.Body,
+			Header: api.Header,
+			Method: strings.ToUpper(api.Method),
+		}
+
+		apiList := make([]domain.APIs, 0)
+		apiList = append(apiList, *apis)
+		task := domain.Task{
+			Id:         1,
+			Name:       "system_trigger_interface_debugging",
+			APIs:       apiList,
+			Durations:  DefaultDurations,
+			Workers:    DefaultWorkers,
+			MaxWorkers: DefaultMaxWorkers,
+			Timeout:    DefaultTimeout,
+			Creator: domain.Editor{
+				Id:   1,
+				Name: "Egg Yolk",
+			},
+			Updater: domain.Editor{
+				Id:   1,
+				Name: "Egg Yolk",
+			},
+			Ctime: time.UnixMilli(now),
+			Utime: time.UnixMilli(now),
+		}
+		display(task)
+		report := debug(task)
+
 		// 把 debug 结果写入数据库
 		api = domain.API{
 			Id:          req.Id, // 传入了 id 就是修改，不传 id 就是新增
@@ -132,46 +174,36 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Code:    1,
 			Message: fmt.Sprintf("%d, OK", Id),
 			Data:    report,
-		}, err
+		}, nil
 	}
 
 }
 
-func run(req APIReq, userEmail string) string {
-	var h = make(http.Header, 0)
-	h.Add("Content-Type", "application/json")
-	h.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36")
-
-	body := []byte(`{"jsonrpc": "2.0", "method": "eth_accounts", "params": [], "id": 1}`)
-
-	ht := model.NewHttpContent(strings.ToUpper(req.Method),
-		req.URL,
-		req.Params,
-		body,
-		h,
-	)
-	ws := model.WebsocketContent{}
-	api := model.NewAPI(req.Name, "123", req.Type, userEmail, req.Debug, *ht, ws)
-
-	apis := []model.API{api}
-	taskConf := model.NewTaskConfig(10)
-	task := model.NewTask("Debug任务 APIs API", apis, *taskConf)
-
-	e := execution.NewExecutionLoadRun(task)
-
-	results := make(chan []*model.HttpResult)
-	var wg sync.WaitGroup
+func debug(taskDomain domain.Task) string {
 	s := &model.Subtask{
 		Began: time.Now(),
 	}
-	wg.Add(1)
-	go e.HttpRunDebug(results, &wg, s)
+	task := taskDomain.APIs[0]
+	var res *model.HttpResult
+	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
+	if task.Type == "http" {
+		//h := jsonToHeader(task.Header)
+		var h = make(http.Header)
+		h.Add("User-Agent", "PostmanRuntime/7.39.0")
+		h.Add("Content-Type", "application/json")
 
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-	return model.FinalReport(s, results)
+		target := model.NewHttpContent(task.Method,
+			task.URL, task.Params,
+			[]byte(task.Body),
+			h,
+		)
+		res = target.Send(s)
+		res.Task = taskDomain.Name
+	}
+
+	// 一次任务的结果
+	content := model.TaskOnceDebugLogs(true, res)
+	return content
 }
 
 func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
@@ -321,4 +353,35 @@ func jsonToHeader(headerJSON string) http.Header {
 		}
 	}
 	return header
+}
+
+func display(task domain.Task) string {
+
+	content := fmt.Sprintf(`
++++++ task Debug Log: +++++
+[Id: %v]
+[Name: %v]
+[APIs: %v]
+[Durations: %v]
+[Workers:%v]
+[MaxWorkers: %v]
+[Timeout: %v]
+[Creator: %v]
+[Updater: %v]
+[Ctime: %v]
+[Utime: %v]`,
+		task.Id,
+		task.Name,
+		task.APIs,
+		task.Durations,
+		task.Workers,
+		task.MaxWorkers,
+		task.Timeout,
+		task.Creator,
+		task.Updater,
+		task.Ctime,
+		task.Utime)
+	log.Println(content)
+	return content
+
 }

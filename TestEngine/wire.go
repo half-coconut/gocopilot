@@ -10,6 +10,7 @@ import (
 	noteDao "TestCopilot/TestEngine/internal/repository/dao/note"
 	noteRepo "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
+	"TestCopilot/TestEngine/internal/service/core/model"
 	"TestCopilot/TestEngine/internal/web"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
@@ -33,6 +34,7 @@ func InitWebServer() *App {
 		dao.NewAPIDAO,
 		dao.NewGORMInteractiveDAO,
 		noteDao.NewNoteDAO,
+		dao.NewGORMTaskDAO,
 
 		noteDao.NewNoteAuthorDAO,
 		noteDao.NewNoteReaderDAO,
@@ -43,15 +45,20 @@ func InitWebServer() *App {
 		noteRepo.NewNoteRepository,
 		repository.NewAPIRepository,
 		repository.NewCachedInteractiveRepository,
+		repository.NewCacheTaskRepository,
 
 		service.NewUserService,
 		service.NewNoteService,
 		service.NewAPIService,
 		service.NewInteractiveService,
+
+		model.NewTaskService,
+
 		web.NewUserHandler,
 		web.NewNoteHandler,
 		web.NewAPIHandler,
 		web.NewAIHandler,
+		web.NewTaskHandler,
 
 		ijwt.NewRedisJWTHandler,
 

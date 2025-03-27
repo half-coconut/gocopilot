@@ -198,12 +198,12 @@ func (r *reportService) displayReport() string {
 // %v: 等同于 %s， 输出可读的字符串格式。
 
 func TaskDebugLogs(debug bool, res []*HttpResult) {
-
+	//resList := make([]string, 0)
 	if debug {
 		for _, re := range res {
-			log.Println(fmt.Sprintf(`
-+++++ Task Debug Log: +++++
-[Task: %s]
+			content := fmt.Sprintf(`
++++++ taskService Debug Log: +++++
+[taskService: %s]
 [Code: %d]
 [Method: %s]
 [URL:%s]
@@ -212,7 +212,10 @@ func TaskDebugLogs(debug bool, res []*HttpResult) {
 [Request: %s]
 [Response: %s]
 [Client IP: %s]
-[Error: %s]`, re.Task, re.Code, re.Method, re.URL, re.Duration, re.Headers, re.Req, re.Resp, re.ClientIp, re.Error))
+[Error: %s]`, re.Task, re.Code, re.Method, re.URL, re.Duration, re.Headers, re.Req, re.Resp, re.ClientIp, re.Error)
+			log.Println(content)
+			//resList = append(resList, content)
 		}
 	}
+	//return resList
 }

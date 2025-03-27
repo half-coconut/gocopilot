@@ -1,9 +1,10 @@
 package model
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"bytes"
+	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -15,7 +16,6 @@ type HttpContent struct {
 	Body   []byte      `json:"data,omitempty"`
 	Header http.Header `json:"header,omitempty"`
 	Method string      `json:"method"`
-	l      logger.LoggerV1
 }
 
 func NewHttpContent(method, url, params string, body []byte, header http.Header) *HttpContent {
@@ -68,20 +68,23 @@ func (h *HttpContent) Send(s *Subtask) *HttpResult {
 
 	req, err := h.HttpRequest()
 	if err != nil {
-		h.l.Error("请求加载异常", logger.Error(err))
+		//h.l.Error("请求加载异常", logger.Error(err))
+		log.Println(fmt.Sprintf("请求加载异常: %v", err))
 	}
 
 	client := &http.Client{}
 	r, err := client.Do(req)
 	if err != nil {
-		h.l.Error("发送请求异常", logger.Error(err))
+		//h.l.Error("发送请求异常", logger.Error(err))
+		log.Println(fmt.Sprintf("发送请求异常: %v", err))
 	}
 	defer r.Body.Close()
 
 	body := io.Reader(r.Body)
 	var buf bytes.Buffer
 	if _, err = io.Copy(&buf, body); err != nil {
-		h.l.Error("响应 body 复制异常", logger.Error(err))
+		//h.l.Error("响应 body 复制异常", logger.Error(err))
+		log.Println(fmt.Sprintf("响应 body 复制异常: %v", err))
 	}
 	res.Resp = string(buf.Bytes())
 

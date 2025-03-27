@@ -1,6 +1,6 @@
 package model
 
-// API 接口结构体，API -> Task
+// API 接口结构体，API -> taskService
 type API struct {
 	Name     string           `json:"name"`
 	TeamId   string           `json:"team_id"`

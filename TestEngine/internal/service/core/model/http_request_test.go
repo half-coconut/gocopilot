@@ -1,11 +1,54 @@
 package model
 
 import (
+	"TestCopilot/TestEngine/cat/log"
 	"encoding/json"
 	"net/http"
 	"testing"
 	"time"
 )
+
+func TestLogin(t *testing.T) {
+	log.InitLogger()
+	s := &Subtask{
+		Began: time.Now(),
+	}
+	var h = make(http.Header)
+	h.Add("Content-Type", "application/json")
+	h.Add("User-Agent", "PostmanRuntime/7.39.0")
+	body := []byte(`{"email": "test@123.com", "password": "Cc12345!"}`)
+
+	target := NewHttpContent("POST", "http://127.0.0.1:3002/users/login", "", body, h)
+	res := target.Send(s)
+	t.Log(res)
+}
+
+func TestCoreRequest(t *testing.T) {
+	log.InitLogger()
+	url := "https://api.infstones.com/neo/mainnet/cdfeb4ccba2b4b7faab8178d77c09788"
+	//url := "https://api.infstones.com/core/mainnet/6e97213d22994a2fae3917c0e00715d6"
+	//url := "https://api.infstones.com/ethereum/mainnet/f6ee2ff15aa64aedac9dde1bfc7ca45f"
+
+	var h = make(http.Header)
+	h.Add("Content-Type", "application/json")
+	h.Add("User-Agent", "PostmanRuntime/7.43.0")
+	h.Add("Cookie", "jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTE2ODYxNDcsImlhdCI6MTcxMTY3ODk0NywiZGF0YSI6eyJjb21wb25lbnQiOiJ3ZWJzZXJ2aWNlIiwiZW1haWwiOiI1ODQ5NDc1NTlAcXEuY29tIiwidWlkIjoiODMyOTAwNDIiLCJyb2xlIjoiYWRtaW4iLCJnaWQiOiIzOTUzNTI0NSIsIm1mYV9lbmFibGVkIjpmYWxzZX19.duVCGmKOaYcJVoDdvklDFMYEfNx1ofBA8brc5YYz2IQ")
+
+	body := []byte(`{"jsonrpc": "2.0", "method": "eth_accounts", "params": [], "id": 1}`)
+
+	ht := NewHttpContent("POST",
+		url,
+		"",
+		body,
+		h,
+	)
+
+	s := &Subtask{
+		Began: time.Now(),
+	}
+	res := ht.Send(s)
+	t.Log(res)
+}
 
 func TestHttpRequest(t *testing.T) {
 	var h = make(http.Header)

@@ -14,6 +14,7 @@ import (
 	"TestCopilot/TestEngine/internal/repository/dao/note"
 	note2 "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
+	"TestCopilot/TestEngine/internal/service/core/model"
 	"TestCopilot/TestEngine/internal/web"
 	"TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
@@ -42,6 +43,10 @@ func InitWebServer() *App {
 	apiRepository := repository.NewAPIRepository(apidao, loggerV1, userRepository)
 	apiService := service.NewAPIService(apiRepository, loggerV1)
 	apiHandler := web.NewAPIHandler(apiService, loggerV1)
+	taskDAO := dao.NewGORMTaskDAO(db, loggerV1)
+	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1)
+	taskService := model.NewTaskService(taskRepository, loggerV1)
+	taskHandler := web.NewTaskHandler(loggerV1, taskService, userService)
 	noteDAO := note.NewNoteDAO(loggerV1, db)
 	authorDAO := note.NewNoteAuthorDAO(loggerV1, db)
 	readerDAO := note.NewNoteReaderDAO(loggerV1, db)
@@ -55,7 +60,7 @@ func InitWebServer() *App {
 	interactiveRepository := repository.NewCachedInteractiveRepository(interactiveDAO, interactiveCache, loggerV1)
 	interactiveService := service.NewInteractiveService(interactiveRepository, loggerV1)
 	noteHandler := web.NewNoteHandler(noteService, loggerV1, interactiveService)
-	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, noteHandler)
+	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, taskHandler, noteHandler)
 	v2 := ioc.NewConsumers()
 	app := &App{
 		Server:    engine,

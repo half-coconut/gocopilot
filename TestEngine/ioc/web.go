@@ -53,7 +53,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userHandler *web.UserHandler, apiHandler *web.APIHandler, notehandler *web.NoteHandler) *gin.Engine {
+func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userHandler *web.UserHandler, apiHandler *web.APIHandler, taskHandler *web.TaskHandler, notehandler *web.NoteHandler) *gin.Engine {
 	server := gin.Default()
 	server.Use(CORSMiddleware())
 
@@ -61,6 +61,7 @@ func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userH
 	parameterExamples(server)
 	userHandler.RegisterRoutes(server)
 	apiHandler.RegisterRoutes(server)
+	taskHandler.RegisterRoutes(server)
 	aiHandler.RegisterRoutes(server)
 	notehandler.RegisterRoutes(server)
 	return server
