@@ -1,78 +1,68 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/service"
-	svcmocks "TestCopilot/TestEngine/internal/service/mocks"
-	"bytes"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
-	"net/http"
-	"net/http/httptest"
+	"TestCopilot/TestEngine/pkg/jsonx"
+	"fmt"
 	"testing"
+	"time"
 )
 
 func TestAPI(t *testing.T) {
+	jsonString := `{"jsonrpc": "2.0", "method": "eth_accounts", "params": [], "id": 1}`
+	//jsonString := `{"Content-Type": "application/json","User-Agent": "PostmanRuntime/7.39.0"}`
+
+	var result map[string]interface{}
+
+	//var result map[string]string
+
+	result = jsonx.JsonUnmarshal(jsonString, result)
+
+	fmt.Println(result)
+	fmt.Println(result["Content-Type"]) // 访问具体字段
+}
+
+func TestTimestemp(t *testing.T) {
+	// Unix 时间戳
+	timestamp := int64(1743144661)
+
+	// 将时间戳转换为时间
+	ts := time.Unix(timestamp, 0)
+
+	// 打印时间
+	fmt.Println("时间:", ts)
+	fmt.Println("格式化时间:", ts.Format("2006-01-02 15:04:05"))
 
 }
 
-func TestUserHandler_SignUp(t *testing.T) {
-	testCases := []struct {
-		name    string
-		mock    func(ctrl *gomock.Controller) service.UserService
-		reqBody string
+func TestAIds(t *testing.T) {
+	AIds := []int64{1, 3, 5, 7, 9}
+	jsonx.JsonMarshal(AIds)
+	fmt.Println(AIds)
 
-		wantCode int
-		wantBody string
-	}{
-		{
-			name: "注册成功",
-			mock: func(ctrl *gomock.Controller) service.UserService {
-				usersvc := svcmocks.NewMockUserService(ctrl)
-				usersvc.EXPECT().Signup(gomock.Any(), domain.User{
-					Email:    "123@qq.com",
-					Password: "Hello#world123",
-				}).Return(nil)
-				// 注册成功是 return nil
-				return usersvc
-			},
-			reqBody: `
-{
-	"email": "123@qq.com",
-	"password": "Hello#world123",
-	"confirmPassword": "Hello#world123"
+	var aids []int64
+	a_ids := "[1, 3, 5, 7, 9]"
+	aids = jsonx.JsonUnmarshal(a_ids, aids)
+	for i := range aids {
+		fmt.Println(aids[i])
+	}
+	//fmt.Println(aids)
 }
-`,
-			wantCode: http.StatusOK,
-			wantBody: "注册成功",
-		},
+
+func TestDuration(t *testing.T) {
+	//durationStr := "10m0s"
+	durationStr := "30s"
+	duration, err := time.ParseDuration(durationStr)
+	if err != nil {
+		// 处理错误
 	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			server := gin.Default()
-			// 用不上 codeSvc
-			h := NewUserHandler(tc.mock(ctrl), nil, nil)
-			h.RegisterRoutes(server)
+	fmt.Println("Received duration:", duration)
+}
 
-			req, err := http.NewRequest(http.MethodPost,
-				"/api/edit", bytes.NewBuffer([]byte(tc.reqBody)))
-			require.NoError(t, err)
-			// 数据是 JSON 格式
-			req.Header.Set("Content-Type", "application/json")
-			// 这里你就可以继续使用 req
-
-			resp := httptest.NewRecorder()
-			// 这就是 HTTP 请求进去 GIN 框架的入口。
-			// 当你这样调用的时候，GIN 就会处理这个请求
-			// 响应写回到 resp 里
-			server.ServeHTTP(resp, req)
-
-			assert.Equal(t, tc.wantCode, resp.Code)
-			assert.Equal(t, tc.wantBody, resp.Body.String())
-		})
-	}
+func TestWorkers(t *testing.T) {
+	w := int64(5)
+	mw := int64(10)
+	Workers := uint64(w)
+	MaxWorkers := uint64(mw)
+	fmt.Println(Workers)
+	fmt.Println(MaxWorkers)
 }

@@ -60,8 +60,8 @@ func (d *DeepSeekHandler) getApiAndEndpoint() (string, string) {
 		log.Fatal(err)
 	}
 	// 构建 .env 文件的路径
-	envPath := filepath.Join(home, "Desktop", "TestCopilot", "TestEngine", "pkg", "qa_copilot", ".env")
-	//envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "TestEngine", "pkg", "qa_copilot", ".env")
+	//envPath := filepath.Join(home, "Desktop", "TestCopilot", "TestEngine", "pkg", "qa_copilot", ".env")
+	envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "TestEngine", "pkg", "qa_copilot", ".env")
 	err = godotenv.Load(envPath)
 	if err != nil {
 		log.Println(err)

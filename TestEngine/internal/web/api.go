@@ -6,13 +6,12 @@ import (
 	"TestCopilot/TestEngine/internal/service/core/model"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/ginx"
+	"TestCopilot/TestEngine/pkg/jsonx"
 	"TestCopilot/TestEngine/pkg/logger"
-	"encoding/json"
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
 	"log"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,10 +25,12 @@ type APIHandler struct {
 	userSvc service.UserService
 }
 
-func NewAPIHandler(svc service.APIService, l logger.LoggerV1) *APIHandler {
+func NewAPIHandler(svc service.APIService, taskSvc model.TaskService, userSvc service.UserService, l logger.LoggerV1) *APIHandler {
 	return &APIHandler{
-		svc: svc,
-		l:   l,
+		svc:     svc,
+		taskSvc: taskSvc,
+		userSvc: userSvc,
+		l:       l,
 	}
 }
 
@@ -40,26 +41,6 @@ func (a *APIHandler) RegisterRoutes(server *gin.Engine) {
 	api.GET("/detail/:id", ginx.WrapToken[ijwt.UserClaims](a.Detail))
 
 }
-
-type APIReq struct {
-	Id      int64  `json:"id"` // 判断是否新增或修改
-	Name    string `json:"name"`
-	URL     string `json:"url"`
-	Params  string `json:"params"`
-	Type    string `json:"type"`
-	Body    string `json:"body"`
-	Header  string `json:"header"`
-	Method  string `json:"method"`
-	Project string `json:"project"`
-	Debug   bool   `json:"debug"` // 是否运行 debug
-}
-
-const (
-	DefaultWorkers    uint64 = 5
-	DefaultMaxWorkers uint64 = math.MaxUint64
-	DefaultDurations         = 10 * time.Minute
-	DefaultTimeout           = 30 * time.Second
-)
 
 func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	// 新增，修改 和 debug 功能
@@ -111,22 +92,22 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 	} else {
 
 		now := time.Now().UnixMilli()
-		// 注意这里将 domain.API 转为 domain.APIs
-		apis := &domain.APIs{
+		// 注意这里将 domain.API 转为 domain.TaskAPI
+		apis := &domain.TaskAPI{
 			Name:   api.Name,
 			URL:    api.URL,
 			Params: api.Params,
 			Type:   api.Type,
-			Body:   api.Body,
-			Header: api.Header,
+			Body:   jsonx.JsonUnmarshal(api.Body, Body),
+			Header: jsonx.JsonUnmarshal(api.Header, Header),
 			Method: strings.ToUpper(api.Method),
 		}
 
-		apiList := make([]domain.APIs, 0)
+		apiList := make([]domain.TaskAPI, 0)
 		apiList = append(apiList, *apis)
 		task := domain.Task{
 			Id:         1,
-			Name:       "system_trigger_interface_debugging",
+			Name:       "system_debugging",
 			APIs:       apiList,
 			Durations:  DefaultDurations,
 			Workers:    DefaultWorkers,
@@ -144,7 +125,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Utime: time.UnixMilli(now),
 		}
 		display(task)
-		report := debug(task)
+		report := a.taskSvc.Debug(task)
 
 		// 把 debug 结果写入数据库
 		api = domain.API{
@@ -158,7 +139,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Method:      strings.ToUpper(req.Method),
 			Project:     req.Project,
 			Debug:       req.Debug,
-			DebugResult: report,
+			DebugResult: domain.TaskDebugLog(report),
 		}
 
 		Id, err = a.svc.Save(ctx, api, uc.Id)
@@ -177,33 +158,6 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		}, nil
 	}
 
-}
-
-func debug(taskDomain domain.Task) string {
-	s := &model.Subtask{
-		Began: time.Now(),
-	}
-	task := taskDomain.APIs[0]
-	var res *model.HttpResult
-	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
-	if task.Type == "http" {
-		//h := jsonToHeader(task.Header)
-		var h = make(http.Header)
-		h.Add("User-Agent", "PostmanRuntime/7.39.0")
-		h.Add("Content-Type", "application/json")
-
-		target := model.NewHttpContent(task.Method,
-			task.URL, task.Params,
-			[]byte(task.Body),
-			h,
-		)
-		res = target.Send(s)
-		res.Task = taskDomain.Name
-	}
-
-	// 一次任务的结果
-	content := model.TaskOnceDebugLogs(true, res)
-	return content
 }
 
 func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
@@ -242,7 +196,7 @@ func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 				Method:      src.Method,
 				Type:        src.Type,
 				Project:     src.Project,
-				DebugResult: src.DebugResult,
+				DebugResult: jsonx.JsonMarshal(src.DebugResult),
 				Creator:     src.Creator.Name,
 				Updater:     src.Updater.Name,
 				Ctime:       src.Ctime.Format(time.DateTime),
@@ -298,7 +252,7 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 		Method:      detail.Method,
 		Type:        detail.Type,
 		Project:     detail.Project,
-		DebugResult: detail.DebugResult,
+		DebugResult: jsonx.JsonMarshal(detail.DebugResult),
 		Creator:     detail.Creator.Name,
 		Updater:     detail.Updater.Name,
 		Ctime:       detail.Ctime.Format(time.DateTime),
@@ -313,55 +267,13 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 
 }
 
-type APIListResponse struct {
-	Interfaces []API0 `json:"interfaces"` // API 列表
-	Total      int    `json:"total"`      // API 总数
-}
-
-// 前端得到的API数据
-type API0 struct {
-	Id          int64  `json:"id"`
-	Name        string `json:"name"`
-	URL         string `json:"url"`
-	Params      string `json:"params"`
-	Body        string `json:"body"`
-	Header      string `json:"header"`
-	Method      string `json:"method"`
-	Type        string `json:"type"` // http/websocket
-	Project     string `json:"project"`
-	DebugResult string `json:"debug_result"`
-
-	Creator string `json:"creator"`
-	Updater string `json:"updater"`
-	Ctime   string `json:"ctime"`
-	Utime   string `json:"utime"`
-}
-
-// 从JSON字符串转换回http.Header
-func jsonToHeader(headerJSON string) http.Header {
-	// 创建一个用于解析的map
-	var headerMap map[string][]string
-	err := json.Unmarshal([]byte(headerJSON), &headerMap)
-	if err != nil {
-		return nil
-	}
-	// 将map转换为http.Header
-	header := make(http.Header)
-	for key, values := range headerMap {
-		for _, value := range values {
-			header.Add(key, value)
-		}
-	}
-	return header
-}
-
 func display(task domain.Task) string {
 
 	content := fmt.Sprintf(`
 +++++ task Debug Log: +++++
 [Id: %v]
 [Name: %v]
-[APIs: %v]
+[TaskAPI: %v]
 [Durations: %v]
 [Workers:%v]
 [MaxWorkers: %v]

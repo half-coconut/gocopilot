@@ -104,7 +104,7 @@ function InterfaceRow({ interfaceItem }) {
                 icon={<HiEye />}
                 onClick={() => navigate(`/interfaces/${interfaceId}`)}
               >
-                See details
+                debug history
               </Menus.Button>
               <Menus.Button
                 icon={<HiSquare2Stack />}

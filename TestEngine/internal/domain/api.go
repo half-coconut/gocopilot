@@ -17,7 +17,7 @@ type API struct {
 	Project string `json:"project"`
 	Debug   bool   `json:"debug"` // 判断是否调用接口 debug 开启 true 关闭 false
 
-	DebugResult string `json:"debug_result"`
+	DebugResult TaskDebugLog `json:"debug_result"`
 
 	Creator Editor `json:"creator"`
 	Updater Editor `json:"updater"`
@@ -34,4 +34,17 @@ type Editor struct {
 type RecordHeader struct {
 	Key   []byte
 	Value []byte
+}
+
+type TaskDebugLog struct {
+	Name     string        `json:"name"`
+	Code     int64         `json:"code"`
+	Method   string        `json:"method"`
+	Url      string        `json:"url"`
+	Duration time.Duration `json:"duration"`
+	Headers  string        `json:"headers"`
+	Request  string        `json:"request"`
+	Response string        `json:"response"`
+	ClientIP string        `json:"client_ip"`
+	Error    string        `json:"error"`
 }

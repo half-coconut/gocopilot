@@ -8,7 +8,7 @@ import (
 // HttpResult 单个请求的响应结果
 type HttpResult struct {
 	Task  string `json:"task"`
-	Code  int    `json:"code,string"`
+	Code  int64  `json:"code,string"`
 	Error string `json:"error"`
 	//Body      string        `json:"body"`
 	Req       string        `json:"request"`

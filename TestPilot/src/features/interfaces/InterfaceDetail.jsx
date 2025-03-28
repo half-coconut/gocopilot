@@ -27,7 +27,7 @@ function InterfaceDetail() {
     <>
       <Row type="horizontal">
         <HeadingGroup>
-          <Heading as="h3">Respone #{interfaceId}</Heading>
+          <Heading as="h2">Debug history #{interfaceId}</Heading>
         </HeadingGroup>
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>

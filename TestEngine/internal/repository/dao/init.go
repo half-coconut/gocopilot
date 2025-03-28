@@ -11,6 +11,7 @@ func InitTable(db *gorm.DB) error {
 		&note.Note{},
 		&note.PublishedNote{},
 		&API{},
+		&Task{},
 
 		&Interactive{},
 		&UserLikeBiz{},

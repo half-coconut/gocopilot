@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
+// import { JsonEditor, monoLightTheme } from "json-edit-react";
+import { JsonEditor, githubLightTheme, monoLightTheme } from "json-edit-react";
 
 import {
   HiOutlineChatBubbleBottomCenterText,
@@ -74,7 +76,7 @@ const Guest = styled.div`
   }
 `;
 
-const Price = styled.div`
+const Result = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -98,6 +100,33 @@ const Price = styled.div`
     width: 2.4rem;
     color: currentColor !important;
   }
+`;
+
+const StyledNote = styled.div`
+  /* Box */
+  background-color: var(--color-grey-0);
+  border: 1px solid var(--color-grey-100);
+  border-radius: var(--border-radius-md);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem 3.2rem;
+  border-radius: var(--border-radius-sm);
+  /* margin-top: 2.4rem; */
+  height: 800px;
+  overflow: auto;
+
+  flex-direction: column;
+  gap: 2.4rem;
+  grid-column: 1 / span 2;
+  /* padding-top: 2.4rem; */
+`;
+
+const StyleUl = styled.ul`
+  margin-top: 10px;
+  color: var(--color-grey-500);
+  gap: 2.4rem;
 `;
 
 const Footer = styled.footer`
@@ -171,16 +200,26 @@ function DebugResultBox({ interfaceItem }) {
         </DataItem>
 
         <DataItem icon={<HiOutlineCheckCircle />} label="headers">
-          <pre>{header}</pre>
+          <pre>
+            <JsonEditor data={JSON.parse(header)} theme={monoLightTheme} />
+          </pre>
         </DataItem>
 
-        <Price isPaid="true">
+        <Result isPaid="true">
           <DataItem
             icon={<TbReportAnalytics />}
             label={`Total Result`}
           ></DataItem>
-          <pre>{debug_result}</pre>
-        </Price>
+        </Result>
+
+        <StyledNote>
+          <StyleUl>
+            <JsonEditor
+              data={JSON.parse(debug_result)}
+              theme={githubLightTheme}
+            />
+          </StyleUl>
+        </StyledNote>
       </Section>
 
       <Footer>

@@ -3,6 +3,7 @@ package repository
 import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/repository/dao"
+	"TestCopilot/TestEngine/pkg/jsonx"
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"database/sql"
@@ -117,8 +118,8 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 			Valid:  api.Project != "",
 		},
 		DebugResult: sql.NullString{
-			String: api.DebugResult,
-			Valid:  api.DebugResult != "",
+			String: jsonx.JsonMarshal(api.DebugResult),
+			Valid:  jsonx.JsonMarshal(api.DebugResult) != "",
 		},
 		CreatorId: api.Creator.Id,
 		UpdaterId: api.Updater.Id,
@@ -126,7 +127,7 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 }
 
 func (c *CacheAPIRepository) entityToDomain(api dao.API, creator, updater domain.User) domain.API {
-
+	var debugRes domain.TaskDebugLog
 	return domain.API{
 		Id:   api.Id,
 		Name: api.Name.String,
@@ -138,7 +139,7 @@ func (c *CacheAPIRepository) entityToDomain(api dao.API, creator, updater domain
 		Header:      api.Header.String,
 		Method:      api.Method.String,
 		Project:     api.Project.String,
-		DebugResult: api.DebugResult.String,
+		DebugResult: jsonx.JsonUnmarshal(api.DebugResult.String, debugRes),
 		Creator: domain.Editor{
 			Id:   creator.Id,
 			Name: creator.FullName,

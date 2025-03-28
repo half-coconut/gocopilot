@@ -6,3 +6,4 @@ URL:http://127.0.0.1:3002/users/login
 Headers: map[Access-Control-Allow-Credentials:[true] Access-Control-Allow-Headers:[Content-Type, Authorization] Access-Control-Allow-Methods:[POST, GET, OPTIONS, PUT, DELETE] Access-Control-Allow-Origin:[http://localhost:5173] Content-Length:[69] Content-Type:[application/json; charset=utf-8] Date:[Thu, 27 Mar 2025 14:37:53 GMT]]
 Duration: 18.159291ms
 
+2025-03-28T10:18:02.325+0800	ERROR	http/http.go:72	发送请求异常	{"error": "Post \"http://127.0.0.1:3002/users/login\": dial tcp 127.0.0.1:3002: connect: connection refused"}

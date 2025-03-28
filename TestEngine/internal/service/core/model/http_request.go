@@ -88,7 +88,7 @@ func (h *HttpContent) Send(s *Subtask) *HttpResult {
 	}
 	res.Resp = string(buf.Bytes())
 
-	if res.Code = int(uint16(r.StatusCode)); res.Code < 200 || res.Code >= 400 {
+	if res.Code = int64(uint16(r.StatusCode)); res.Code < 200 || res.Code >= 400 {
 		res.Error = r.Status
 	}
 	res.Headers = r.Header

@@ -30,10 +30,10 @@ type reportService struct {
 }
 
 type Base struct {
-	Codes           []int
+	Codes           []int64
 	TotalRequest    int
-	SuccessRequests []int
-	FailedRequests  []int
+	SuccessRequests []int64
+	FailedRequests  []int64
 	TotalDuration   time.Duration
 	Durations       []time.Duration
 }
@@ -47,15 +47,15 @@ type Base struct {
 // FinalReport 生成 Report Base，并输出 Report
 func FinalReport(s *Subtask, resCh chan []*HttpResult) string {
 	var b Base
-	b.Codes = make([]int, 0)
-	b.SuccessRequests = make([]int, 0)
-	b.FailedRequests = make([]int, 0)
+	b.Codes = make([]int64, 0)
+	b.SuccessRequests = make([]int64, 0)
+	b.FailedRequests = make([]int64, 0)
 	b.Durations = make([]time.Duration, 0)
 
 	for res := range resCh {
 		for _, re := range res {
 			// 暂定200为成功状态码
-			if re.Code == 200 {
+			if re.Code == int64(200) {
 				b.SuccessRequests = append(b.SuccessRequests, re.Code)
 			} else {
 				// 还没有对错误码作分类
