@@ -1,7 +1,12 @@
 import PropTypes from "prop-types";
 import { getToday } from "../utils/helpers.js";
-import supabase from "./supabase";
-import { PAGE_SIZE } from "../utils/constants";
+import supabase from "./supabase.js";
+import { PAGE_SIZE } from "../utils/constants.js";
+import taskService from "./apiService/taskService.js";
+
+export async function createEditTask(newTask) {
+  return taskService.edit(newTask);
+}
 
 export async function getBookings({ filter, sortBy, page }) {
   let query = supabase

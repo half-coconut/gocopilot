@@ -3,10 +3,10 @@ import Menus from "../../ui/Menus.jsx";
 import Empty from "../../ui/Empty.jsx";
 import { useBookings } from "./useBookings.js";
 import Spinner from "../../ui/Spinner.jsx";
-import BookingRow from "./BookingRow.jsx";
+import TaskRow from "./TaskRow.jsx";
 import Pagination from "../../ui/Pagination.jsx";
 
-function BookingTable() {
+function TaskTable() {
   const { bookings, isLoading, count } = useBookings();
 
   if (isLoading) return <Spinner />;
@@ -27,9 +27,7 @@ function BookingTable() {
 
         <Table.Body
           data={bookings}
-          render={(booking) => (
-            <BookingRow key={booking.id} booking={booking} />
-          )}
+          render={(booking) => <TaskRow key={booking.id} booking={booking} />}
         />
         <Table.Footer>
           <Pagination count={count} />
@@ -39,4 +37,4 @@ function BookingTable() {
   );
 }
 
-export default BookingTable;
+export default TaskTable;

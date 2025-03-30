@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { HiXMark } from "react-icons/hi2";
 import { createPortal } from "react-dom";
 import { cloneElement, createContext, useContext, useState } from "react";
-import useOutsideClick from "../hooks/useOutsideClick";
+// import useOutsideClick from "../hooks/useOutsideClick";
 
 const StyledModal = styled.div`
   position: fixed;
@@ -77,13 +77,14 @@ function Open({ children, opens: opensWindowName }) {
 function Window({ children, name }) {
   const { openName, close } = useContext(ModalContext);
   // 这里封装了点击其他地方关闭弹窗
-  const ref = useOutsideClick(close);
+  // const ref = useOutsideClick(close);
 
   if (name !== openName) return null;
 
   return createPortal(
     <Overlay>
-      <StyledModal ref={ref}>
+      {/* <StyledModal ref={ref}> */}
+      <StyledModal>
         <Button onClick={close}>
           <HiXMark />
         </Button>

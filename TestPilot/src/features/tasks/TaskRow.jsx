@@ -46,7 +46,7 @@ const Amount = styled.div`
   font-weight: 500;
 `;
 
-function BookingRow({
+function TaskRow({
   booking: {
     id: bookingId,
     // created_at,
@@ -147,7 +147,7 @@ function BookingRow({
   );
 }
 
-BookingRow.propTypes = {
+TaskRow.propTypes = {
   booking: PropTypes.shape({
     id: PropTypes.number.isRequired,
     created_at: PropTypes.node,
@@ -162,4 +162,4 @@ BookingRow.propTypes = {
   }),
 };
 
-export default BookingRow;
+export default TaskRow;

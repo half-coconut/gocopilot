@@ -103,7 +103,7 @@ const Footer = styled.footer`
 `;
 
 // A purely presentational component
-function BookingDataBox({ booking }) {
+function TaskDataBox({ booking }) {
   const {
     created_at,
     startDate,
@@ -185,7 +185,7 @@ function BookingDataBox({ booking }) {
   );
 }
 
-BookingDataBox.propTypes = {
+TaskDataBox.propTypes = {
   booking: PropTypes.shape({
     id: PropTypes.number.isRequired,
     created_at: PropTypes.string,
@@ -205,4 +205,4 @@ BookingDataBox.propTypes = {
   }),
 };
 
-export default BookingDataBox;
+export default TaskDataBox;

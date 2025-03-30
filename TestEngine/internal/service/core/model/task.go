@@ -27,8 +27,9 @@ type TaskService interface {
 
 // taskService 任务结构体
 type taskService struct {
-	repo repository.TaskRepository
-	l    logger.LoggerV1
+	repo    repository.TaskRepository
+	l       logger.LoggerV1
+	subtask *Subtask
 }
 
 type Subtask struct {
@@ -41,6 +42,9 @@ func NewTaskService(repo repository.TaskRepository, l logger.LoggerV1) TaskServi
 	return &taskService{
 		repo: repo,
 		l:    l,
+		subtask: &Subtask{
+			Began: time.Now(),
+		},
 	}
 }
 
@@ -71,9 +75,6 @@ func (t *taskService) Save(ctx *gin.Context, task domain.Task, uid int64) (int64
 }
 
 func (t *taskService) OnceRunDebug(taskDomain domain.Task) string {
-	s := &Subtask{
-		Began: time.Now(),
-	}
 	task := taskDomain.APIs[0]
 	var res *HttpResult
 	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
@@ -86,7 +87,7 @@ func (t *taskService) OnceRunDebug(taskDomain domain.Task) string {
 		target := NewHttpContent(
 			//task.Method, task.URL, task.Params, []byte(task.Body), jsonToHeader(task.Header))
 			task.Method, task.URL, task.Params, body, h)
-		res = target.Send(s)
+		res = target.Send(t.subtask)
 		res.Task = taskDomain.Name
 	}
 
@@ -97,9 +98,9 @@ func (t *taskService) OnceRunDebug(taskDomain domain.Task) string {
 }
 
 func (t *taskService) Debug(taskDomain domain.Task) TaskDebugLog {
-	s := &Subtask{
-		Began: time.Now(),
-	}
+	//s := &Subtask{
+	//	Began: time.Now(),
+	//}
 	task := taskDomain.APIs[0]
 	var res *HttpResult
 	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
@@ -114,7 +115,7 @@ func (t *taskService) Debug(taskDomain domain.Task) TaskDebugLog {
 			[]byte(jsonx.JsonMarshal(task.Body)),
 			headers,
 		)
-		res = target.Send(s)
+		res = target.Send(t.subtask)
 		res.Task = taskDomain.Name
 	}
 
@@ -167,13 +168,13 @@ func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, ra
 
 	results := make(chan []*HttpResult)
 
-	s := &Subtask{
-		Began: time.Now(),
-	}
+	//s := &Subtask{
+	//	Began: time.Now(),
+	//}
 
 	for i := uint64(0); i < worker; i++ {
 		wg.Add(1)
-		go t.HttpRunDebug(taskDomain, results, &wg, s)
+		go t.HttpRunDebug(taskDomain, results, &wg, t.subtask)
 	}
 
 	go func() {
@@ -193,7 +194,7 @@ func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, ra
 				if limiter.Allow() {
 					// 启动 goroutine 发送请求
 					wg.Add(1)
-					go t.HttpRunDebug(taskDomain, results, &wg, s)
+					go t.HttpRunDebug(taskDomain, results, &wg, t.subtask)
 				}
 				//} else {
 				//	// 处理限速，例如记录日志或等待一段时间
@@ -203,7 +204,7 @@ func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, ra
 		}
 	}()
 
-	FinalReport(s, results)
+	FinalReport(t.subtask, results)
 	t.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
 	t.l.Info(fmt.Sprintf("当前 http_load 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
 

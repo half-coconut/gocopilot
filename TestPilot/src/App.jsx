@@ -4,7 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
 
 import Dashboard from "./pages/Dashboard";
-import Bookings from "./pages/Bookings";
+import Tasks from "./pages/Tasks";
 import Cabins from "./pages/Interfaces";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
@@ -13,12 +13,12 @@ import Login from "./pages/Login";
 import PageNotFound from "./pages/PageNotFound";
 import GlobalStyles from "./styles/GlobalStyle";
 import AppLayout from "./ui/AppLayout";
-import Booking from "./pages/Booking";
+import Task from "./pages/Task";
 import Checkin from "./pages/Checkin";
 import { ProtectedRoute } from "./ui/ProtectedRoute";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import AICopilot from "./pages/AICopilot";
-import Interface from "./pages/interface";
+import Interface from "./pages/Interface";
 import History from "./pages/History";
 import Environments from "./pages/Environments";
 import Notes from "./pages/Notes";
@@ -52,8 +52,8 @@ function App() {
             >
               <Route index element={<Navigate replace to="dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="bookings" element={<Bookings />} />
-              <Route path="bookings/:bookingId" element={<Booking />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="tasks/:taskId" element={<Task />} />
               <Route path="checkin/:bookingId" element={<Checkin />} />
               <Route path="interfaces" element={<Cabins />} />
               <Route path="interfaces/:interfaceId" element={<Interface />} />

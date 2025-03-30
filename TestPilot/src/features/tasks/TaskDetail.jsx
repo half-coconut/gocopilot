@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
-import Row from "../../ui/Row";
-import Heading from "../../ui/Heading";
+import Row from "../../ui/Row.jsx";
+import Heading from "../../ui/Heading.jsx";
 import Tag from "../../ui/Tag.jsx";
 import ButtonGroup from "../../ui/ButtonGroup.jsx";
 import Button from "../../ui/Button.jsx";
@@ -9,7 +9,7 @@ import ButtonText from "../../ui/ButtonText.jsx";
 import { useMoveBack } from "../../hooks/useMoveBack.js";
 import { useBooking } from "./useBooking.js";
 import Spinner from "../../ui/Spinner.jsx";
-import BookingDataBox from "./BookingDataBox.jsx";
+import TaskDataBox from "./TaskDataBox.jsx";
 
 import { useNavigate } from "react-router-dom";
 import { HiArrowUpOnSquare, HiTrash } from "react-icons/hi2";
@@ -25,7 +25,7 @@ const HeadingGroup = styled.div`
   align-items: center;
 `;
 
-function BookingDetail() {
+function TaskDetail() {
   const { booking, isLoading } = useBooking();
   const { checkout, isCheckingOut } = useCheckout();
   const { isBookingDeleting, deleteBooking } = useDeleteBooking();
@@ -54,7 +54,7 @@ function BookingDetail() {
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>
 
-      <BookingDataBox booking={booking} />
+      <TaskDataBox booking={booking} />
 
       <ButtonGroup>
         {status === "unconfirmed" && (
@@ -100,4 +100,4 @@ function BookingDetail() {
   );
 }
 
-export default BookingDetail;
+export default TaskDetail;

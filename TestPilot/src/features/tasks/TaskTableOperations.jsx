@@ -1,8 +1,8 @@
-import SortBy from "../../ui/SortBy";
+import SortBy from "../../ui/SortBy.jsx";
 import Filter from "../../ui/Filter.jsx";
 import TableOperations from "../../ui/TableOperations.jsx";
 
-function BookingTableOperations() {
+function TaskTableOperations() {
   return (
     <TableOperations>
       <Filter
@@ -30,4 +30,4 @@ function BookingTableOperations() {
   );
 }
 
-export default BookingTableOperations;
+export default TaskTableOperations;

@@ -1,14 +1,14 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
 
-import BookingDataBox from "../bookings/BookingDataBox.jsx";
+import TaskDataBox from "../tasks/TaskDataBox.jsx";
 import Row from "../../ui/Row";
 import Heading from "../../ui/Heading";
 import ButtonGroup from "../../ui/ButtonGroup.jsx";
 import Button from "../../ui/Button.jsx";
 import ButtonText from "../../ui/ButtonText.jsx";
 import { useMoveBack } from "../../hooks/useMoveBack.js";
-import { useBooking } from "../bookings/useBooking.js";
+import { useBooking } from "../tasks/useBooking.js";
 import Spinner from "../../ui/Spinner.jsx";
 import { useEffect, useState } from "react";
 import Checkbox from "../../ui/Checkbox.jsx";
@@ -80,7 +80,7 @@ function CheckinBooking() {
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>
 
-      <BookingDataBox booking={booking} />
+      <TaskDataBox booking={booking} />
 
       {!hasBreakfast && (
         <Box>

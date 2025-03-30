@@ -75,7 +75,7 @@ function MainNav() {
           </StyledNavLink>
         </li>
         <li>
-          <StyledNavLink to="/bookings">
+          <StyledNavLink to="/tasks">
             <HiOutlineChartPie />
             <span>Tasks</span>
           </StyledNavLink>
