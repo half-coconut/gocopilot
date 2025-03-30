@@ -7,11 +7,10 @@ type Note struct {
 	Title   string `gorm:"type=varchar(4096)" bson:"title,omitempty"`
 	Content string `gorm:"type=BLOB" bson:"content,omitempty"`
 	// 作者
-	AuthorId int64  `gorm:"index" bson:"author_id,omitempty"`
-	Role     string `bson:"role,omitempty"`
-	Status   uint8  `bson:"status,omitempty"`
-	Ctime    int64  `bson:"ctime,omitempty"`
-	Utime    int64  `bson:"utime,omitempty"`
+	AuthorId int64 `gorm:"index" bson:"author_id,omitempty"`
+	Status   uint8 `bson:"status,omitempty"`
+	Ctime    int64 `bson:"ctime,omitempty"`
+	Utime    int64 `bson:"utime,omitempty"`
 }
 
 type PublishedNote Note

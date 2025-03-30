@@ -8,9 +8,30 @@ import (
 )
 
 var (
-	addrs      = []string{"localhost:9094"}
-	test_topic = "test_topic"
+	addrs = []string{"localhost:9094"}
+	//test_topic = "test_topic"
+	test_topic = "read_note"
+	message    = `{"nid":1,"uid":1}`
 )
+
+func TestSyncBatchProducer(t *testing.T) {
+	cfg := sarama.NewConfig()
+	cfg.Producer.Return.Successes = true
+	producer, err := sarama.NewSyncProducer(addrs, cfg)
+	assert.NoError(t, err)
+	for i := 0; i < 100; i++ {
+		_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+			Topic: test_topic,
+			Value: sarama.StringEncoder(message),
+		})
+		if err != nil {
+			t.Logf("SendMessage error: %v", err)
+			t.Fail()
+		}
+		assert.NoError(t, err)
+	}
+
+}
 
 func TestSyncProducer(t *testing.T) {
 	// 同步发送
@@ -18,19 +39,26 @@ func TestSyncProducer(t *testing.T) {
 	cfg.Producer.Return.Successes = true
 	producer, err := sarama.NewSyncProducer(addrs, cfg)
 	assert.NoError(t, err)
+
 	_, _, err = producer.SendMessage(&sarama.ProducerMessage{
 		Topic: test_topic,
 		// 消息数据本体
 		// json 序列化，转 json, 或 protobuf
-		Value: sarama.StringEncoder("hello, this is a message A."),
+		//Value: sarama.StringEncoder("hello, this is a message A."),
+		Value: sarama.StringEncoder(message),
 		// 生产者和消费者之间传递
-		Headers: []sarama.RecordHeader{{
-			Key:   []byte("trace_id"),
-			Value: []byte("123456"),
-		}},
-		// 只作用于发送过程
-		Metadata: "this is metadata",
+		//Headers: []sarama.RecordHeader{{
+		//	Key:   []byte("trace_id"),
+		//	Value: []byte("123456"),
+		//}},
+		//// 只作用于发送过程
+		//Metadata: "this is metadata",
 	})
+
+	if err != nil {
+		t.Logf("SendMessage error: %v", err)
+		t.Fail()
+	}
 	assert.NoError(t, err)
 }
 
@@ -51,16 +79,17 @@ func TestSyncProducer_partitioner(t *testing.T) {
 	_, _, err = producer.SendMessage(&sarama.ProducerMessage{
 		Topic: test_topic,
 		// 因为 key 相同，可以保证每次都落入到相同的分区，即可以保证消息的有序性
-		Key: sarama.StringEncoder("old-123"),
+		//Key: sarama.StringEncoder("old-123"),
 		// 消息数据本体
 		// json 序列化，转 json, 或 protobuf
-		Value: sarama.StringEncoder("hello, this is a message B."),
-		Headers: []sarama.RecordHeader{{
-			Key:   []byte("trace_id"),
-			Value: []byte("123456"),
-		}},
-		// 之作用于发送过程
-		Metadata: "this is metadata",
+		//Value: sarama.StringEncoder("hello, this is a message B."),
+		Value: sarama.StringEncoder(message),
+		//Headers: []sarama.RecordHeader{{
+		//	Key:   []byte("trace_id"),
+		//	Value: []byte("123456"),
+		//}},
+		//// 之作用于发送过程
+		//Metadata: "this is metadata",
 	})
 	assert.NoError(t, err)
 }

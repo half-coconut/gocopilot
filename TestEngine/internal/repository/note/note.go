@@ -7,6 +7,7 @@ import (
 	dao "TestCopilot/TestEngine/internal/repository/dao/note"
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"fmt"
 	"github.com/ecodeclub/ekit/slice"
 	"time"
 )
@@ -47,7 +48,6 @@ func (c *CacheNoteRepository) GetPublishedById(ctx context.Context, id int64) (d
 		Author: domain.Author{
 			Id:   user.Id,
 			Name: user.FullName},
-		Role:   note.Role,
 		Status: domain.NoteStatus(note.Status),
 		Ctime:  time.UnixMilli(note.Ctime),
 		Utime:  time.UnixMilli(note.Utime),
@@ -65,16 +65,16 @@ func (c *CacheNoteRepository) GetByID(ctx context.Context, id int64) (domain.Not
 
 func (c *CacheNoteRepository) List(ctx context.Context, uid int64, offset, limit int) ([]domain.Note, error) {
 	// 在这里集成缓存方案
-	if offset == 0 && limit <= 100 {
-		data, err := c.cache.GetFirstPage(ctx, uid)
-		if err == nil {
-			// 注意：是否为同步或者异步的调用，最好有调用者来决定，通常下层就只提供一个同步的方法。
-			go func() {
-				c.preCache(ctx, data)
-			}()
-			return data, err
-		}
-	}
+	//if offset == 0 && limit <= 100 {
+	//	data, err := c.cache.GetFirstPage(ctx, uid)
+	//	if err == nil {
+	//		// 注意：是否为同步或者异步的调用，最好有调用者来决定，通常下层就只提供一个同步的方法。
+	//		go func() {
+	//			c.preCache(ctx, data)
+	//		}()
+	//		return data, err
+	//	}
+	//}
 	res, err := c.dao.GetByAuthor(ctx, uid, offset, limit)
 	if err != nil {
 		return nil, err
@@ -87,11 +87,11 @@ func (c *CacheNoteRepository) List(ctx context.Context, uid int64, offset, limit
 	// 如果有很高并发，就 del
 	// 可以同步，也可以异步
 
-	go func() {
-		err := c.cache.SetFirstPage(ctx, uid, data)
-		c.l.Error("回写缓存失败", logger.Error(err))
-		c.preCache(ctx, data)
-	}()
+	//go func() {
+	//	err := c.cache.SetFirstPage(ctx, uid, data)
+	//	c.l.Error("回写缓存失败", logger.Error(err))
+	//	c.preCache(ctx, data)
+	//}()
 	return data, nil
 }
 
@@ -111,8 +111,14 @@ func NewNoteRepository(dao dao.NoteDAO, authorDAO dao.AuthorDAO, readerDAO dao.R
 func (c *CacheNoteRepository) Create(ctx context.Context, note domain.Note) (int64, error) {
 	id, err := c.dao.Insert(ctx, c.domainToEntity(note))
 	if err == nil {
-		c.cache.DelFirstPage(ctx, note.Author.Id)
-		c.cache.SetPub(ctx, note)
+		//err = c.cache.DelFirstPage(ctx, note.Author.Id)
+		//if err != nil {
+		//	c.l.Error(fmt.Sprintf("删除缓存失败：%v", err))
+		//}
+		err = c.cache.SetPub(ctx, note)
+		if err != nil {
+			c.l.Error(fmt.Sprintf("set缓存失败：%v", err))
+		}
 	}
 	return id, err
 }
@@ -129,14 +135,13 @@ func (c *CacheNoteRepository) Update(ctx context.Context, note domain.Note) erro
 }
 
 func (c *CacheNoteRepository) Sync(ctx context.Context, n domain.Note) (int64, error) {
-	defer func() {
-		// 如果有数据变更，清空缓存
-		err := c.cache.DelFirstPage(ctx, n.Author.Id)
-		if err != nil {
-			return
-		}
-
-	}()
+	//defer func() {
+	//	// 如果有数据变更，清空缓存
+	//	err := c.cache.DelFirstPage(ctx, n.Author.Id)
+	//	if err != nil {
+	//		return
+	//	}
+	//}()
 
 	var (
 		id  = n.Id
@@ -160,7 +165,6 @@ func (c *CacheNoteRepository) domainToEntity(n domain.Note) dao.Note {
 		Title:    n.Title,
 		Content:  n.Content,
 		AuthorId: n.Author.Id,
-		Role:     n.Role,
 		Status:   n.Status.ToUint8(),
 	}
 }
@@ -171,7 +175,6 @@ func (u *CacheNoteRepository) entityToDomain(n dao.Note) domain.Note {
 		Title:   n.Title,
 		Content: n.Content,
 		Author:  domain.Author{Id: n.AuthorId},
-		Role:    n.Role,
 		Status:  domain.NoteStatus(n.Status),
 		Ctime:   time.UnixMilli(n.Ctime),
 		Utime:   time.UnixMilli(n.Utime),

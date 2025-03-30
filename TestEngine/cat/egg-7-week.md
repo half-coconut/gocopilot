@@ -162,3 +162,6 @@ kafka doc
 - https://hellosean1025.github.io/yapi/documents/project.html#%e5%9f%ba%e6%9c%ac%e8%ae%be%e7%bd%ae
 - https://github.com/YMFE/yapi
 
+
+MQ-api 开源项目
+- https://github.com/ecodeclub/mq-api

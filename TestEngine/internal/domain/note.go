@@ -7,17 +7,10 @@ type Note struct {
 	Title   string
 	Content string
 	Author  Author
-	Role    string
 	Status  NoteStatus
 
 	Ctime time.Time
 	Utime time.Time
-}
-
-type Role struct {
-	Author string // 首次创建，默认为 Auther，自己编辑时
-	Editor string // 其他人编辑时
-	Viewer string // get 请求时，仅查看
 }
 
 // PublishedArticle 衍生类型

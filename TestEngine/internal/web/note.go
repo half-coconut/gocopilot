@@ -27,7 +27,7 @@ func NewNoteHandler(svc service.NoteService, l logger.LoggerV1, intrSvc service.
 		svc:     svc,
 		l:       l,
 		intrSvc: intrSvc,
-		biz:     "notes",
+		biz:     "note",
 	}
 }
 
@@ -39,7 +39,7 @@ func (n *NoteHandler) RegisterRoutes(server *gin.Engine) {
 	note.POST("/list", ginx.WrapBodyAndToken[ListReq, ijwt.UserClaims](n.List))
 	note.GET("/detail:id", ginx.WrapToken[ijwt.UserClaims](n.Detail))
 
-	pub := server.Group("pub")
+	pub := server.Group("/pub")
 	pub.GET("/:id", n.PubDetail, func(ctx *gin.Context) {})
 	pub.POST("/like", ginx.WrapBodyAndToken[LikeReq, ijwt.UserClaims](n.Like))
 	pub.POST("/reward", ginx.WrapBodyAndToken[RewardReq, ijwt.UserClaims](n.Reward))
@@ -60,11 +60,7 @@ func (n *NoteHandler) Edit(ctx *gin.Context) {
 		return
 	}
 
-	note := domain.Note{
-		Id:      req.Id, // 以是否传入 id，作为新增和修改的依据
-		Title:   req.Title,
-		Content: req.Content,
-	}
+	note := req.toDomain(claims.Id)
 
 	Id, err := n.svc.Save(ctx, note)
 	if err != nil {
@@ -76,13 +72,6 @@ func (n *NoteHandler) Edit(ctx *gin.Context) {
 }
 
 func (n *NoteHandler) Publish(ctx *gin.Context) {
-	type NoteReq struct {
-		Id       int64  `json:"id"`
-		Title    string `json:"title"`
-		Content  string `json:"content"`
-		AuthorId int64  `json:"authorId"`
-		Role     string `json:"role"`
-	}
 	var req NoteReq
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -95,11 +84,8 @@ func (n *NoteHandler) Publish(ctx *gin.Context) {
 		n.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
 		return
 	}
-	note := domain.Note{
-		Id:      req.Id, // 以是否传入 id，作为新增和修改的依据
-		Title:   req.Title,
-		Content: req.Content,
-	}
+
+	note := req.toDomain(claims.Id)
 
 	Id, err := n.svc.Publish(ctx, note)
 	if err != nil {
@@ -229,6 +215,9 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	var note domain.Note
 	eg.Go(func() error {
 		note, err = n.svc.GetPublishedById(ctx, id, uc.Id)
+		if err != nil {
+			n.l.Error("获取 publicedBy uid 失败", logger.Error(err))
+		}
 		return err
 	})
 
@@ -253,7 +242,7 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	// 增加阅读计数
 	go func() {
 		// 最好不要在gorutine 里面复用外面的 error
-		er := n.intrSvc.IncrReadCnt(ctx, n.biz, note.Id)
+		er := n.intrSvc.IncrReadCnt(ctx, n.biz, id)
 		if er != nil {
 			n.l.Error("增加阅读计数失败", logger.Int64("noteId: ", note.Id), logger.Error(er))
 		}

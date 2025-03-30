@@ -39,7 +39,7 @@ func (h Handler[T]) ConsumeClaim(session sarama.ConsumerGroupSession, claim sara
 		// 统一处理重试
 		for i := 0; i < 3; i++ {
 			err = h.fn(msg, t)
-			if err != nil {
+			if err == nil {
 				break
 			}
 			h.l.Error("处理消息失败",
@@ -57,6 +57,7 @@ func (h Handler[T]) ConsumeClaim(session sarama.ConsumerGroupSession, claim sara
 				logger.Int64("offset", msg.Offset))
 		} else {
 			session.MarkMessage(msg, "")
+
 		}
 	}
 	return nil

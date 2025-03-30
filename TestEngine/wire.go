@@ -27,7 +27,7 @@ func InitWebServer() *App {
 		ioc.NewSyncProducer,
 
 		// consumer
-		//events.NewKafkaConsumer,
+		events.NewInteractiveReadEventBatchConsumer,
 		events.NewKafkaProducer,
 
 		dao.NewUserDAO,

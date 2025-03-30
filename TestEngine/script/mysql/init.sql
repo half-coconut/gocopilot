@@ -1,1 +1,1 @@
-create database testcopilot;
+CREATE DATABASE testengine;

@@ -266,7 +266,7 @@ function CreateInterfaceForm({ interfaceToEdit = {}, onCloseModal }) {
         <Button disabled={isWorking}>
           {isEditSession ? "Edit interface" : "Create new interface"}
         </Button>
-        {isOn ? <Button>Debug</Button> : ""}
+        {isOn ? <Button variation="run">Debug</Button> : ""}
       </FormRow>
     </Form>
   );

@@ -23,12 +23,18 @@ type InteractiveRepository interface {
 	Liked(ctx context.Context, biz string, id int64, uid int64) (bool, error)
 	Collected(ctx context.Context, biz string, id int64, uid int64) (bool, error)
 	GetByIds(ctx context.Context, biz string, ids []int64) ([]domain.Interactive, error)
+	AddRecord(ctx context.Context, nid int64, nid2 int64) error
 }
 
 type CachedReadCntRepository struct {
 	cache cache.InteractiveCache
 	dao   dao.InteractiveDAO
 	l     logger.LoggerV1
+}
+
+func (c *CachedReadCntRepository) AddRecord(ctx context.Context, nid int64, nid2 int64) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *CachedReadCntRepository) GetByIds(ctx context.Context, biz string, ids []int64) ([]domain.Interactive, error) {
@@ -98,7 +104,14 @@ func (c *CachedReadCntRepository) IncrReadCnt(ctx context.Context,
 
 func (c *CachedReadCntRepository) BatchIncrReadCnt(ctx context.Context,
 	bizs []string, bizIds []int64) error {
-	return c.dao.BatchIncrReadCnt(ctx, bizs, bizIds)
+	err := c.dao.BatchIncrReadCnt(ctx, bizs, bizIds)
+	if err != nil {
+		return err
+	}
+	// 这里需要批量的去修改 redis，改 lua 脚本
+	//c.cache.IncrReadCntIfPresent()
+	// TODO 新的 lua 脚本 或者用 pipeline
+	return nil
 }
 
 func (c *CachedReadCntRepository) AddCollectionItem(ctx context.Context,
