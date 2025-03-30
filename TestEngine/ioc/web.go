@@ -4,10 +4,9 @@ import (
 	"TestCopilot/TestEngine/internal/web"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/internal/web/middleware"
-	"TestCopilot/TestEngine/pkg/ginx/middlewares/logger"
+	"TestCopilot/TestEngine/pkg/ginx/middlewares/metric"
 	"TestCopilot/TestEngine/pkg/ginx/middlewares/ratelimit"
 	logger2 "TestCopilot/TestEngine/pkg/logger"
-	"context"
 	"errors"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -26,14 +25,24 @@ import (
 func InitMiddleware(redisClients redis.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.Handler) []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		corsHandler(),
-		logger.NewBuilder(func(ctx context.Context, al *logger.AccessLog) {
-			l.Debug("Http请求", logger2.Field{Key: "al", Value: al})
-		}).AllowReqBody().AllowRespBody().Build(),
+		//logger.NewBuilder(func(ctx context.Context, al *logger.AccessLog) {
+		//	l.Debug("Http请求", logger2.Field{Key: "al", Value: al})
+		//}).AllowReqBody().AllowRespBody().Build(),
+
+		(&metric.MiddlewareBuilder{
+			Namespace:  "test_copilot",
+			Subsystem:  "test_engine",
+			Name:       "gin_http",
+			Help:       "统计 GIN 的 HTTP 接口",
+			InstanceId: "my-instance-1",
+		}).Builder(),
+
 		middleware.NewLoginJWTMiddlewareBuilder(jwtHdl).
 			IgnorePath("/hello").
 			IgnorePath("/users/signup").
-			IgnorePath("/users/login").Build(),
-		// 限流的方案和 lua 脚本
+			IgnorePath("/users/login").
+			IgnorePath("/test/metric").Build(),
+		// 限流的方案和 lua 脚本，注意这里限流 200个请求
 		ratelimit.NewBuilder(redisClients, time.Second, 100).Build(),
 	}
 }
@@ -43,7 +52,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		//c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -64,6 +73,8 @@ func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userH
 	taskHandler.RegisterRoutes(server)
 	aiHandler.RegisterRoutes(server)
 	notehandler.RegisterRoutes(server)
+	// 仅仅用于测试，不需要依赖注入
+	(&web.ObservabilityHandler{}).RegisterRoutes(server)
 	return server
 }
 
