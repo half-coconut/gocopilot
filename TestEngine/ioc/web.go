@@ -4,12 +4,14 @@ import (
 	"TestCopilot/TestEngine/internal/web"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/internal/web/middleware"
+	"TestCopilot/TestEngine/pkg/ginx"
 	"TestCopilot/TestEngine/pkg/ginx/middlewares/metric"
 	"TestCopilot/TestEngine/pkg/ginx/middlewares/ratelimit"
 	logger2 "TestCopilot/TestEngine/pkg/logger"
 	"errors"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -23,6 +25,12 @@ import (
 )
 
 func InitMiddleware(redisClients redis.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.Handler) []gin.HandlerFunc {
+	ginx.InitCounter(prometheus.CounterOpts{
+		Namespace: "test_copilot",
+		Subsystem: "test_engine",
+		Name:      "http_biz_code",
+		Help:      "HTTPde 业务错误码",
+	})
 	return []gin.HandlerFunc{
 		corsHandler(),
 		//logger.NewBuilder(func(ctx context.Context, al *logger.AccessLog) {

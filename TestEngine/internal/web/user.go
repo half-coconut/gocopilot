@@ -2,6 +2,7 @@ package web
 
 import (
 	"TestCopilot/TestEngine/internal/domain"
+	"TestCopilot/TestEngine/internal/errs"
 	"TestCopilot/TestEngine/internal/service"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/logger"
@@ -62,28 +63,28 @@ func (u *UserHandler) SignUp(context *gin.Context) {
 
 	matched, err := u.emailRegexp.MatchString(req.Email)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		u.l.Info("邮箱校验报错", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
 	if !matched {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "邮箱不正确"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidOrPassword, Message: "邮箱不正确"})
 		u.l.Info("邮箱不正确", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
 	matched, err = u.passwordRegexp.MatchString(req.Password)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		u.l.Info("密码校验报错", logger.Error(err), logger.String("password", req.Password))
 		return
 	}
 	if !matched {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "密码长度不小于8位，包含数字，字母，特殊字符，字母需要大小写"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "密码长度不小于8位，包含数字，字母，特殊字符，字母需要大小写"})
 		u.l.Info("密码校验报错", logger.Error(err), logger.String("password", req.Password))
 		return
 	}
 	if req.Password != req.ConfirmPassword {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "两次输入密码不一致"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "两次输入密码不一致"})
 		u.l.Info("两次输入密码不一致", logger.Error(err), logger.String("password", req.Password), logger.String("confirm password", req.ConfirmPassword))
 		return
 	}
@@ -92,7 +93,7 @@ func (u *UserHandler) SignUp(context *gin.Context) {
 		Password: req.Password,
 	})
 	if errors.Is(err, service.ErrUserDuplicate) {
-		context.JSON(http.StatusConflict, Result{Code: 0, Message: "邮箱冲突"})
+		context.JSON(http.StatusConflict, Result{Code: errs.UserInvalidOrPassword, Message: "邮箱冲突"})
 		u.l.Info("邮箱冲突", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
@@ -113,11 +114,11 @@ func (u *UserHandler) LoginSession(context *gin.Context) {
 	var user domain.User
 	user, err := u.svc.Login(context, req.Email, req.Password)
 	if errors.Is(err, service.ErrInvalidUserOrPassword) {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "邮箱/用户或者密码不正确"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidOrPassword, Message: "邮箱/用户或者密码不正确"})
 		return
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		return
 	}
 	// 使用 session 作为登录校验
@@ -145,18 +146,18 @@ func (u *UserHandler) LoginJWT(context *gin.Context) {
 	var user domain.User
 	user, err := u.svc.Login(context, req.Email, req.Password)
 	if errors.Is(err, service.ErrInvalidUserOrPassword) {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "邮箱/用户或者密码不正确"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidOrPassword, Message: "邮箱/用户或者密码不正确"})
 		u.l.Info("邮箱/用户或者密码不正确", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		u.l.Info("登录系统错误", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
 	// 使用 JWT 校验登录
 	if err = u.SetLoginToken(context, user.Id); err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统异常"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInvalidOrPassword, Message: "系统异常"})
 		u.l.Info("JWT登录校验，系统异常", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
@@ -204,19 +205,19 @@ func (u *UserHandler) Edit(context *gin.Context) {
 		return
 	}
 	if req.FullName == "" {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "昵称不能为空"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "昵称不能为空"})
 		return
 	}
 	if req.Department == "" {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "部门不能为空"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "部门不能为空"})
 		return
 	}
 	if req.Role == "" {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "角色不能为空"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "角色不能为空"})
 		return
 	}
 	if len(req.Description) > 1024 {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "描述过长"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "描述过长"})
 		return
 	}
 	err := u.svc.UpdateNonSensitiveInfo(context, domain.User{
@@ -229,7 +230,7 @@ func (u *UserHandler) Edit(context *gin.Context) {
 		Description: req.Description,
 	})
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		return
 	}
 	context.JSON(http.StatusOK, Result{Code: 1, Message: "更新成功", Data: req})
@@ -250,19 +251,19 @@ func (u *UserHandler) ProfileJWT(context *gin.Context) {
 	c, _ := context.Get("users")
 	claims, ok := c.(ijwt.UserClaims)
 	if !ok {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		u.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id), logger.Error(err))
 		return
 	}
 	user, err := u.svc.Profile(context, claims.Id)
 
 	if errors.Is(err, service.ErrInvalidUserOrPassword) {
-		context.JSON(http.StatusBadRequest, Result{Code: 0, Message: "邮箱不存在"})
+		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidOrPassword, Message: "邮箱不存在"})
 		u.l.Info("邮箱不存在", logger.Error(err), logger.String("email", user.Email))
 		return
 	}
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, Result{Code: 0, Message: "系统错误"})
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
 		u.l.Info("用户校验，系统错误", logger.Error(err), logger.String("email", user.Email))
 		return
 	}

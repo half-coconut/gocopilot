@@ -4,24 +4,23 @@ import (
 	"TestCopilot/TestEngine/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
+	"strconv"
 )
 
 // ginx 插件库
 
 var L logger.LoggerV1
 
-func Wrap(fn func(ctx *gin.Context) (Result, error)) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		res, err := fn(ctx)
-		if err != nil {
-			L.Error("handle business logic logs",
-				logger.String("path", ctx.Request.URL.Path),
-				logger.String("route", ctx.FullPath()),
-				logger.Error(err))
-		}
-		ctx.JSON(http.StatusOK, res)
-	}
+var vector *prometheus.CounterVec
+
+func InitCounter(opt prometheus.CounterOpts) {
+	vector = prometheus.NewCounterVec(
+		opt, []string{"code"},
+	)
+	// 后期可以考虑 code,method,命中路由，http状态码
+	prometheus.MustRegister(vector)
 }
 
 func WrapToken[C jwt.Claims](fn func(ctx *gin.Context, uc C) (Result, error)) gin.HandlerFunc {
@@ -44,6 +43,7 @@ func WrapToken[C jwt.Claims](fn func(ctx *gin.Context, uc C) (Result, error)) gi
 				logger.String("route", ctx.FullPath()),
 				logger.Error(err))
 		}
+		vector.WithLabelValues(strconv.Itoa(int(res.Code))).Inc()
 		ctx.JSON(http.StatusOK, res)
 	}
 }

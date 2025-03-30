@@ -37,6 +37,8 @@ func (cache *RedisUserCache) Set(ctx context.Context, user domain.User) error {
 }
 
 func (cache *RedisUserCache) Get(ctx context.Context, id int64) (domain.User, error) {
+	//ctx = context.WithValue(ctx, "biz", "user")
+	//ctx = context.WithValue(ctx, "pattern", "user:info:%d")
 	key := cache.key(id)
 	val, err := cache.cmd.Get(ctx, key).Bytes()
 	if err != nil {
