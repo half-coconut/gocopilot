@@ -1,36 +1,41 @@
 import Table from "../../ui/Table.jsx";
 import Menus from "../../ui/Menus.jsx";
 import Empty from "../../ui/Empty.jsx";
-import { useBookings } from "./useBookings.js";
+
 import Spinner from "../../ui/Spinner.jsx";
 import TaskRow from "./TaskRow.jsx";
 import Pagination from "../../ui/Pagination.jsx";
+import { useTasks } from "./useTasks.js";
 
 function TaskTable() {
-  const { bookings, isLoading, count } = useBookings();
+  const { isLoading, taskItems, total } = useTasks();
 
   if (isLoading) return <Spinner />;
-
-  if (!bookings.length) return <Empty resourceName="bookings" />;
+  if (!total) return <Empty resourceName="tasks" />;
 
   return (
     <Menus>
-      <Table columns="0.6fr 2fr 2.4fr 1.4fr 1fr 3.2rem">
+      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr">
         <Table.Header>
-          <div>Cabin</div>
-          <div>Guest</div>
-          <div>Dates</div>
-          <div>Status</div>
-          <div>Amount</div>
+          {/* <div></div> */}
+          <div>Name</div>
+          <div>InterfaceId</div>
+          <div>Durations</div>
+          <div>Workers Scope</div>
+          <div>Rate</div>
+          <div>Creator</div>
+          <div>Ctime</div>
           <div></div>
         </Table.Header>
 
         <Table.Body
-          data={bookings}
-          render={(booking) => <TaskRow key={booking.id} booking={booking} />}
+          data={taskItems}
+          render={(taskItem) => (
+            <TaskRow key={taskItem.id} taskItem={taskItem} />
+          )}
         />
         <Table.Footer>
-          <Pagination count={count} />
+          <Pagination count={total} />
         </Table.Footer>
       </Table>
     </Menus>

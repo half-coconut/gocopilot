@@ -1,4 +1,4 @@
-// import TaskTable from "../features/bookings/TaskTable";
+import TaskTable from "../features/tasks/TaskTable";
 // import TaskTableOperations from "../features/bookings/TaskTableOperations";
 
 import AddTask from "../features/tasks/AddTask";
@@ -14,7 +14,7 @@ function Tasks() {
         <AddTask />
       </Row>
 
-      {/* <TaskTable /> */}
+      <TaskTable />
     </>
   );
 }

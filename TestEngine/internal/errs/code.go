@@ -15,9 +15,19 @@ const (
 	UserInvalidOrPassword = 401002
 )
 
+// Note 模块
 const (
 	NoteInvalidInput        = 402001
 	NoteInternalServerError = 502001
+)
+
+// 任务模块
+const (
+	// TaskInvalidInput 用户模块输入错误，含糊的错误
+	TaskInvalidInput        = 403001
+	TaskInternalServerError = 503001
+	// TaskInvalidOrNotExist 用户不存在，或者密码错误
+	TaskInvalidOrNotExist = 403002
 )
 
 var (

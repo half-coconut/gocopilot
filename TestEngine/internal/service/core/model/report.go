@@ -45,7 +45,7 @@ type Base struct {
 //}
 
 // FinalReport 生成 Report Base，并输出 Report
-func FinalReport(s *Subtask, resCh chan []*HttpResult) string {
+func FinalReport(begin time.Time, resCh chan []*HttpResult) string {
 	var b Base
 	b.Codes = make([]int64, 0)
 	b.SuccessRequests = make([]int64, 0)
@@ -66,7 +66,7 @@ func FinalReport(s *Subtask, resCh chan []*HttpResult) string {
 		}
 	}
 
-	b.TotalDuration = time.Since(s.Began)
+	b.TotalDuration = time.Since(begin)
 
 	b.TotalRequest = len(b.Codes)
 
@@ -150,7 +150,7 @@ func (r *reportService) displayReport() string {
 
 }
 
-//func DisplayReportResult(s *model.Subtask, res []*model.HttpResult) {
+//func DisplayReportResult(s *model.subtask, res []*model.HttpResult) {
 //	var b Base
 //	b.Codes = make([]int, 0)
 //	b.SuccessRequests = make([]int, 0)

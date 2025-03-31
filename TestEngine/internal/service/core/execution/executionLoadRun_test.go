@@ -59,7 +59,7 @@ package execution
 //		Began: time.Now(),
 //	}
 //	wg.Add(1)
-//	go e.HttpRunDebug(results, &wg, s)
+//	go e.httpRunDebug(results, &wg, s)
 //
 //	go func() {
 //		wg.Wait()

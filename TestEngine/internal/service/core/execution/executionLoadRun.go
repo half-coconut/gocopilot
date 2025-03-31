@@ -1,7 +1,6 @@
 package execution
 
 //
-//
 //import (
 //	model "TestCopilot/TestEngine/internal/service/core/model"
 //	"TestCopilot/TestEngine/pkg/logger"
@@ -14,7 +13,7 @@ package execution
 //)
 //
 //type ExecutionLoadRun interface {
-//	HttpRunDebug(result chan []*model.HttpResult, wg *sync.WaitGroup, s *model.Subtask) []*model.HttpResult
+//	httpRunDebug(result chan []*model.HttpResult, wg *sync.WaitGroup, s *model.Subtask) []*model.HttpResult
 //	HttpRun(duration time.Duration, rate float64)
 //}
 //
@@ -33,7 +32,7 @@ package execution
 //	}
 //}
 //
-//func (e *executionLoadRun) HttpRunDebug(result chan []*model.HttpResult, wg *sync.WaitGroup, s *model.Subtask) []*model.HttpResult {
+//func (e *executionLoadRun) httpRunDebug(result chan []*model.HttpResult, wg *sync.WaitGroup, s *model.Subtask) []*model.HttpResult {
 //	defer wg.Done()
 //	res := make([]*model.HttpResult, 0)
 //	for _, api := range e.t.APIs {
@@ -72,7 +71,7 @@ package execution
 //
 //	for i := uint64(0); i < worker; i++ {
 //		wg.Add(1)
-//		go e.HttpRunDebug(results, &wg, s)
+//		go e.httpRunDebug(results, &wg, s)
 //	}
 //
 //	go func() {
@@ -92,7 +91,7 @@ package execution
 //				if limiter.Allow() {
 //					// 启动 goroutine 发送请求
 //					wg.Add(1)
-//					go e.HttpRunDebug(results, &wg, s)
+//					go e.httpRunDebug(results, &wg, s)
 //				}
 //				//} else {
 //				//	// 处理限速，例如记录日志或等待一段时间

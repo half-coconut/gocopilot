@@ -12,8 +12,8 @@ import (
 type TaskDAO interface {
 	Insert(ctx context.Context, task Task) (int64, error)
 	UpdateById(ctx context.Context, task Task) error
-	FindByUId(ctx context.Context, id int64) ([]API, error)
-	FindByTId(ctx context.Context, tid int64) (API, error)
+	FindByUId(ctx context.Context, id int64) ([]Task, error)
+	FindByTId(ctx context.Context, tid int64) (Task, error)
 }
 
 type GORMTaskDAO struct {
@@ -39,7 +39,7 @@ func (dao GORMTaskDAO) UpdateById(ctx context.Context, task Task) error {
 			"durations":   task.Durations,
 			"workers":     task.Workers,
 			"max_workers": task.MaxWorkers,
-			"timeout":     task.Timeout,
+			"rate":        task.Rate,
 			"utime":       now,
 			"updater_id":  task.UpdaterId,
 		})
@@ -54,14 +54,16 @@ func (dao GORMTaskDAO) UpdateById(ctx context.Context, task Task) error {
 	return err
 }
 
-func (dao GORMTaskDAO) FindByUId(ctx context.Context, id int64) ([]API, error) {
-	//TODO implement me
-	panic("implement me")
+func (dao GORMTaskDAO) FindByUId(ctx context.Context, id int64) ([]Task, error) {
+	var task []Task
+	err := dao.db.WithContext(ctx).Where("creator_id=?", id).Find(&task).Error
+	return task, err
 }
 
-func (dao GORMTaskDAO) FindByTId(ctx context.Context, tid int64) (API, error) {
-	//TODO implement me
-	panic("implement me")
+func (dao GORMTaskDAO) FindByTId(ctx context.Context, tid int64) (Task, error) {
+	var task Task
+	err := dao.db.WithContext(ctx).Where("id=?", tid).Find(&task).Error
+	return task, err
 }
 
 func NewGORMTaskDAO(db *gorm.DB, l logger.LoggerV1) TaskDAO {
@@ -76,7 +78,7 @@ type Task struct {
 	Durations  int64
 	Workers    uint64
 	MaxWorkers uint64
-	Timeout    int64
+	Rate       float64
 
 	CreatorId int64
 	UpdaterId int64

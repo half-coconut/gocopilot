@@ -15,8 +15,8 @@ import (
 type APIRepository interface {
 	Create(ctx context.Context, api domain.API) (int64, error)
 	Update(ctx context.Context, api domain.API) error
-	FindByUId(ctx context.Context, id int64) ([]domain.API, error)
-	FindByAId(ctx context.Context, uid, aid int64) (domain.API, error)
+	FindByUId(ctx context.Context, uid int64) ([]domain.API, error)
+	FindByAId(ctx context.Context, aid int64) (domain.API, error)
 }
 
 type CacheAPIRepository struct {
@@ -25,26 +25,26 @@ type CacheAPIRepository struct {
 	userRepo UserRepository
 }
 
-func (c *CacheAPIRepository) FindByAId(ctx context.Context, uid, aid int64) (domain.API, error) {
+func (c *CacheAPIRepository) FindByAId(ctx context.Context, aid int64) (domain.API, error) {
 	api, err := c.dao.FindByAId(ctx, aid)
 	if err != nil {
 		return domain.API{}, nil
 	}
-	creator, updater := c.findUserByUId(ctx, uid, api)
+	creator, updater := c.findUserByAPI(ctx, api)
 	return c.entityToDomain(api, creator, updater), err
 }
 
-func (c *CacheAPIRepository) FindByUId(ctx context.Context, id int64) ([]domain.API, error) {
+func (c *CacheAPIRepository) FindByUId(ctx context.Context, uid int64) ([]domain.API, error) {
 	// 直接查库
 	var api []dao.API
-	api, err := c.dao.FindByUId(ctx, id)
+	api, err := c.dao.FindByUId(ctx, uid)
 	if err != nil {
 		return []domain.API{}, err
 	}
 	apiResp := make([]domain.API, 0)
 
 	for _, a := range api {
-		creator, updater := c.findUserByUId(ctx, id, a)
+		creator, updater := c.findUserByAPI(ctx, a)
 		aResp := c.entityToDomain(a, creator, updater)
 		apiResp = append(apiResp, aResp)
 	}
@@ -52,9 +52,9 @@ func (c *CacheAPIRepository) FindByUId(ctx context.Context, id int64) ([]domain.
 	return apiResp, err
 }
 
-func (c *CacheAPIRepository) findUserByUId(ctx context.Context, id int64, api dao.API) (domain.User, domain.User) {
+func (c *CacheAPIRepository) findUserByAPI(ctx context.Context, api dao.API) (domain.User, domain.User) {
 	// 适合单体应用
-	creator, err := c.userRepo.FindById(ctx, id)
+	creator, err := c.userRepo.FindById(ctx, api.CreatorId)
 	if err != nil {
 		c.l.Error("查询创建人失败", logger.Error(err))
 	}

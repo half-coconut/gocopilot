@@ -9,8 +9,8 @@ import (
 
 type APIService interface {
 	Save(ctx context.Context, api domain.API, uid int64) (int64, error)
-	List(ctx context.Context, id int64) ([]domain.API, error)
-	Detail(ctx context.Context, uid, aid int64) (domain.API, error)
+	List(ctx context.Context, uid int64) ([]domain.API, error)
+	Detail(ctx context.Context, aid int64) (domain.API, error)
 }
 
 type apiService struct {
@@ -18,12 +18,12 @@ type apiService struct {
 	l    logger.LoggerV1
 }
 
-func (a apiService) Detail(ctx context.Context, uid, aid int64) (domain.API, error) {
-	return a.repo.FindByAId(ctx, uid, aid)
+func (a apiService) Detail(ctx context.Context, aid int64) (domain.API, error) {
+	return a.repo.FindByAId(ctx, aid)
 }
 
-func (a apiService) List(ctx context.Context, id int64) ([]domain.API, error) {
-	return a.repo.FindByUId(ctx, id)
+func (a apiService) List(ctx context.Context, uid int64) ([]domain.API, error) {
+	return a.repo.FindByUId(ctx, uid)
 }
 
 func (a apiService) Save(ctx context.Context, api domain.API, uid int64) (int64, error) {

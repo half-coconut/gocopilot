@@ -5,9 +5,11 @@ import (
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/internal/web/middleware"
 	"TestCopilot/TestEngine/pkg/ginx"
+	"TestCopilot/TestEngine/pkg/ginx/middlewares/logger"
 	"TestCopilot/TestEngine/pkg/ginx/middlewares/metric"
 	"TestCopilot/TestEngine/pkg/ginx/middlewares/ratelimit"
 	logger2 "TestCopilot/TestEngine/pkg/logger"
+	"context"
 	"errors"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -33,9 +35,9 @@ func InitMiddleware(redisClients redis.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.
 	})
 	return []gin.HandlerFunc{
 		corsHandler(),
-		//logger.NewBuilder(func(ctx context.Context, al *logger.AccessLog) {
-		//	l.Debug("Http请求", logger2.Field{Key: "al", Value: al})
-		//}).AllowReqBody().AllowRespBody().Build(),
+		logger.NewBuilder(func(ctx context.Context, al *logger.AccessLog) {
+			l.Debug("Http请求", logger2.Field{Key: "al", Value: al})
+		}).AllowReqBody().AllowRespBody().Build(),
 
 		(&metric.MiddlewareBuilder{
 			Namespace:  "test_copilot",

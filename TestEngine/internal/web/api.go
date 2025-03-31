@@ -112,7 +112,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Durations:  DefaultDurations,
 			Workers:    DefaultWorkers,
 			MaxWorkers: DefaultMaxWorkers,
-			Timeout:    DefaultTimeout,
+			Rate:       DefaultRate,
 			Creator: domain.Editor{
 				Id:   1,
 				Name: "Egg Yolk",
@@ -157,7 +157,6 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Data:    report,
 		}, nil
 	}
-
 }
 
 func (a *APIHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
@@ -237,7 +236,7 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 			Message: "系统错误",
 		}, err
 	}
-	detail, err := a.svc.Detail(ctx, uc.Id, req.aid)
+	detail, err := a.svc.Detail(ctx, req.aid)
 	if err != nil {
 		return ginx.Result{}, err
 	}
@@ -277,7 +276,7 @@ func display(task domain.Task) string {
 [Durations: %v]
 [Workers:%v]
 [MaxWorkers: %v]
-[Timeout: %v]
+[Rate: %v]
 [Creator: %v]
 [Updater: %v]
 [Ctime: %v]
@@ -288,7 +287,7 @@ func display(task domain.Task) string {
 		task.Durations,
 		task.Workers,
 		task.MaxWorkers,
-		task.Timeout,
+		task.Rate,
 		task.Creator,
 		task.Updater,
 		task.Ctime,

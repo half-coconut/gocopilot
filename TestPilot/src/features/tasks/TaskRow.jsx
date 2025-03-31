@@ -1,23 +1,23 @@
 import styled from "styled-components";
-import { format, isToday } from "date-fns";
+
 import PropTypes from "prop-types";
 import {
-  HiArrowDownOnSquare,
-  HiArrowUpOnSquare,
+  // HiArrowDownOnSquare,
+  // HiArrowUpOnSquare,
   HiEye,
   HiTrash,
 } from "react-icons/hi2";
 
-import Tag from "../../ui/Tag.jsx";
+// import Tag from "../../ui/Tag.jsx";
 import Table from "../../ui/Table.jsx";
 import Modal from "../../ui/Modal.jsx";
 import Menus from "../../ui/Menus.jsx";
 import ConfirmDelete from "../../ui/ConfirmDelete.jsx";
-import { formatCurrency } from "../../utils/helpers.js";
-import { formatDistanceFromNow } from "../../utils/helpers.js";
+
 import { useNavigate } from "react-router-dom";
-import { useCheckout } from "../check-in-out/useCheckout.js";
+// import { useCheckout } from "../check-in-out/useCheckout.js";
 import { useDeleteBooking } from "./useDeleteBooking.js";
+import { convertNanosecondsToHMS } from "../../utils/helpers.js";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -41,77 +41,69 @@ const Stacked = styled.div`
   }
 `;
 
-const Amount = styled.div`
-  font-family: "Sono";
-  font-weight: 500;
-`;
+// const Amount = styled.div`
+//   font-family: "Sono";
+//   font-weight: 500;
+// `;
 
-function TaskRow({
-  booking: {
-    id: bookingId,
-    // created_at,
-    startDate,
-    endDate,
-    numNights,
-    // numGuests,
-    totalPrice,
-    status,
-    guests: { fullName: guestName, email },
-    cabins: { name: cabinName },
-  },
-}) {
+function TaskRow({ taskItem }) {
+  const {
+    id: taskId,
+    name,
+    a_ids,
+    durations,
+    workers,
+    max_workers,
+    rate,
+    creator,
+    updater,
+    ctime,
+    utime,
+  } = taskItem || {};
+
   const navigate = useNavigate();
-  const { checkout, isCheckingOut } = useCheckout();
+  // const { checkout, isCheckingOut } = useCheckout();
   const { isBookingDeleting, deleteBooking } = useDeleteBooking();
+  console.log(updater, utime);
 
   // 根据状态返回不同的颜色
-  const statusToTagName = {
-    unconfirmed: "blue",
-    "checked-in": "green",
-    "checked-out": "silver",
-  };
+  // const statusToTagName = {
+  //   unconfirmed: "blue",
+  //   "checked-in": "green",
+  //   "checked-out": "silver",
+  // };
 
   return (
     <Table.Row>
-      <Cabin>{cabinName}</Cabin>
+      <Cabin>{name}</Cabin>
+      <div>{a_ids} </div>
 
       <Stacked>
-        <span>{guestName}</span>
-        <span>{email}</span>
+        <span>{convertNanosecondsToHMS(durations)}</span>
       </Stacked>
-
       <Stacked>
-        <span>
-          {isToday(new Date(startDate))
-            ? "Today"
-            : formatDistanceFromNow(startDate)}{" "}
-          &rarr; {numNights} night stay
-        </span>
-        <span>
-          {format(new Date(startDate), "MMM dd yyyy")} &mdash;{" "}
-          {format(new Date(endDate), "MMM dd yyyy")}
-        </span>
+        <div>
+          <span>{workers}</span> ~<span>{max_workers}</span>
+        </div>
       </Stacked>
-
-      <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
-
-      <Amount>{formatCurrency(totalPrice)}</Amount>
-
+      <Stacked>{rate}</Stacked>
+      <Stacked>{creator}</Stacked>
+      <Stacked>{ctime}</Stacked>
       <Modal>
         <Menus.Menu>
-          <Menus.Toggle id={bookingId} />
-          <Menus.List id={bookingId}>
+          <Menus.Toggle id={taskId} />
+          <Menus.List id={taskId}>
             <Menus.Button
               icon={<HiEye />}
-              onClick={() => navigate(`/bookings/${bookingId}`)}
+              onClick={() => navigate(`/task/${taskId}`)}
             >
               See details
             </Menus.Button>
-
+            {/* 
             {status === "unconfirmed" && (
               <Menus.Button
                 icon={<HiArrowDownOnSquare />}
-                onClick={() => navigate(`/checkin/${bookingId}`)}
+                onClick={() => navigate(`/checkin/${taskId}`)}
               >
                 Check in
               </Menus.Button>
@@ -121,16 +113,16 @@ function TaskRow({
               <Menus.Button
                 icon={<HiArrowUpOnSquare />}
                 onClick={() => {
-                  checkout(bookingId);
+                  checkout(taskId);
                 }}
                 disabled={isCheckingOut}
               >
                 Check out
               </Menus.Button>
-            )}
+            )} */}
 
             <Modal.Open opens="delete">
-              <Menus.Button icon={<HiTrash />}>Delete booking</Menus.Button>
+              <Menus.Button icon={<HiTrash />}>Delete task</Menus.Button>
             </Modal.Open>
           </Menus.List>
         </Menus.Menu>
@@ -138,7 +130,7 @@ function TaskRow({
         <Modal.Window name="delete">
           <ConfirmDelete
             resourceName="booking"
-            onConfirm={() => deleteBooking(bookingId)}
+            onConfirm={() => deleteBooking(taskId)}
             disabled={isBookingDeleting}
           />
         </Modal.Window>
@@ -148,17 +140,18 @@ function TaskRow({
 }
 
 TaskRow.propTypes = {
-  booking: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    created_at: PropTypes.node,
-    startDate: PropTypes.node,
-    endDate: PropTypes.node,
-    numNights: PropTypes.node,
-    numGuests: PropTypes.node,
-    totalPrice: PropTypes.node,
-    status: PropTypes.string,
-    guests: PropTypes.node,
-    cabins: PropTypes.node,
+  taskItem: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string,
+    a_ids: PropTypes.List,
+    durations: PropTypes.string,
+    workers: PropTypes.number,
+    max_workers: PropTypes.number,
+    rate: PropTypes.string,
+    creator: PropTypes.string,
+    updater: PropTypes.string,
+    ctime: PropTypes.string,
+    utime: PropTypes.string,
   }),
 };
 

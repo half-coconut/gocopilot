@@ -30,3 +30,17 @@ export const formatCurrency = (value) =>
   );
 
 export default getToday;
+
+export function convertNanosecondsToHMS(nanoseconds) {
+  const seconds = Math.floor(nanoseconds / 1e9); // 转换为秒
+  const hours = Math.floor(seconds / 3600); // 计算小时
+  const minutes = Math.floor((seconds % 3600) / 60); // 计算分钟
+  const secs = seconds % 60; // 计算秒
+  if (hours !== 0) {
+    return `${hours}h ${minutes}min ${secs}s`;
+  } else if (minutes !== 0) {
+    return `${minutes}min ${secs}s`;
+  } else {
+    return `${secs}s`;
+  }
+}

@@ -13,7 +13,7 @@ type Task struct {
 	Durations  time.Duration `json:"durations"`  // 持续时间
 	Workers    uint64        `json:"workers"`    // 并发数
 	MaxWorkers uint64        `json:"maxWorkers"` // 最大持续时间
-	Timeout    time.Duration `json:"timeout"`    // 超时时间
+	Rate       float64       `json:"rate"`       // rate 速率
 
 	Creator Editor `json:"creator"`
 	Updater Editor `json:"updater"`
@@ -22,6 +22,7 @@ type Task struct {
 }
 
 type TaskAPI struct {
+	Id     int64                  `json:"id"`
 	Name   string                 `json:"name"`
 	URL    string                 `json:"url"`
 	Params string                 `json:"params,omitempty"`

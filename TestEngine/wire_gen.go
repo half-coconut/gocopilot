@@ -44,7 +44,7 @@ func InitWebServer() *App {
 	apiRepository := repository.NewAPIRepository(apidao, loggerV1, userRepository)
 	apiService := service.NewAPIService(apiRepository, loggerV1)
 	taskDAO := dao.NewGORMTaskDAO(db, loggerV1)
-	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1)
+	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1, userRepository, apiRepository)
 	taskService := model.NewTaskService(taskRepository, loggerV1)
 	apiHandler := web.NewAPIHandler(apiService, taskService, userService, loggerV1)
 	taskHandler := web.NewTaskHandler(loggerV1, taskService, userService)

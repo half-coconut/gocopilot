@@ -6,15 +6,19 @@ import Button from "../../ui/Button.jsx";
 import FormRow from "../../ui/FormRow.jsx";
 import Input from "../../ui/Input.jsx";
 import { Select } from "antd";
+import { useCreateTask } from "./useCreateTask.js";
 
 function EditTask({ onCloseModal }) {
+  const { isCreating, createTask } = useCreateTask();
+  const isWorking = isCreating;
+
   const initialData = {
     name: "task-01",
     a_ids: [],
     durations: "10m0s",
-    workers: "5",
-    max_workers: "200",
-    timeout: "30s",
+    workers: 5,
+    max_workers: 100,
+    rate: 10,
   };
 
   const {
@@ -22,14 +26,15 @@ function EditTask({ onCloseModal }) {
     handleSubmit,
     control,
     // formState,
+    reset,
   } = useForm({
     defaultValues: initialData,
   });
 
   const interfaces = [
-    { value: "1", label: "Login" },
-    { value: "2", label: "Login2" },
-    { value: "3", label: "Login3" },
+    { value: 1, label: "Login" },
+    { value: 2, label: "Login2" },
+    { value: 3, label: "Login3" },
   ];
 
   const handleChange = (value) => {
@@ -38,6 +43,14 @@ function EditTask({ onCloseModal }) {
 
   function onSubmit(data) {
     console.log("onsubmit 的 data:", data);
+    createTask(
+      { ...data },
+      {
+        onSuccess: () => {
+          reset(), onCloseModal?.();
+        },
+      }
+    );
   }
 
   return (
@@ -89,24 +102,45 @@ function EditTask({ onCloseModal }) {
         </FormRow>
         <FormRow label="Workers">
           <Input
-            type="text"
+            type="number"
             id="workers"
-            {...register("workers", { required: "This field is required" })}
+            {...register("workers", {
+              required: "This field is required",
+              valueAsNumber: true,
+              min: {
+                value: 1,
+                message: "Min value is 1",
+              },
+            })}
           />
         </FormRow>
         <FormRow label="Max workers">
           <Input
-            type="text"
+            type="number"
             id="max_workers"
-            {...register("max_workers", { required: "This field is required" })}
+            {...register("max_workers", {
+              required: "This field is required",
+              valueAsNumber: true,
+              min: {
+                value: 1,
+                message: "Min value is 1",
+              },
+            })}
           />
         </FormRow>
 
-        <FormRow label="Timeout">
+        <FormRow label="Rate">
           <Input
-            type="text"
-            id="timeout"
-            {...register("timeout", { required: "This field is required" })}
+            type="number"
+            id="rate"
+            disabled={isWorking}
+            {...register("rate", {
+              required: "This field is required",
+              min: {
+                value: 1,
+                message: "Min value is 1",
+              },
+            })}
           />
         </FormRow>
 

@@ -11,7 +11,7 @@ function InterfaceTable() {
   // const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
-  if (!total) return <Empty resourceName="cabins" />;
+  if (!total) return <Empty resourceName="interfaces" />;
 
   // 1） FILTER
   // const filterValue = searchParams.get("discount") || "all";

@@ -6,7 +6,6 @@ import (
 	"TestCopilot/TestEngine/pkg/jsonx"
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	rate2 "golang.org/x/time/rate"
@@ -19,10 +18,11 @@ import (
 
 type TaskService interface {
 	Debug(taskDomain domain.Task) TaskDebugLog
-	OnceRunDebug(taskDomain domain.Task) string
-	HttpRunDebug(taskDomain domain.Task, result chan []*HttpResult, wg *sync.WaitGroup, s *Subtask) []*HttpResult
-	HttpRun(taskDomain domain.Task, duration time.Duration, rate float64)
+	HttpRun(ctx context.Context, tid int64, duration time.Duration, rate float64) string
+	HttpRunDebug(ctx context.Context, tid int64, result chan []*HttpResult, wg *sync.WaitGroup) []*HttpResult
+	OnceRunDebug(ctx context.Context, tid int64) []TaskDebugLog
 	Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error)
+	List(ctx context.Context, uid int64) ([]domain.Task, error)
 }
 
 // taskService 任务结构体
@@ -30,6 +30,10 @@ type taskService struct {
 	repo    repository.TaskRepository
 	l       logger.LoggerV1
 	subtask *Subtask
+}
+
+func (t *taskService) List(ctx context.Context, uid int64) ([]domain.Task, error) {
+	return t.repo.FindByUId(ctx, uid)
 }
 
 type Subtask struct {
@@ -74,62 +78,68 @@ func (t *taskService) Save(ctx *gin.Context, task domain.Task, uid int64) (int64
 	return Id, err
 }
 
-func (t *taskService) OnceRunDebug(taskDomain domain.Task) string {
-	task := taskDomain.APIs[0]
-	var res *HttpResult
-	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
-	if task.Type == "http" {
-		var h = make(http.Header, 0)
-		h.Add("Content-Type", "application/json")
-		h.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36")
+func (t *taskService) OnceRunDebug(ctx context.Context, tid int64) []TaskDebugLog {
+	task := t.getTask(ctx, tid)
 
-		body := []byte(`{"jsonrpc": "2.0", "method": "eth_accounts", "params": [], "id": 1}`)
-		target := NewHttpContent(
-			//task.Method, task.URL, task.Params, []byte(task.Body), jsonToHeader(task.Header))
-			task.Method, task.URL, task.Params, body, h)
-		res = target.Send(t.subtask)
-		res.Task = taskDomain.Name
+	var (
+		reports []TaskDebugLog
+		res     *HttpResult
+	)
+	for _, api := range task.APIs {
+
+		// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
+		if api.Type == "http" {
+			headers := http.Header{}
+			for key, value := range api.Header {
+				headers.Add(key, value)
+			}
+
+			target := NewHttpContent(api.Method,
+				api.URL, api.Params,
+				[]byte(jsonx.JsonMarshal(api.Body)),
+				headers,
+			)
+			res = target.Send(t.subtask)
+			res.Task = task.Name
+			content := ExportDebugLogs(true, res)
+			reports = append(reports, content)
+		}
 	}
-
 	// 一次任务的结果
-	content := TaskOnceDebugLogs(true, res)
-
-	return content
+	return reports
 }
 
-func (t *taskService) Debug(taskDomain domain.Task) TaskDebugLog {
-	//s := &Subtask{
-	//	Began: time.Now(),
-	//}
-	task := taskDomain.APIs[0]
+func (t *taskService) Debug(task domain.Task) TaskDebugLog {
+	api := task.APIs[0]
 	var res *HttpResult
 	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
-	if task.Type == "http" {
+	if api.Type == "http" {
 		headers := http.Header{}
-		for key, value := range task.Header {
+		for key, value := range api.Header {
 			headers.Add(key, value)
 		}
 
-		target := NewHttpContent(task.Method,
-			task.URL, task.Params,
-			[]byte(jsonx.JsonMarshal(task.Body)),
+		target := NewHttpContent(api.Method,
+			api.URL, api.Params,
+			[]byte(jsonx.JsonMarshal(api.Body)),
 			headers,
 		)
 		res = target.Send(t.subtask)
-		res.Task = taskDomain.Name
+		res.Task = task.Name
 	}
 
 	// 一次任务的结果
-	//content := TaskOnceDebugLogs(true, res)
 	content := ExportDebugLogs(true, res)
 	return content
 }
 
-func (t *taskService) HttpRunDebug(taskDomain domain.Task, result chan []*HttpResult, wg *sync.WaitGroup, s *Subtask) []*HttpResult {
+func (t *taskService) HttpRunDebug(ctx context.Context, tid int64, result chan []*HttpResult, wg *sync.WaitGroup) []*HttpResult {
 	defer wg.Done()
 
+	task := t.getTask(ctx, tid)
+
 	res := make([]*HttpResult, 0)
-	for _, api := range taskDomain.APIs {
+	for _, api := range task.APIs {
 		if api.Type == "http" {
 			headers := http.Header{}
 			for key, value := range api.Header {
@@ -138,8 +148,8 @@ func (t *taskService) HttpRunDebug(taskDomain domain.Task, result chan []*HttpRe
 
 			target := NewHttpContent(
 				api.Method, api.URL, api.Params, []byte(jsonx.JsonMarshal(api.Body)), headers)
-			api_res := target.Send(s)
-			api_res.Task = taskDomain.Name
+			api_res := target.Send(t.subtask)
+			api_res.Task = task.Name
 			res = append(res, api_res)
 		}
 	}
@@ -150,10 +160,11 @@ func (t *taskService) HttpRunDebug(taskDomain domain.Task, result chan []*HttpRe
 	return res
 }
 
-func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, rate float64) {
+func (t *taskService) HttpRun(ctx context.Context, tid int64, duration time.Duration, rate float64) string {
 	// 这里将 task 中的所有接口，按照一个goroutine 去请求，
 	// 创建限速器
 	limiter := rate2.NewLimiter(rate2.Limit(rate), 1)
+	task := t.getTask(ctx, tid)
 
 	// 创建上下文，用于控制压测持续时间
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
@@ -161,20 +172,16 @@ func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, ra
 
 	var wg sync.WaitGroup
 
-	worker := taskDomain.Workers
-	if worker > taskDomain.MaxWorkers {
-		worker = taskDomain.MaxWorkers
+	worker := task.Workers
+	if worker > task.MaxWorkers {
+		worker = task.MaxWorkers
 	}
 
 	results := make(chan []*HttpResult)
 
-	//s := &Subtask{
-	//	Began: time.Now(),
-	//}
-
 	for i := uint64(0); i < worker; i++ {
 		wg.Add(1)
-		go t.HttpRunDebug(taskDomain, results, &wg, t.subtask)
+		go t.HttpRunDebug(ctx, tid, results, &wg)
 	}
 
 	go func() {
@@ -194,7 +201,7 @@ func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, ra
 				if limiter.Allow() {
 					// 启动 goroutine 发送请求
 					wg.Add(1)
-					go t.HttpRunDebug(taskDomain, results, &wg, t.subtask)
+					go t.HttpRunDebug(ctx, tid, results, &wg)
 				}
 				//} else {
 				//	// 处理限速，例如记录日志或等待一段时间
@@ -204,28 +211,19 @@ func (t *taskService) HttpRun(taskDomain domain.Task, duration time.Duration, ra
 		}
 	}()
 
-	FinalReport(t.subtask, results)
+	content := FinalReport(t.subtask.Began, results)
 	t.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
 	t.l.Info(fmt.Sprintf("当前 http_load 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
+	return content
 
 }
 
-// 从JSON字符串转换回http.Header
-func jsonToHeader(headerJSON string) http.Header {
-	// 创建一个用于解析的map
-	var headerMap map[string][]string
-	err := json.Unmarshal([]byte(headerJSON), &headerMap)
+func (t *taskService) getTask(ctx context.Context, tid int64) domain.Task {
+	task, err := t.repo.FindByTId(ctx, tid)
 	if err != nil {
-		return nil
+		t.l.Warn("查询任务失败", logger.Error(err))
 	}
-	// 将map转换为http.Header
-	header := make(http.Header)
-	for key, values := range headerMap {
-		for _, value := range values {
-			header.Add(key, value)
-		}
-	}
-	return header
+	return task
 }
 
 func TaskOnceDebugLogs(debug bool, re *HttpResult) string {

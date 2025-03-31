@@ -8,6 +8,11 @@ export async function createEditTask(newTask) {
   return taskService.edit(newTask);
 }
 
+export default async function getTasks() {
+  const resp = await taskService.list();
+  return resp;
+}
+
 export async function getBookings({ filter, sortBy, page }) {
   let query = supabase
     .from("bookings")
