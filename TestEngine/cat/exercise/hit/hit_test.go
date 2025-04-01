@@ -1,7 +1,7 @@
 package hit
 
 import (
-	"TestCopilot/TestEngine/cat/log"
+	"TestCopilot/TestEngine/cat/exercise/log"
 	"net/http"
 	"testing"
 	"time"

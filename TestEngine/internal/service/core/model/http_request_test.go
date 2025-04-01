@@ -1,7 +1,7 @@
 package model
 
 import (
-	"TestCopilot/TestEngine/cat/log"
+	"TestCopilot/TestEngine/cat/exercise/log"
 	"encoding/json"
 	"net/http"
 	"testing"

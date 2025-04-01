@@ -9,11 +9,13 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=note.go -package=mocks -destination=mocks/note.mock.go NoteService
 type NoteService interface {
 	Save(ctx context.Context, note domain.Note) (int64, error)
 	Withdraw(ctx context.Context, note domain.Note) error
 	Publish(ctx context.Context, note domain.Note) (int64, error)
 	List(ctx context.Context, id int64, offset int, limit int) ([]domain.Note, error)
+	ListPub(ctx context.Context, offset int, limit int) ([]domain.Note, error)
 	GetById(ctx context.Context, id int64) (domain.Note, error)
 	GetPublishedById(ctx context.Context, id, uid int64) (domain.Note, error)
 }
@@ -26,6 +28,11 @@ type noteService struct {
 	producer events.Producer
 
 	ch chan readInfo
+}
+
+func (svc *noteService) ListPub(ctx context.Context, offset int, limit int) ([]domain.Note, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 type readInfo struct {

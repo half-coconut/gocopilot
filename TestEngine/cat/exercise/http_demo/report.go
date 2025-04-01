@@ -1,7 +1,7 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/cat/log"
+	"TestCopilot/TestEngine/cat/exercise/log"
 	"fmt"
 	"sort"
 	"time"

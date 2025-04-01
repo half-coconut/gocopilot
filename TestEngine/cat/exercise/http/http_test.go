@@ -1,7 +1,7 @@
 package http
 
 import (
-	"TestCopilot/TestEngine/cat/log"
+	"TestCopilot/TestEngine/cat/exercise/log"
 	"fmt"
 	"net/http"
 	"testing"
