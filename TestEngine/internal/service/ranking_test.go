@@ -24,13 +24,13 @@ func TestBatchRankingService_TopN(t *testing.T) {
 			mock: func(ctrl *gomock.Controller) (NoteService, InteractiveService) {
 				noteSvc := svcmocks.NewMockNoteService(ctrl)
 				// 一批就搞完
-				noteSvc.EXPECT().ListPub(gomock.Any(), 0, 3).
+				noteSvc.EXPECT().ListPub(gomock.Any(), gomock.Any(), 0, 3).
 					Return([]domain.Note{
 						{Id: 1, Utime: now, Ctime: now},
 						{Id: 2, Utime: now, Ctime: now},
 						{Id: 3, Utime: now, Ctime: now},
 					}, nil)
-				noteSvc.EXPECT().ListPub(gomock.Any(), 3, 3).
+				noteSvc.EXPECT().ListPub(gomock.Any(), gomock.Any(), 3, 3).
 					Return([]domain.Note{}, nil)
 				intrSvc := svcmocks.NewMockInteractiveService(ctrl)
 				intrSvc.EXPECT().GetByIds(gomock.Any(),

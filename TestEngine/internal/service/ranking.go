@@ -48,6 +48,7 @@ func (svc *BatchRankingService) TopN(ctx context.Context) error {
 }
 
 func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error) {
+	now := time.Now()
 	offset := 0
 	type Score struct {
 		note  domain.Note
@@ -66,7 +67,7 @@ func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error)
 
 		})
 	for {
-		notes, err := svc.noteSvc.ListPub(ctx, offset, svc.batchSize)
+		notes, err := svc.noteSvc.ListPub(ctx, now, offset, svc.batchSize)
 		if err != nil {
 			return nil, err
 		}
@@ -113,7 +114,7 @@ func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error)
 		offset += len(notes)
 	}
 	// 最后得出结论
-	res := make([]domain.Note, 0, svc.n)
+	res := make([]domain.Note, svc.n)
 	for i := svc.n - 1; i >= 0; i-- {
 		val, err := topN.Dequeue()
 		if err != nil {
@@ -122,5 +123,6 @@ func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error)
 		}
 		res[i] = val.note
 	}
+
 	return res, nil
 }

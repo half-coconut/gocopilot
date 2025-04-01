@@ -8,6 +8,7 @@ import (
 	domain "TestCopilot/TestEngine/internal/domain"
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	gomock "go.uber.org/mock/gomock"
 )
@@ -81,18 +82,18 @@ func (mr *MockNoteServiceMockRecorder) List(ctx, id, offset, limit interface{}) 
 }
 
 // ListPub mocks base method.
-func (m *MockNoteService) ListPub(ctx context.Context, offset, limit int) ([]domain.Note, error) {
+func (m *MockNoteService) ListPub(ctx context.Context, start time.Time, offset, limit int) ([]domain.Note, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListPub", ctx, offset, limit)
+	ret := m.ctrl.Call(m, "ListPub", ctx, start, offset, limit)
 	ret0, _ := ret[0].([]domain.Note)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListPub indicates an expected call of ListPub.
-func (mr *MockNoteServiceMockRecorder) ListPub(ctx, offset, limit interface{}) *gomock.Call {
+func (mr *MockNoteServiceMockRecorder) ListPub(ctx, start, offset, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPub", reflect.TypeOf((*MockNoteService)(nil).ListPub), ctx, offset, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPub", reflect.TypeOf((*MockNoteService)(nil).ListPub), ctx, start, offset, limit)
 }
 
 // Publish mocks base method.
