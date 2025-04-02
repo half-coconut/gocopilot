@@ -18,6 +18,7 @@ import (
 	"TestCopilot/TestEngine/internal/web"
 	"TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
+	"github.com/google/wire"
 )
 
 import (
@@ -64,9 +65,17 @@ func InitWebServer() *App {
 	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, taskHandler, noteHandler)
 	interactiveReadEventBatchConsumer := note3.NewInteractiveReadEventBatchConsumer(client, interactiveRepository, loggerV1)
 	v2 := ioc.NewConsumers(interactiveReadEventBatchConsumer)
+	rankingService := service.NewBatchRankingService(noteService, interactiveService)
+	rankingJob := ioc.InitRankingJob(rankingService)
+	cron := ioc.InitJobs(loggerV1, rankingJob)
 	app := &App{
-		Server:    engine,
-		Consumers: v2,
+		server:    engine,
+		consumers: v2,
+		cron:      cron,
 	}
 	return app
 }
+
+// wire.go:
+
+var rankingServiceSet = wire.NewSet(repository.NewCacheRankingRepository, cache.NewRankingRedisCache, service.NewBatchRankingService)

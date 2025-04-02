@@ -11,21 +11,41 @@ import (
 )
 
 type MongoDBDAO struct {
-	//client *mongo.Client
-	//db     *mongo.Database
+	client *mongo.Client
+	db     *mongo.Database
 
 	col     *mongo.Collection // 制作库
 	liveCol *mongo.Collection // 线上库
 	node    *snowflake.Node
 }
 
-//func NewMongoDBDAO(db *mongo.Database, node *snowflake.Node) NoteDAO {
-//	return &MongoDBDAO{
-//		col:     db.Collection("notes"),
-//		liveCol: db.Collection("published_notes"),
-//		node:    node,
-//	}
-//}
+func (m *MongoDBDAO) GetByAuthor(ctx context.Context, author int64, offset, limit int) ([]Note, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MongoDBDAO) GetById(ctx context.Context, id int64) (Note, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MongoDBDAO) GetPubById(ctx context.Context, id int64) (PublishedNote, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MongoDBDAO) ListPub(ctx context.Context, start time.Time, offset int, limit int) ([]Note, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func NewMongoDBDAO(db *mongo.Database, node *snowflake.Node) NoteDAO {
+	return &MongoDBDAO{
+		col:     db.Collection("notes"),
+		liveCol: db.Collection("published_notes"),
+		node:    node,
+	}
+}
 
 func (m *MongoDBDAO) Sync(ctx context.Context, note Note) (int64, error) {
 	var (

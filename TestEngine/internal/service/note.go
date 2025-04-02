@@ -31,8 +31,7 @@ type noteService struct {
 }
 
 func (svc *noteService) ListPub(ctx context.Context, start time.Time, offset int, limit int) ([]domain.Note, error) {
-	//TODO implement me
-	panic("implement me")
+	return svc.repo.ListPub(ctx, start, offset, limit)
 }
 
 type readInfo struct {

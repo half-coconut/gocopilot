@@ -14,6 +14,18 @@ type GORMNoteDAO struct {
 	l  logger.LoggerV1
 }
 
+func (dao *GORMNoteDAO) ListPub(ctx context.Context, start time.Time, offset int, limit int) ([]Note, error) {
+	var res []Note
+	// 保持排序的稳定
+	err := dao.db.WithContext(ctx).
+		Where("utime<?", start.UnixMilli()).
+		Order("utime DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&res).Error
+	return res, err
+}
+
 func (dao *GORMNoteDAO) GetById(ctx context.Context, id int64) (Note, error) {
 	//TODO implement me
 	panic("implement me")

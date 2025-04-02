@@ -2,10 +2,10 @@ package service
 
 import (
 	"TestCopilot/TestEngine/internal/domain"
+	"TestCopilot/TestEngine/internal/repository"
 	"context"
 	"github.com/ecodeclub/ekit/queue"
 	"github.com/ecodeclub/ekit/slice"
-	"log"
 	"math"
 	"time"
 )
@@ -17,6 +17,7 @@ type RankingService interface {
 type BatchRankingService struct {
 	noteSvc   NoteService
 	intrSvc   InteractiveService
+	repo      repository.RankingRepository
 	batchSize int
 	// 优先队列的容量
 	n int
@@ -24,26 +25,27 @@ type BatchRankingService struct {
 	scoreFunc func(t time.Time, likeCnt int64) float64
 }
 
-func NewBatchRankingService(noteSvc NoteService, intrSvc InteractiveService) *BatchRankingService {
+func NewBatchRankingService(noteSvc NoteService, intrSvc InteractiveService) RankingService {
 	return &BatchRankingService{
 		noteSvc:   noteSvc,
 		intrSvc:   intrSvc,
 		batchSize: 100,
 		n:         100,
 		scoreFunc: func(t time.Time, likeCnt int64) float64 {
-			return float64(likeCnt-1) / math.Pow(float64(likeCnt+2), 1.5)
+			ms := time.Since(t).Seconds()
+			return float64(likeCnt-1) / math.Pow(float64(ms+2), 1.5)
 		},
 	}
 }
 
-// 准备分批
+// TopN 准备分批
 func (svc *BatchRankingService) TopN(ctx context.Context) error {
 	notes, err := svc.topN(ctx)
 	if err != nil {
 		return err
 	}
 	// 在这里，存起来
-	log.Println(notes)
+	svc.repo.ReplaceTopN(ctx, notes)
 	return nil
 }
 
@@ -102,12 +104,16 @@ func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error)
 						note:  note,
 						score: score,
 					})
+				} else {
+					_ = topN.Enqueue(val)
 				}
 			}
 		}
 		// 一批已经处理完了
-		if len(notes) < svc.batchSize {
+		if len(notes) < svc.batchSize ||
+			now.Sub(notes[len(notes)-1].Utime).Hours() > 7*24 {
 			// 这一批没取够
+			// 或者取到 7天之前的数据了，说明可以中断了
 			break
 		}
 		// 这边要更新 offset

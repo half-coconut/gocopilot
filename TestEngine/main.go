@@ -20,14 +20,30 @@ func main() {
 	initPrometheus()
 
 	app := InitWebServer()
-	for _, c := range app.Consumers {
+	for _, c := range app.consumers {
 		err := c.Start()
 		if err != nil {
 			panic(err)
 		}
 	}
-	server := app.Server
+	//app.cron.Start()
+
+	server := app.server
 	server.Run(":3002")
+
+	//// 一分钟内要关完，要退出
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	//defer cancel()
+	//log.Println(ctx)
+	//// 等待运行完毕
+	//ctx = app.cron.Stop()
+	//// 超时强制退出，防止有些任务执行时间过长
+	//tm := time.NewTimer(time.Minute * 10)
+	//select {
+	//case <-tm.C:
+	//case <-ctx.Done():
+	//}
+
 }
 
 func initPrometheus() {

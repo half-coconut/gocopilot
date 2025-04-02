@@ -18,6 +18,7 @@ type NoteRepository interface {
 	Sync(ctx context.Context, note domain.Note) (int64, error)
 	SyncStatus(ctx context.Context, id, author_id int64, status domain.NoteStatus) error
 	List(ctx context.Context, uid int64, offset, limit int) ([]domain.Note, error)
+	ListPub(ctx context.Context, start time.Time, offset int, limit int) ([]domain.Note, error)
 	GetByID(ctx context.Context, id int64) (domain.Note, error)
 	GetPublishedById(ctx context.Context, id int64) (domain.Note, error)
 }
@@ -31,6 +32,16 @@ type CacheNoteRepository struct {
 	authorDAO dao.AuthorDAO
 	readerDAO dao.ReaderDAO
 	l         logger.LoggerV1
+}
+
+func (c *CacheNoteRepository) ListPub(ctx context.Context, start time.Time, offset int, limit int) ([]domain.Note, error) {
+	res, err := c.dao.ListPub(ctx, start, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return slice.Map(res, func(idx int, src dao.Note) domain.Note {
+		return c.entityToDomain(src)
+	}), nil
 }
 
 func (c *CacheNoteRepository) GetPublishedById(ctx context.Context, id int64) (domain.Note, error) {

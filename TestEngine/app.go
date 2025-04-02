@@ -3,9 +3,11 @@ package main
 import (
 	"TestCopilot/TestEngine/internal/events"
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 )
 
 type App struct {
-	Server    *gin.Engine
-	Consumers []events.Consumer
+	server    *gin.Engine
+	consumers []events.Consumer
+	cron      *cron.Cron
 }

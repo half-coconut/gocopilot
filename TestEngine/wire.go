@@ -17,6 +17,10 @@ import (
 	"github.com/google/wire"
 )
 
+var rankingServiceSet = wire.NewSet(repository.NewCacheRankingRepository,
+	cache.NewRankingRedisCache, service.NewBatchRankingService,
+)
+
 func InitWebServer() *App {
 	wire.Build(
 		ioc.InitDB, ioc.InitRedis,
@@ -25,6 +29,10 @@ func InitWebServer() *App {
 		ioc.InitKafka,
 		ioc.NewConsumers,
 		ioc.NewSyncProducer,
+
+		rankingServiceSet,
+		ioc.InitJobs,
+		ioc.InitRankingJob,
 
 		// consumer
 		events.NewInteractiveReadEventBatchConsumer,
