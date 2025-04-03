@@ -25,4 +25,5 @@ func InitLocalFuncExeutor(svc service.RankingService) *job.LocalFuncExecutor {
 		defer cancel()
 		return svc.TopN(ctx)
 	})
+	return res
 }

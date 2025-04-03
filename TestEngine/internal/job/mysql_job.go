@@ -19,7 +19,7 @@ type LocalFuncExecutor struct {
 	funcs map[string]func(ctx context.Context, j domain.Job) error
 }
 
-func NewLocalFuncExecutor() Executor {
+func NewLocalFuncExecutor() *LocalFuncExecutor {
 	return &LocalFuncExecutor{funcs: make(map[string]func(ctx context.Context, j domain.Job) error)}
 }
 
