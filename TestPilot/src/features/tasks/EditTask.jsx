@@ -31,9 +31,11 @@ function EditTask({ onCloseModal }) {
     rate: 10,
   };
 
-  const { register, handleSubmit, control, reset } = useForm({
+  const { register, handleSubmit, control, reset, formState } = useForm({
     defaultValues: initialData,
   });
+
+  const { errors } = formState;
 
   const handleChange = (value) => {
     console.log(`Selected: ${value}`);
@@ -50,15 +52,18 @@ function EditTask({ onCloseModal }) {
       }
     );
   }
+  function onError(errors) {
+    console.log(errors);
+  }
 
   return (
     <>
       <Heading as="h2">Create a new Task</Heading>
       <Form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit, onError)}
         type={onCloseModal ? "modal" : "regular"}
       >
-        <FormRow label="Task name">
+        <FormRow label="Task name" error={errors?.name?.message}>
           <Input
             type="text"
             id="name"
@@ -66,7 +71,7 @@ function EditTask({ onCloseModal }) {
           />
         </FormRow>
 
-        <FormRow label="Interfaces">
+        <FormRow label="Interfaces" error={errors?.a_ids?.message}>
           <Controller
             id="a_ids"
             name="a_ids"
@@ -92,14 +97,14 @@ function EditTask({ onCloseModal }) {
           />
         </FormRow>
 
-        <FormRow label="Duration">
+        <FormRow label="Duration" error={errors?.durations?.message}>
           <Input
             type="text"
             id="durations"
             {...register("durations", { required: "This field is required" })}
           />
         </FormRow>
-        <FormRow label="Workers">
+        <FormRow label="Workers" error={errors?.workers?.message}>
           <Input
             type="number"
             id="workers"
@@ -113,7 +118,7 @@ function EditTask({ onCloseModal }) {
             })}
           />
         </FormRow>
-        <FormRow label="Max workers">
+        <FormRow label="Max workers" error={errors?.max_workers?.message}>
           <Input
             type="number"
             id="max_workers"
@@ -128,13 +133,14 @@ function EditTask({ onCloseModal }) {
           />
         </FormRow>
 
-        <FormRow label="Rate">
+        <FormRow label="Rate" error={errors?.rate?.message}>
           <Input
             type="number"
             id="rate"
             disabled={isWorking}
             {...register("rate", {
               required: "This field is required",
+              valueAsNumber: true,
               min: {
                 value: 1,
                 message: "Min value is 1",
