@@ -4,7 +4,7 @@ import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/errs"
 	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/internal/service/core/model"
+	"TestCopilot/TestEngine/internal/service/core"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/ginx"
 	"TestCopilot/TestEngine/pkg/jsonx"
@@ -22,11 +22,11 @@ import (
 
 type TaskHandler struct {
 	l       logger.LoggerV1
-	svc     model.TaskService
+	svc     core.TaskService
 	userSvc service.UserService
 }
 
-func NewTaskHandler(l logger.LoggerV1, svc model.TaskService, userSvc service.UserService) *TaskHandler {
+func NewTaskHandler(l logger.LoggerV1, svc core.TaskService, userSvc service.UserService) *TaskHandler {
 	return &TaskHandler{
 		l:       l,
 		svc:     svc,
@@ -94,7 +94,7 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 			//	}, err
 			//}
 			report := t.svc.HttpRun(ctx, req.Id,
-				5*time.Minute, req.Rate)
+				1*time.Minute, req.Rate)
 
 			return ginx.Result{
 				Code:    1,
@@ -199,8 +199,9 @@ func (t *TaskHandler) RunOnce(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 		}, err
 	}
 
+	t.svc.SetBegin(ctx)
 	begin := time.Now()
-	results := make(chan []*model.HttpResult)
+	results := make(chan []*core.HttpResult)
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -211,7 +212,7 @@ func (t *TaskHandler) RunOnce(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 		close(results)
 	}()
 
-	content := model.FinalReport(begin, results)
+	content := core.FinalReport(begin, results)
 	return ginx.Result{
 		Code:    1,
 		Message: "OK",

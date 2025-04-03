@@ -39,6 +39,8 @@ func (c *CacheRankingRepository) GetTopN(ctx context.Context, notes []domain.Not
 	data, err = c.redis.Get(ctx)
 	if err == nil {
 		_ = c.local.Set(ctx, data)
+	} else {
+		return c.local.ForceGet(ctx)
 	}
 	return data, err
 }

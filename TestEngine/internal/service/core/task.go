@@ -1,4 +1,4 @@
-package model
+package core
 
 import (
 	"TestCopilot/TestEngine/internal/domain"
@@ -23,6 +23,7 @@ type TaskService interface {
 	OnceRunDebug(ctx context.Context, tid int64) []TaskDebugLog
 	Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error)
 	List(ctx context.Context, uid int64) ([]domain.Task, error)
+	SetBegin(ctx context.Context)
 }
 
 // taskService 任务结构体
@@ -30,10 +31,6 @@ type taskService struct {
 	repo    repository.TaskRepository
 	l       logger.LoggerV1
 	subtask *Subtask
-}
-
-func (t *taskService) List(ctx context.Context, uid int64) ([]domain.Task, error) {
-	return t.repo.FindByUId(ctx, uid)
 }
 
 type Subtask struct {
@@ -44,12 +41,18 @@ type Subtask struct {
 
 func NewTaskService(repo repository.TaskRepository, l logger.LoggerV1) TaskService {
 	return &taskService{
-		repo: repo,
-		l:    l,
-		subtask: &Subtask{
-			Began: time.Now(),
-		},
+		repo:    repo,
+		l:       l,
+		subtask: &Subtask{},
 	}
+}
+
+func (t *taskService) List(ctx context.Context, uid int64) ([]domain.Task, error) {
+	return t.repo.FindByUId(ctx, uid)
+}
+
+func (t *taskService) SetBegin(ctx context.Context) {
+	t.subtask.Began = time.Now()
 }
 
 func (t *taskService) Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error) {
@@ -79,8 +82,9 @@ func (t *taskService) Save(ctx *gin.Context, task domain.Task, uid int64) (int64
 }
 
 func (t *taskService) OnceRunDebug(ctx context.Context, tid int64) []TaskDebugLog {
-	task := t.getTask(ctx, tid)
+	t.SetBegin(ctx)
 
+	task := t.getTask(ctx, tid)
 	var (
 		reports []TaskDebugLog
 		res     *HttpResult
@@ -110,6 +114,8 @@ func (t *taskService) OnceRunDebug(ctx context.Context, tid int64) []TaskDebugLo
 }
 
 func (t *taskService) Debug(task domain.Task) TaskDebugLog {
+	// 这个接口是为了 web api 服务的
+	t.SetBegin(context.Background())
 	api := task.APIs[0]
 	var res *HttpResult
 	// 根据 type 区分不同的协议，需要那 api 转为 http 请求，然后发送
@@ -161,6 +167,7 @@ func (t *taskService) HttpRunDebug(ctx context.Context, tid int64, result chan [
 }
 
 func (t *taskService) HttpRun(ctx context.Context, tid int64, duration time.Duration, rate float64) string {
+	t.SetBegin(ctx)
 	// 这里将 task 中的所有接口，按照一个goroutine 去请求，
 	// 创建限速器
 	limiter := rate2.NewLimiter(rate2.Limit(rate), 1)

@@ -41,6 +41,17 @@ func (r RankingLocalCache) Get(ctx context.Context) ([]domain.Note, error) {
 	return notes, nil
 }
 
+func (r RankingLocalCache) Preload(ctx context.Context) {
+	// 处理预加载
+	panic("implement me")
+}
+
+func (r RankingLocalCache) ForceGet(ctx context.Context) ([]domain.Note, error) {
+	// 不检查过期时间，直接返回
+	notes := r.topN.Load()
+	return notes, nil
+}
+
 type item struct {
 	notes []domain.Note
 	ddl   time.Time

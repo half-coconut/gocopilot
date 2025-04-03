@@ -3,7 +3,7 @@ package web
 import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/internal/service/core/model"
+	"TestCopilot/TestEngine/internal/service/core"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/ginx"
 	"TestCopilot/TestEngine/pkg/jsonx"
@@ -21,11 +21,11 @@ import (
 type APIHandler struct {
 	l       logger.LoggerV1
 	svc     service.APIService
-	taskSvc model.TaskService
+	taskSvc core.TaskService
 	userSvc service.UserService
 }
 
-func NewAPIHandler(svc service.APIService, taskSvc model.TaskService, userSvc service.UserService, l logger.LoggerV1) *APIHandler {
+func NewAPIHandler(svc service.APIService, taskSvc core.TaskService, userSvc service.UserService, l logger.LoggerV1) *APIHandler {
 	return &APIHandler{
 		svc:     svc,
 		taskSvc: taskSvc,

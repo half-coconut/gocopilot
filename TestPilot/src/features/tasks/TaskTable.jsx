@@ -20,7 +20,7 @@ function TaskTable() {
           {/* <div></div> */}
           <div>Name</div>
           <div>InterfaceId</div>
-          <div>Durations</div>
+          <div>Duration</div>
           <div>Workers Scope</div>
           <div>Rate</div>
           <div>Creator</div>

@@ -10,7 +10,7 @@ import (
 	noteDao "TestCopilot/TestEngine/internal/repository/dao/note"
 	noteRepo "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/internal/service/core/model"
+	"TestCopilot/TestEngine/internal/service/core"
 	"TestCopilot/TestEngine/internal/web"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
@@ -23,7 +23,7 @@ var rankingServiceSet = wire.NewSet(repository.NewCacheRankingRepository,
 
 func InitWebServer() *App {
 	wire.Build(
-		ioc.InitDB, ioc.InitRedis,
+		ioc.InitDB, ioc.InitRedis, ioc.InitRLockClient,
 		//ioc.InitMongoDB,
 		ioc.InitLogger,
 		ioc.InitKafka,
@@ -60,7 +60,7 @@ func InitWebServer() *App {
 		service.NewAPIService,
 		service.NewInteractiveService,
 
-		model.NewTaskService,
+		core.NewTaskService,
 
 		web.NewUserHandler,
 		web.NewNoteHandler,

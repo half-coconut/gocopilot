@@ -45,7 +45,7 @@ func (u *UserHandler) RegisterRoutes(server *gin.Engine) {
 	ug.POST("/signup", u.SignUp)
 	ug.POST("/login", u.LoginJWT)
 	ug.GET("/logout", u.LogoutJWT)
-	ug.POST("/edit", u.Edit)
+	ug.POST("/edit", u.EditJWT)
 	ug.GET("/profile", u.ProfileJWT)
 }
 
@@ -190,7 +190,7 @@ func (u *UserHandler) LogoutJWT(ctx *gin.Context) {
 	})
 }
 
-func (u *UserHandler) Edit(context *gin.Context) {
+func (u *UserHandler) EditJWT(context *gin.Context) {
 	type EditReq struct {
 		Email       string `json:"email"`
 		FullName    string `json:"fullName"`
@@ -204,6 +204,15 @@ func (u *UserHandler) Edit(context *gin.Context) {
 	if err := context.Bind(&req); err != nil {
 		return
 	}
+
+	c, _ := context.Get("users")
+	claims, ok := c.(ijwt.UserClaims)
+	if !ok {
+		context.JSON(http.StatusInternalServerError, Result{Code: errs.UserInternalServerError, Message: "系统错误"})
+		u.l.Info(fmt.Sprintf("未发现用户 token 信息：%v", claims.Id))
+		return
+	}
+
 	if req.FullName == "" {
 		context.JSON(http.StatusBadRequest, Result{Code: errs.UserInvalidInput, Message: "昵称不能为空"})
 		return
@@ -221,6 +230,7 @@ func (u *UserHandler) Edit(context *gin.Context) {
 		return
 	}
 	err := u.svc.UpdateNonSensitiveInfo(context, domain.User{
+		Id:          claims.Id,
 		Email:       req.Email,
 		FullName:    req.FullName,
 		Department:  req.Department,

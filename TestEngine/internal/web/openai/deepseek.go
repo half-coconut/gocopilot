@@ -1,7 +1,7 @@
 package openai
 
 import (
-	httprequest "TestCopilot/TestEngine/internal/service/core/model"
+	"TestCopilot/TestEngine/internal/service/core"
 	"TestCopilot/TestEngine/pkg/logger"
 	"encoding/json"
 	"errors"
@@ -29,9 +29,9 @@ func (d *DeepSeekHandler) DeepseekClient(prompt, userInput string) (string, erro
 	h.Add("Content-Type", "application/json")
 	h.Add("Authorization", "Bearer "+apiKey)
 
-	target := httprequest.NewHttpContent("POST", apiEndpoint, "", jsonBody, h)
+	target := core.NewHttpContent("POST", apiEndpoint, "", jsonBody, h)
 
-	s := &httprequest.Subtask{
+	s := &core.Subtask{
 		Began: time.Now(),
 	}
 	res := target.Send(s)

@@ -18,7 +18,7 @@ type UserCache interface {
 func NewUserCache(cmd redis.Cmdable) UserCache {
 	return &RedisUserCache{
 		cmd:        cmd,
-		expiration: time.Minute * 5,
+		expiration: time.Minute * 5, // 5min 过期时间
 	}
 }
 

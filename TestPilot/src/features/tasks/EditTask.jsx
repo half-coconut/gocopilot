@@ -7,10 +7,20 @@ import FormRow from "../../ui/FormRow.jsx";
 import Input from "../../ui/Input.jsx";
 import { Select } from "antd";
 import { useCreateTask } from "./useCreateTask.js";
+import { useInterfaces } from "../interfaces/useInterfaces.js";
 
 function EditTask({ onCloseModal }) {
+  const { isLoading, interfaceItems } = useInterfaces();
+
   const { isCreating, createTask } = useCreateTask();
-  const isWorking = isCreating;
+  const isWorking = isCreating || isLoading;
+
+  const interfaces = !isLoading
+    ? interfaceItems.map((item) => ({
+        value: item.id,
+        label: item.name,
+      }))
+    : [];
 
   const initialData = {
     name: "task-01",
@@ -21,21 +31,9 @@ function EditTask({ onCloseModal }) {
     rate: 10,
   };
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    // formState,
-    reset,
-  } = useForm({
+  const { register, handleSubmit, control, reset } = useForm({
     defaultValues: initialData,
   });
-
-  const interfaces = [
-    { value: 1, label: "Login" },
-    { value: 2, label: "Login2" },
-    { value: 3, label: "Login3" },
-  ];
 
   const handleChange = (value) => {
     console.log(`Selected: ${value}`);
@@ -81,6 +79,7 @@ function EditTask({ onCloseModal }) {
                 {...field}
                 showSearch
                 mode="tags"
+                disabled={isWorking}
                 style={{ width: 300 }}
                 placeholder="Tags Mode"
                 onChange={(value) => {

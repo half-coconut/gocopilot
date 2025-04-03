@@ -14,7 +14,7 @@ import (
 	"TestCopilot/TestEngine/internal/repository/dao/note"
 	note2 "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/internal/service/core/model"
+	"TestCopilot/TestEngine/internal/service/core"
 	"TestCopilot/TestEngine/internal/web"
 	"TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
@@ -46,7 +46,7 @@ func InitWebServer() *App {
 	apiService := service.NewAPIService(apiRepository, loggerV1)
 	taskDAO := dao.NewGORMTaskDAO(db, loggerV1)
 	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1, userRepository, apiRepository)
-	taskService := model.NewTaskService(taskRepository, loggerV1)
+	taskService := core.NewTaskService(taskRepository, loggerV1)
 	apiHandler := web.NewAPIHandler(apiService, taskService, userService, loggerV1)
 	taskHandler := web.NewTaskHandler(loggerV1, taskService, userService)
 	noteDAO := note.NewNoteDAO(loggerV1, db)
@@ -66,7 +66,8 @@ func InitWebServer() *App {
 	interactiveReadEventBatchConsumer := note3.NewInteractiveReadEventBatchConsumer(client, interactiveRepository, loggerV1)
 	v2 := ioc.NewConsumers(interactiveReadEventBatchConsumer)
 	rankingService := service.NewBatchRankingService(noteService, interactiveService)
-	rankingJob := ioc.InitRankingJob(rankingService)
+	rlockClient := ioc.InitRLockClient(cmdable)
+	rankingJob := ioc.InitRankingJob(rankingService, rlockClient, loggerV1)
 	cron := ioc.InitJobs(loggerV1, rankingJob)
 	app := &App{
 		server:    engine,

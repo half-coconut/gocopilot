@@ -69,9 +69,9 @@ function MainNav() {
           </StyledNavLink>
         </li>
         <li>
-          <StyledNavLink to="/bookings">
+          <StyledNavLink to="/jobs">
             <HiOutlineCalendarDateRange />
-            <span>Plans</span>
+            <span>Jobs</span>
           </StyledNavLink>
         </li>
         <li>

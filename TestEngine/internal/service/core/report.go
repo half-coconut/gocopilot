@@ -1,4 +1,4 @@
-package model
+package core
 
 import (
 	"TestCopilot/TestEngine/pkg/logger"
@@ -27,6 +27,7 @@ type reportService struct {
 	Ratio         float64
 	StatusCodes   string
 	l             logger.LoggerV1
+	TestStatus    TestStatus
 }
 
 type Base struct {
@@ -36,6 +37,14 @@ type Base struct {
 	FailedRequests  []int64
 	TotalDuration   time.Duration
 	Durations       []time.Duration
+	TestStatus      TestStatus
+}
+
+type TestStatus struct {
+	Passed  int64
+	Failed  int64
+	Skipped int64
+	Errors  int64
 }
 
 //func NewReport(l logger.LoggerV1) ReportService {
@@ -57,14 +66,18 @@ func FinalReport(begin time.Time, resCh chan []*HttpResult) string {
 			// 暂定200为成功状态码
 			if re.Code == int64(200) {
 				b.SuccessRequests = append(b.SuccessRequests, re.Code)
+				b.TestStatus.Passed += 1
 			} else {
 				// 还没有对错误码作分类
 				b.FailedRequests = append(b.FailedRequests, re.Code)
+				b.TestStatus.Failed += 1
 			}
 			b.Codes = append(b.Codes, re.Code)
 			b.Durations = append(b.Durations, re.Duration)
 		}
 	}
+	b.TestStatus.Skipped = 0
+	b.TestStatus.Errors = 0
 
 	b.TotalDuration = time.Since(begin)
 
@@ -86,6 +99,7 @@ func (r *reportService) Requests(b *Base) {
 	r.Ratio = float64(len(b.SuccessRequests)) / float64(b.TotalRequest)
 	r.Total = b.TotalRequest
 	r.TotalDuration = b.TotalDuration
+	r.TestStatus = b.TestStatus
 
 	r.Rate = float64(r.Total) / r.TotalDuration.Seconds()
 	r.Throughput = float64(len(b.SuccessRequests)) / r.TotalDuration.Seconds()
@@ -137,6 +151,8 @@ func (r *reportService) displayReport() string {
 +++ Success +++
 [ratio 成功率: %.2f%%]
 [status codes: %v]
+[passed: %v]
+[failed: %v]
 `, r.Total, r.Rate, r.Throughput,
 		round(r.TotalDuration),
 		round(r.Min),
@@ -146,7 +162,10 @@ func (r *reportService) displayReport() string {
 		round(r.P90),
 		round(r.P95),
 		round(r.P99),
-		r.Ratio*100, r.StatusCodes)
+		r.Ratio*100,
+		r.StatusCodes,
+		r.TestStatus.Passed,
+		r.TestStatus.Failed)
 
 }
 

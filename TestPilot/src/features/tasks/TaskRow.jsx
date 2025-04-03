@@ -56,15 +56,15 @@ function TaskRow({ taskItem }) {
     max_workers,
     rate,
     creator,
-    updater,
+    // updater,
     ctime,
-    utime,
+    // utime,
   } = taskItem || {};
 
   const navigate = useNavigate();
   // const { checkout, isCheckingOut } = useCheckout();
   const { isBookingDeleting, deleteBooking } = useDeleteBooking();
-  console.log(updater, utime);
+  // console.log(updater, utime);
 
   // 根据状态返回不同的颜色
   // const statusToTagName = {

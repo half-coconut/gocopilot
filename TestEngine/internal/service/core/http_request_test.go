@@ -1,4 +1,4 @@
-package model
+package core
 
 import (
 	"TestCopilot/TestEngine/cat/exercise/log"
