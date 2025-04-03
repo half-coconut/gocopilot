@@ -15,11 +15,11 @@ function TaskTable() {
 
   return (
     <Menus>
-      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr">
+      <Table columns="1fr 1fr 1fr 1.3fr 1fr 1fr 1fr 1fr">
         <Table.Header>
           {/* <div></div> */}
           <div>Name</div>
-          <div>InterfaceId</div>
+          <div>Interfaces</div>
           <div>Duration</div>
           <div>Workers Scope</div>
           <div>Rate</div>

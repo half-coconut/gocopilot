@@ -50,7 +50,7 @@ function TaskRow({ taskItem }) {
   const {
     id: taskId,
     name,
-    a_ids,
+    apis,
     durations,
     workers,
     max_workers,
@@ -72,11 +72,20 @@ function TaskRow({ taskItem }) {
   //   "checked-in": "green",
   //   "checked-out": "silver",
   // };
+  let result;
+
+  if (apis.length > 2) {
+    // 取前 3 个元素并连接
+    result = apis.slice(0, 2).join(", ") + " ...";
+  } else {
+    // 如果元素少于等于 3，直接连接所有
+    result = apis.join(", ");
+  }
 
   return (
     <Table.Row>
       <Cabin>{name}</Cabin>
-      <div>{a_ids} </div>
+      <div>{result} </div>
 
       <Stacked>
         <span>{convertNanosecondsToHMS(durations)}</span>
