@@ -221,7 +221,7 @@ func TaskDebugLogs(debug bool, res []*HttpResult) {
 	if debug {
 		for _, re := range res {
 			content := fmt.Sprintf(`
-+++++ taskService Debug Log: +++++
++++++ taskService InterfacesDebug Log: +++++
 [taskService: %s]
 [Code: %d]
 [Method: %s]

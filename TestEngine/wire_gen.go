@@ -15,6 +15,7 @@ import (
 	note2 "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
 	"TestCopilot/TestEngine/internal/service/core"
+	"TestCopilot/TestEngine/internal/service/openai"
 	"TestCopilot/TestEngine/internal/web"
 	"TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
@@ -34,7 +35,9 @@ func InitWebServer() *App {
 	loggerV1 := ioc.InitLogger()
 	handler := jwt.NewRedisJWTHandler(cmdable)
 	v := ioc.InitMiddleware(cmdable, loggerV1, handler)
-	aiHandler := web.NewAIHandler(loggerV1)
+	httpService := core.NewHttpService(loggerV1)
+	deepSeekService := openai.NewDeepSeekService(loggerV1, httpService)
+	aiHandler := web.NewAIHandler(loggerV1, deepSeekService)
 	db := ioc.InitDB(loggerV1)
 	userDAO := dao.NewUserDAO(db)
 	userCache := cache.NewUserCache(cmdable)
@@ -46,7 +49,7 @@ func InitWebServer() *App {
 	apiService := service.NewAPIService(apiRepository, loggerV1)
 	taskDAO := dao.NewGORMTaskDAO(db, loggerV1)
 	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1, userRepository, apiRepository)
-	taskService := core.NewTaskService(taskRepository, loggerV1)
+	taskService := core.NewTaskService(taskRepository, loggerV1, httpService)
 	apiHandler := web.NewAPIHandler(apiService, taskService, userService, loggerV1)
 	taskHandler := web.NewTaskHandler(loggerV1, taskService, userService)
 	noteDAO := note.NewNoteDAO(loggerV1, db)

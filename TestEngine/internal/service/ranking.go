@@ -38,6 +38,20 @@ func NewBatchRankingService(noteSvc NoteService, intrSvc InteractiveService) Ran
 	}
 }
 
+func NewBatchRankingServiceV1(noteSvc NoteService, intrSvc InteractiveService) *BatchRankingService {
+	// 用于测试
+	return &BatchRankingService{
+		noteSvc:   noteSvc,
+		intrSvc:   intrSvc,
+		batchSize: 100,
+		n:         100,
+		scoreFunc: func(t time.Time, likeCnt int64) float64 {
+			ms := time.Since(t).Seconds()
+			return float64(likeCnt-1) / math.Pow(float64(ms+2), 1.5)
+		},
+	}
+}
+
 // TopN 准备分批
 func (svc *BatchRankingService) TopN(ctx context.Context) error {
 	notes, err := svc.topN(ctx)

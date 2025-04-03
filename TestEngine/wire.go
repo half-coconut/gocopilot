@@ -11,6 +11,7 @@ import (
 	noteRepo "TestCopilot/TestEngine/internal/repository/note"
 	"TestCopilot/TestEngine/internal/service"
 	"TestCopilot/TestEngine/internal/service/core"
+	"TestCopilot/TestEngine/internal/service/openai"
 	"TestCopilot/TestEngine/internal/web"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/ioc"
@@ -61,6 +62,8 @@ func InitWebServer() *App {
 		service.NewInteractiveService,
 
 		core.NewTaskService,
+		core.NewHttpService,
+		openai.NewDeepSeekService,
 
 		web.NewUserHandler,
 		web.NewNoteHandler,

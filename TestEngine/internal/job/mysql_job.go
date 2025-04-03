@@ -5,16 +5,48 @@ import (
 	"TestCopilot/TestEngine/internal/service"
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"golang.org/x/sync/semaphore"
+	"net/http"
 	"time"
 )
 
 type Executor interface {
 	Name() string
 	Exec(ctx context.Context, j domain.Job) error
-	RegisterFunc(name string, fn func(ctx context.Context, j domain.Job) error)
 }
+
+type HttpExecutor struct {
+}
+
+func (h HttpExecutor) Name() string {
+	return "http"
+}
+
+func (h HttpExecutor) Exec(ctx context.Context, j domain.Job) error {
+	// 这部分实现是说：任务调度节点，到时间之后，就通过 http 去找你的服务节点的定时任务，然后去执行
+	type Config struct {
+		Endpoint string
+		Method   string
+	}
+	var cfg Config
+	err := json.Unmarshal([]byte(j.Cfg), &cfg)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest(cfg.Method, cfg.Endpoint, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("执行失败")
+	}
+	return nil
+}
+
 type LocalFuncExecutor struct {
 	funcs map[string]func(ctx context.Context, j domain.Job) error
 }

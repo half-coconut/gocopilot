@@ -73,7 +73,7 @@ func (t *Target) attack(wg *sync.WaitGroup, results chan<- *Result) {
 	//select {
 	//case results <- t.Do():
 	//case <-time.After(time.Second * 5): // 设置 5 秒超时
-	//	log.L.Debug("attack timeout")
+	//	log.L.InterfacesDebug("attack timeout")
 	//}
 }
 func (t *Target) request() (*http.Request, error) {

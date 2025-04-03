@@ -4,7 +4,7 @@ import (
 	"TestCopilot/TestEngine/internal/service/core"
 	"TestCopilot/TestEngine/pkg/logger"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"log"
@@ -14,14 +14,23 @@ import (
 	"time"
 )
 
-type DeepSeekHandler struct {
+type DeepSeekService interface {
+	DeepSeekClient(prompt, userInput string) (string, error)
 }
 
-func NewDeepSeekHandler() DeepSeekHandler {
-	return DeepSeekHandler{}
+type deepSeekService struct {
+	l       logger.LoggerV1
+	httpsvc core.HttpService
 }
 
-func (d *DeepSeekHandler) DeepseekClient(prompt, userInput string) (string, error) {
+func NewDeepSeekService(l logger.LoggerV1, httpsvc core.HttpService) DeepSeekService {
+	return &deepSeekService{
+		l:       l,
+		httpsvc: httpsvc,
+	}
+}
+
+func (d *deepSeekService) DeepSeekClient(prompt, userInput string) (string, error) {
 	apiKey, apiEndpoint := d.getApiAndEndpoint()
 	jsonBody := d.requestBody(prompt, userInput)
 
@@ -29,55 +38,54 @@ func (d *DeepSeekHandler) DeepseekClient(prompt, userInput string) (string, erro
 	h.Add("Content-Type", "application/json")
 	h.Add("Authorization", "Bearer "+apiKey)
 
-	target := core.NewHttpContent("POST", apiEndpoint, "", jsonBody, h)
+	d.httpsvc.SetHttpInput("POST", apiEndpoint, "", jsonBody, h)
 
 	s := &core.Subtask{
 		Began: time.Now(),
 	}
-	res := target.Send(s)
+	res := d.httpsvc.Send(s)
 
 	var response DeepSeekResponse
 	err := json.Unmarshal([]byte(res.Resp), &response)
 	if err != nil {
-		log.Printf("Error decoding JSON: %v", err)
+		d.l.Error("Error decoding JSON:", logger.Error(err))
 		return "", err
 	}
 
 	// 访问 content 字段
 	if len(response.Choices) > 0 {
 		content := response.Choices[0].Message.Content
-		log.Printf("Content: %v", content)
+		d.l.Info(fmt.Sprintf("Content: %v", content))
 		return content, nil
 	} else {
-		log.Println("No choices found in response.")
+		d.l.Error("No choices found in response.")
 	}
 	return "", err
 }
 
-func (d *DeepSeekHandler) getApiAndEndpoint() (string, string) {
+func (d *deepSeekService) getApiAndEndpoint() (string, string) {
 	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatal(err)
 	}
 	// 构建 .env 文件的路径
-	//envPath := filepath.Join(home, "Desktop", "TestCopilot", "TestEngine", "pkg", "qa_copilot", ".env")
-	envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "TestEngine", "pkg", "qa_copilot", ".env")
+	envPath := filepath.Join(home, "Desktop", "TestCopilot", "TestEngine", "cmd", "qa_copilot", ".env")
+	//envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "TestEngine", "cmd", "qa_copilot", ".env")
 	err = godotenv.Load(envPath)
 	if err != nil {
-		log.Println(err)
-		log.Fatal("Error loading .env file")
+		d.l.Error("Error loading .env file", logger.Error(err))
 	}
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 	apiEndpoint := os.Getenv("DEEPSEEK_API_BASE")
 
 	if apiKey == "" {
-		log.Println(errors.New("DEEPSEEK_API_KEY environment variable is not set"))
+		d.l.Error("DEEPSEEK_API_KEY environment variable is not set")
 	}
 
 	return apiKey, apiEndpoint
 }
 
-func (d *DeepSeekHandler) requestBody(prompt, userInput string) []byte {
+func (d *deepSeekService) requestBody(prompt, userInput string) []byte {
 	type Message struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
@@ -89,8 +97,6 @@ func (d *DeepSeekHandler) requestBody(prompt, userInput string) []byte {
 		Messages []Message `json:"messages"`
 		Stream   bool      `json:"stream"`
 	}
-
-	//userInput := "What is the capital of France?"
 
 	requestBody := RequestBody{
 		Model: "deepseek-chat",

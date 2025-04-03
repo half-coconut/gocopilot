@@ -184,7 +184,7 @@ func displayTaskDebugLogs(debug bool, r []*Result) {
 	if debug {
 		for _, res := range r {
 			log.L.Info(fmt.Sprintf(`
-+++++ Task Debug Log: +++++
++++++ Task InterfacesDebug Log: +++++
 [Task: %s]
 [Code: %d]
 [Method: %s]

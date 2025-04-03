@@ -35,13 +35,15 @@ func NewTaskHandler(l logger.LoggerV1, svc core.TaskService, userSvc service.Use
 
 func (t *TaskHandler) RegisterRoutes(server *gin.Engine) {
 	task := server.Group("/task")
-	// 创建任务,执行性能测试，支持修改参数，然后执行
+	// 创建任务
+	// 设置或者修改 rate 和 duration，执行性能测试
+	// 包含 PerformanceRun 的执行
 	task.POST("/edit", ginx.WrapToken[ijwt.UserClaims](t.Edit))
 
-	// 执行一次，生成性能测试报告
-	task.GET("/run/once/:id", ginx.WrapToken[ijwt.UserClaims](t.RunOnce))
-	// 某个任务的 debug 执行，生成接口测试报告
-	task.GET("/debug/:id", ginx.WrapToken[ijwt.UserClaims](t.Debug))
+	// 执行一次，设置 rate 和 duration ，生成性能测试报告
+	task.GET("/run/once/:id", ginx.WrapToken[ijwt.UserClaims](t.PerformanceDebug))
+	// 用于某个任务的接口调试，生成接口测试报告
+	task.GET("/debug/:id", ginx.WrapToken[ijwt.UserClaims](t.InterfaceDebug))
 
 	task.GET("/list", ginx.WrapToken[ijwt.UserClaims](t.List))
 	task.GET("/detail/:id", ginx.WrapToken[ijwt.UserClaims](t.Detail))
@@ -93,7 +95,7 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 			//		Message: "Durations 输入有误",
 			//	}, err
 			//}
-			report := t.svc.HttpRun(ctx, req.Id,
+			report := t.svc.PerformanceRun(ctx, req.Id,
 				1*time.Minute, req.Rate)
 
 			return ginx.Result{
@@ -174,8 +176,8 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 	panic("implement me")
 }
 
-// RunOnce 设置并发数等，执行一次，生成性能测试报告
-func (t *TaskHandler) RunOnce(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+// PerformanceDebug 设置并发数等，执行一次，生成性能测试报告
+func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	tid := ctx.Param("id")
 
 	type TaskReq struct {
@@ -205,7 +207,7 @@ func (t *TaskHandler) RunOnce(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	go t.svc.HttpRunDebug(ctx, req.tid, results, &wg)
+	go t.svc.PerformanceDebug(ctx, req.tid, results, &wg)
 
 	go func() {
 		wg.Wait()
@@ -220,8 +222,8 @@ func (t *TaskHandler) RunOnce(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	}, nil
 }
 
-// Debug 发送请求，把任务里所有接口跑一遍
-func (t *TaskHandler) Debug(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+// InterfaceDebug 发送请求，把任务里所有接口跑一遍
+func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	tid := ctx.Param("id")
 
 	type TaskReq struct {
@@ -245,7 +247,7 @@ func (t *TaskHandler) Debug(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 		}, err
 	}
 
-	debug := t.svc.OnceRunDebug(ctx, req.tid)
+	debug := t.svc.InterfacesDebug(ctx, req.tid)
 
 	return ginx.Result{
 		Code:    1,

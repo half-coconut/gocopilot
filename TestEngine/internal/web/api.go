@@ -94,13 +94,14 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 		now := time.Now().UnixMilli()
 		// 注意这里将 domain.API 转为 domain.TaskAPI
 		apis := &domain.TaskAPI{
+			Id:     api.Id,
 			Name:   api.Name,
 			URL:    api.URL,
 			Params: api.Params,
 			Type:   api.Type,
 			Body:   jsonx.JsonUnmarshal(api.Body, Body),
 			Header: jsonx.JsonUnmarshal(api.Header, Header),
-			Method: strings.ToUpper(api.Method),
+			Method: api.Method,
 		}
 
 		apiList := make([]domain.TaskAPI, 0)
@@ -109,6 +110,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Id:         1,
 			Name:       "system_debugging",
 			APIs:       apiList,
+			AIds:       []int64{1},
 			Durations:  DefaultDurations,
 			Workers:    DefaultWorkers,
 			MaxWorkers: DefaultMaxWorkers,
@@ -125,7 +127,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Utime: time.UnixMilli(now),
 		}
 		display(task)
-		report := a.taskSvc.Debug(task)
+		report := a.taskSvc.DebugForAPI(ctx, task)
 
 		// 把 debug 结果写入数据库
 		api = domain.API{
@@ -269,10 +271,11 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 func display(task domain.Task) string {
 
 	content := fmt.Sprintf(`
-+++++ task Debug Log: +++++
++++++ task InterfacesDebug Log: +++++
 [Id: %v]
 [Name: %v]
 [TaskAPI: %v]
+[TaskApiIds: %v]
 [Durations: %v]
 [Workers:%v]
 [MaxWorkers: %v]
@@ -284,6 +287,7 @@ func display(task domain.Task) string {
 		task.Id,
 		task.Name,
 		task.APIs,
+		task.AIds,
 		task.Durations,
 		task.Workers,
 		task.MaxWorkers,

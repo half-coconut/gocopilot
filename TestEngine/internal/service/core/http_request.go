@@ -1,25 +1,30 @@
 package core
 
 import (
+	"TestCopilot/TestEngine/pkg/logger"
 	"bytes"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
 
-type HttpContent struct {
-	Name   string      `json:"name"`
-	URL    string      `json:"url"`
-	Params string      `json:"params,omitempty"`
-	Body   []byte      `json:"data,omitempty"`
-	Header http.Header `json:"header,omitempty"`
-	Method string      `json:"method"`
+type HttpService interface {
+	SetHttpInput(method, url, params string, body []byte, header http.Header)
+	Send(s *Subtask) *HttpResult
+}
+type httpService struct {
+	l  logger.LoggerV1
+	hc HttpContent
 }
 
-func NewHttpContent(method, url, params string, body []byte, header http.Header) *HttpContent {
-	return &HttpContent{
+func NewHttpService(l logger.LoggerV1) HttpService {
+	return &httpService{
+		l: l,
+	}
+}
+
+func (h *httpService) SetHttpInput(method, url, params string, body []byte, header http.Header) {
+	h.hc = HttpContent{
 		Method: method,
 		URL:    url,
 		Params: params,
@@ -28,37 +33,12 @@ func NewHttpContent(method, url, params string, body []byte, header http.Header)
 	}
 }
 
-// HttpRequest 组合 http请求
-func (h *HttpContent) HttpRequest() (*http.Request, error) {
-	var body io.Reader
-
-	if len(h.Body) != 0 {
-		body = bytes.NewReader(h.Body)
-	}
-
-	req, err := http.NewRequest(h.Method, h.URL, body)
-	if err != nil {
-		return nil, err
-	}
-
-	for k, v := range h.Header {
-		req.Header[k] = make([]string, len(v))
-		copy(req.Header[k], v)
-	}
-
-	if host := req.Header.Get("Host"); host != "" {
-		req.Host = host
-	}
-	return req, err
-}
-
-// Send 发送 http请求
-func (h *HttpContent) Send(s *Subtask) *HttpResult {
+func (h *httpService) Send(s *Subtask) *HttpResult {
 	var res HttpResult
 
-	res.Method = h.Method
-	res.URL = h.URL
-	res.Req = string(h.Body)
+	res.Method = h.hc.Method
+	res.URL = h.hc.URL
+	res.Req = string(h.hc.Body)
 
 	s.seqmu.Lock()
 	res.Timestamp = s.Began.Add(time.Since(s.Began))
@@ -66,25 +46,22 @@ func (h *HttpContent) Send(s *Subtask) *HttpResult {
 	s.seq++
 	s.seqmu.Unlock()
 
-	req, err := h.HttpRequest()
+	req, err := h.httpRequest()
 	if err != nil {
-		//h.l.Error("请求加载异常", logger.Error(err))
-		log.Println(fmt.Sprintf("请求加载异常: %v", err))
+		h.l.Error("请求加载异常", logger.Error(err))
 	}
 
 	client := &http.Client{}
 	r, err := client.Do(req)
 	if err != nil {
-		//h.l.Error("发送请求异常", logger.Error(err))
-		log.Println(fmt.Sprintf("发送请求异常: %v", err))
+		h.l.Error("发送请求异常", logger.Error(err))
 	}
 	defer r.Body.Close()
 
 	body := io.Reader(r.Body)
 	var buf bytes.Buffer
 	if _, err = io.Copy(&buf, body); err != nil {
-		//h.l.Error("响应 body 复制异常", logger.Error(err))
-		log.Println(fmt.Sprintf("响应 body 复制异常: %v", err))
+		h.l.Error("响应 body 复制异常", logger.Error(err))
 	}
 	res.Resp = string(buf.Bytes())
 
@@ -98,8 +75,39 @@ func (h *HttpContent) Send(s *Subtask) *HttpResult {
 		if err != nil {
 			res.Error = err.Error()
 		}
-		//h.l.Info(printResult(&res))
 	}()
 
 	return &res
+}
+
+func (h *httpService) httpRequest() (*http.Request, error) {
+	var body io.Reader
+
+	if len(h.hc.Body) != 0 {
+		body = bytes.NewReader(h.hc.Body)
+	}
+
+	req, err := http.NewRequest(h.hc.Method, h.hc.URL, body)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range h.hc.Header {
+		req.Header[k] = make([]string, len(v))
+		copy(req.Header[k], v)
+	}
+
+	if host := req.Header.Get("Host"); host != "" {
+		req.Host = host
+	}
+	return req, err
+}
+
+type HttpContent struct {
+	Name   string      `json:"name"`
+	URL    string      `json:"url"`
+	Params string      `json:"params,omitempty"`
+	Body   []byte      `json:"data,omitempty"`
+	Header http.Header `json:"header,omitempty"`
+	Method string      `json:"method"`
 }

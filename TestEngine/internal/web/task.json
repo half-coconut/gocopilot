@@ -1,8 +1,10 @@
 {
+  "id":1,
   "name": "task_01",
-  "a_ids": "[38,39,40]",
-  "durations": "10m0s",
+  "a_ids": [1,2],
+  "durations": "10s",
   "workers": 5,
   "max_workers": 10,
-  "timeout": "30s"
+  "rate": 5,
+  "execute": true
 }

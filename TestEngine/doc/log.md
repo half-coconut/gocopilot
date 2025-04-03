@@ -43,3 +43,4 @@ https://nvbtdjgdbhgsgccuwkap.supabase.co/storage/v1/object/public/avatars//avata
     - a1,a2,a3 任务, 执行成功，-> 任务 B
     - a1,a2 成功了,a3 成功无所谓 任务, 执行成功，-> 任务 B
 - 负载均衡
+

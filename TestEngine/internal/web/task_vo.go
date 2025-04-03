@@ -6,8 +6,8 @@ import (
 )
 
 type TaskListResponse struct {
-	Tasks []Task0 `json:"tasks"` // API 列表
-	Total int     `json:"total"` // API 总数
+	Tasks []Task0 `json:"tasks"` // Task 列表
+	Total int     `json:"total"` // Task 总数
 }
 
 type TaskReq struct {
@@ -24,7 +24,7 @@ type TaskReq struct {
 const (
 	DefaultWorkers    uint64  = 5
 	DefaultMaxWorkers uint64  = math.MaxUint64
-	DefaultDurations          = 10 * time.Minute
+	DefaultDurations          = 1 * time.Minute
 	DefaultRate       float64 = 10
 )
 
