@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testengine-live-mysql
+  labels:
+    app: testengine-live-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testengine-live-mysql
+  template:
+    metadata:
+      name: testengine-live-mysql
+      labels:
+        app: testengine-live-mysql
+    spec:
+      containers:
+        - name: testengine-live-mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+#            - 这边要对应到 mysql 的数据存储的位置
+#            - 通过 MySQL 的配置可以改这个目录
+            - mountPath: /var/lib/mysql
+              name: mysql-storage
+          ports:
+            - containerPort: 3306
+#        - name: testengine-live-hadoop
+      restartPolicy: Always
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: testengine-mysql-live-claim-v3
+#        - name: hadoop-storage
+#          persistentVolumeClaim:
+#            claimName: testengine-hadoop-live-claim
+
+      

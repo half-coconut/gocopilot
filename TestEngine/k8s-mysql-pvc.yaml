@@ -1,0 +1,19 @@
+# pvc => PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: testengine-mysql-live-claim-v3
+spec:
+  storageClassName: suibianv3
+  accessModes:
+    - ReadWriteOnce
+#    多个读，一个写
+#    - ReadOnlyMany
+#    - 多个读写
+#    - ReadWriteMany
+  resources:
+    requests:
+#      1 GB
+      storage: 1Gi
+
+  
