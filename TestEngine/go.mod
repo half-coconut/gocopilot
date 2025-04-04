@@ -19,7 +19,6 @@ require (
 	github.com/gotomicro/redis-lock v0.0.3
 	github.com/joho/godotenv v1.5.1
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redis/go-redis/v9 v9.7.0
