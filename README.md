@@ -1,6 +1,5 @@
 # TestCopilot
 
-![testengine.drawio.png](TestEngine/doc/testengine.drawio.png)
 
 ![testengine drawio](https://github.com/user-attachments/assets/b12b1ac1-a31a-418b-8095-ef353373f883)
 
