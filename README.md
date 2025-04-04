@@ -2,6 +2,9 @@
 
 ![testengine.drawio.png](TestEngine/doc/testengine.drawio.png)
 
+![testengine drawio](https://github.com/user-attachments/assets/b12b1ac1-a31a-418b-8095-ef353373f883)
+
+
 
 - 旧版架构图如上，缺少 Job 模块和消息队列的实现；
 - 后期更新为微服务架构，新增缓存方案，消息队列，分布式任务调度等模块；
