@@ -1,6 +1,7 @@
 # TestCopilot
 
-![testengine.drawio.png](TestEngine%2Fdoc%2Ftestengine.drawio.png)
+![testengine.drawio.png](TestEngine/doc/testengine.drawio.png)
+
 
 - 旧版架构图如上，缺少 Job 模块和消息队列的实现；
 - 后期更新为微服务架构，新增缓存方案，消息队列，分布式任务调度等模块；
