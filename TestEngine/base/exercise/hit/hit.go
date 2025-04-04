@@ -1,7 +1,7 @@
 package hit
 
 import (
-	"TestCopilot/TestEngine/cat/exercise/log"
+	"TestCopilot/TestEngine/base/exercise/log"
 	"bytes"
 	"fmt"
 	"go.uber.org/zap"

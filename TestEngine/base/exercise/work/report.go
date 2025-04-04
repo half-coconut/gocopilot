@@ -1,7 +1,7 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/cat/exercise/log"
+	"TestCopilot/TestEngine/base/exercise/log"
 	"fmt"
 	"sort"
 	"time"
@@ -14,22 +14,14 @@ func (r *Report) Report(b *Base) {
 }
 
 func (r *Report) Requests(b *Base) {
-	r.Ratio = float64(len(b.SuccessRequests)) / float64(b.TotalRequest)
+	r.Ratio = float64(len(b.SuccessRequests) / b.TotalRequest)
 	r.Total = b.TotalRequest
 	r.TotalDuration = b.TotalDuration
 
 	r.Rate = float64(r.Total) / r.TotalDuration.Seconds()
-	r.Throughput = float64(len(b.SuccessRequests)) / r.TotalDuration.Seconds()
-
-	if len(b.SuccessRequests) != 0 && len(b.FailedRequests) != 0 {
-		r.StatusCodes = fmt.Sprintf(" %d:%d, %d...:%d", b.SuccessRequests[0], len(b.SuccessRequests),
-			b.FailedRequests[0], len(b.FailedRequests))
-	} else if len(b.SuccessRequests) != 0 && len(b.FailedRequests) == 0 {
-		r.StatusCodes = fmt.Sprintf(" %d:%d", b.SuccessRequests[0], len(b.SuccessRequests))
-	} else if len(b.SuccessRequests) == 0 && len(b.FailedRequests) != 0 {
-		r.StatusCodes = fmt.Sprintf(" %d...:%d", b.FailedRequests[0], len(b.FailedRequests))
+	if r.Ratio == 1.0 {
+		r.Throughput = r.Rate
 	}
-
 }
 
 func (r *Report) Latencies(b *Base) {
@@ -55,24 +47,6 @@ func index(percent float64, b []time.Duration) time.Duration {
 	return b[idx]
 }
 
-var durations = [...]time.Duration{
-	time.Hour,
-	time.Minute,
-	time.Second,
-	time.Millisecond,
-	time.Microsecond,
-	time.Nanosecond,
-}
-
-func round(d time.Duration) time.Duration {
-	for i, unit := range durations {
-		if d >= unit && i < len(durations)-1 {
-			return d.Round(durations[i+1])
-		}
-	}
-	return d
-}
-
 func (r *Report) displayReport() string {
 	return fmt.Sprintf(`
 +++ Requests +++
@@ -93,18 +67,8 @@ func (r *Report) displayReport() string {
 [P99 百分之99 响应时间: %v]
 
 +++ Success +++
-[ratio 成功率: %.2f%%]
-[status codes: %v]
-`, r.Total, r.Rate, r.Throughput,
-		round(r.TotalDuration),
-		round(r.Min),
-		round(r.Mean),
-		round(r.Max),
-		round(r.P50),
-		round(r.P90),
-		round(r.P95),
-		round(r.P99),
-		r.Ratio*100, r.StatusCodes)
+[ratio 成功率: %.0f%%]
+`, r.Total, r.Rate, r.Throughput, r.TotalDuration, r.Min, r.Mean, r.Max, r.P50, r.P90, r.P95, r.P99, r.Ratio*100)
 
 }
 
@@ -136,25 +100,25 @@ func DisplayReport(s *subtask, resCh chan []*Result) {
 			if r.Code == 200 {
 				b.SuccessRequests = append(b.SuccessRequests, r.Code)
 			} else {
-				// 还没有对错误码作分类
 				b.FailedRequests = append(b.FailedRequests, r.Code)
 			}
 			b.Codes = append(b.Codes, r.Code)
 			b.Durations = append(b.Durations, r.Duration)
 		}
+		//b.TotalDuration = res[len(res)-1].Duration
 	}
-
+	//for _, du := range b.Durations {
+	//	b.TotalDuration += du
+	//}
 	b.TotalDuration = time.Since(s.began)
 
 	b.TotalRequest = len(b.Codes)
 
-	displayReportBase(b)
 	var r Report
 	r.Report(&b)
-
 }
 
-func DisplayReportResult(s *subtask, res []*Result) {
+func DisplayReportResult(res []*Result) {
 	var b Base
 	b.Codes = make([]int, 0)
 	b.SuccessRequests = make([]int, 0)
@@ -166,14 +130,15 @@ func DisplayReportResult(s *subtask, res []*Result) {
 		if r.Code == 200 {
 			b.SuccessRequests = append(b.SuccessRequests, r.Code)
 		} else {
-			// 还没有对错误码作分类
 			b.FailedRequests = append(b.FailedRequests, r.Code)
 		}
 		b.Codes = append(b.Codes, r.Code)
 		b.Durations = append(b.Durations, r.Duration)
 	}
 
-	b.TotalDuration = time.Since(s.began)
+	for _, du := range b.Durations {
+		b.TotalDuration += du
+	}
 
 	b.TotalRequest = len(b.Codes)
 

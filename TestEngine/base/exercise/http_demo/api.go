@@ -1,7 +1,7 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/cat/exercise/log"
+	"TestCopilot/TestEngine/base/exercise/log"
 	"bytes"
 	"fmt"
 	"go.uber.org/zap"
@@ -20,7 +20,7 @@ type API struct {
 	Header  http.Header `json:"header,omitempty"`
 	Method  string      `json:"method"`
 	Creator string      `json:"creator"`
-	Updator string      `json:"updator"`
+	Updater string      `json:"updater"`
 }
 
 func NewAPI(name, method, url, params, email string, body []byte, header http.Header) API {
@@ -32,7 +32,7 @@ func NewAPI(name, method, url, params, email string, body []byte, header http.He
 		Body:    body,
 		Header:  header,
 		Creator: email,
-		Updator: email,
+		Updater: email,
 	}
 }
 
@@ -98,7 +98,7 @@ func (a *API) Send(s *subtask) *Result {
 	res.Headers = r.Header
 
 	defer func() {
-		res.Duration = time.Since(s.began)
+		res.Duration = time.Since(res.Timestamp)
 		if err != nil {
 			res.Error = err.Error()
 		}

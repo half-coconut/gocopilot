@@ -212,7 +212,7 @@ userRepository: NewUserRepository(), // 直接创建依赖项
 vegeta attack -targets=targets.txt -rate=50 -duration=30s | vegeta report
 
 vegeta attack -targets=targets.txt -duration=10s -rate=10/s | tee results.bin
-cat results.bin | vegeta report > results.txt 
+base results.bin | vegeta report > results.txt 
 
 #-targets=targets.txt：
 #这个参数指定了一个包含 HTTP 请求定义的文件。每行代表一个请求，可以包含请求方法（如 GET 或 POST）、URL、headers 和 body 等信息。
