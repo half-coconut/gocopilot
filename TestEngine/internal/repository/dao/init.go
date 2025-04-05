@@ -13,10 +13,10 @@ func InitTable(db *gorm.DB) error {
 		&API{},
 		&Task{},
 
-		&Interactive{},
-		&UserLikeBiz{},
-		&Collection{},
-		&UserCollectionBiz{},
+		//&Interactive{},
+		//&UserLikeBiz{},
+		//&Collection{},
+		//&UserCollectionBiz{},
 		&Job{},
 	)
 }

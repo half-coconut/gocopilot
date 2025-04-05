@@ -106,6 +106,7 @@ func (t *taskService) InterfacesDebug(ctx context.Context, tid int64) []TaskDebu
 				headers)
 
 			res = t.httpSvc.Send(t.subtask)
+
 			res.Task = task.Name
 			content := ExportDebugLogs(true, res)
 			reports = append(reports, content)
@@ -134,6 +135,7 @@ func (t *taskService) DebugForAPI(ctx context.Context, task domain.Task) TaskDeb
 		)
 
 		res = t.httpSvc.Send(t.subtask)
+
 		res.Task = task.Name
 	}
 
@@ -157,6 +159,7 @@ func (t *taskService) PerformanceDebug(ctx context.Context, tid int64, result ch
 
 			t.httpSvc.SetHttpInput(api.Method, api.URL, api.Params, []byte(jsonx.JsonMarshal(api.Body)), headers)
 			apiRes := t.httpSvc.Send(t.subtask)
+
 			apiRes.Task = task.Name
 			res = append(res, apiRes)
 		}

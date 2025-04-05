@@ -104,7 +104,7 @@ function TaskRow({ taskItem }) {
           <Menus.List id={taskId}>
             <Menus.Button
               icon={<HiEye />}
-              onClick={() => navigate(`/task/${taskId}`)}
+              onClick={() => navigate(`/tasks/${taskId}`)}
             >
               See details
             </Menus.Button>

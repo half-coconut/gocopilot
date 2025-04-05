@@ -4,7 +4,7 @@ import InterfaceTableOperations from "../features/interfaces/InterfaceTableOpera
 import Heading from "../ui/Heading";
 import Row from "../ui/Row";
 
-function Cabins() {
+function Interfaces() {
   return (
     <>
       <Row type="horizontal">
@@ -20,4 +20,4 @@ function Cabins() {
   );
 }
 
-export default Cabins;
+export default Interfaces;

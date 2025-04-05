@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
-import Cabins from "./pages/Interfaces";
+import Interfaces from "./pages/Interfaces";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
@@ -22,6 +22,7 @@ import Interface from "./pages/Interface";
 import History from "./pages/History";
 import Environments from "./pages/Environments";
 import Notes from "./pages/Notes";
+import Jobs from "./pages/Jobs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,10 +53,11 @@ function App() {
             >
               <Route index element={<Navigate replace to="dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="jobs" element={<Jobs />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="tasks/:taskId" element={<Task />} />
               <Route path="checkin/:bookingId" element={<Checkin />} />
-              <Route path="interfaces" element={<Cabins />} />
+              <Route path="interfaces" element={<Interfaces />} />
               <Route path="interfaces/:interfaceId" element={<Interface />} />
               <Route path="aicopilot" element={<AICopilot />} />
               <Route path="history" element={<History />} />

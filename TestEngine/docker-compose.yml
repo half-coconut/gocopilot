@@ -69,3 +69,15 @@ services:
     image: openzipkin/zipkin-slim:2.24
     ports:
       - '9411:9411'
+
+#  appsmith:
+#    image: index.docker.io/appsmith/appsmith-ee
+#    container_name: appsmith
+#    ports:
+#      #      - "80:80"
+#      #      - "443:443"
+#      - "0.0.0.0:80:80"  # 将 80 端口映射到所有接口
+#      - "0.0.0.0:443:443" # 将 443 端口映射到所有接口
+#    volumes:
+#      - ./stacks:/appsmith-stacks
+#    restart: unless-stopped

@@ -59,15 +59,15 @@ func (r *RankingJob) Run() error {
 		r.lock = lock
 		// 需要保证一直拿着这个锁
 		go func() {
-			r.localLock.Lock()
-			defer r.localLock.Unlock()
-			// 自动续约机制
+			// 自动续约机制，AutoRefresh 是阻塞的
 			er := lock.AutoRefresh(r.timeout/2, time.Second)
 			// 说明退出了续约机制
 			if er != nil {
 				r.l.Error("续约失败", logger.Error(err))
 			}
+			r.localLock.Lock()
 			r.lock = nil
+			r.localLock.Unlock()
 		}()
 	}
 

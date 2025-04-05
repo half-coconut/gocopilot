@@ -25,3 +25,13 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 
 - 生成 `user.pb.go` -> go 代码
 - 生成 `user_grpc.pb.go` -> grpc 代码，客户端和服务端
+
+
+使用 buf 工具，方便编译
+```shell
+npm install @bufbuild/buf
+
+npx buf --version
+
+➜  TestEngine git:(main) ✗ npx buf generate api/proto
+```

@@ -1,6 +1,7 @@
 package ioc
 
 import (
+	dao2 "TestCopilot/TestEngine/interactive/repository/dao"
 	"TestCopilot/TestEngine/internal/repository/dao"
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
@@ -80,6 +81,10 @@ func InitDB(l logger.LoggerV1) *gorm.DB {
 	db.Use(pcb)
 
 	err = dao.InitTable(db)
+	if err != nil {
+		panic(err)
+	}
+	err = dao2.InitTable(db)
 	if err != nil {
 		panic(err)
 	}
