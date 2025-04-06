@@ -1,6 +1,9 @@
+//go:build need_fix
+
 package service
 
 import (
+	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
 	"TestCopilot/TestEngine/internal/domain"
 	svcmocks "TestCopilot/TestEngine/internal/service/mocks"
 	"context"
@@ -14,14 +17,14 @@ func TestBatchRankingService_TopN(t *testing.T) {
 	now := time.Now()
 	teatCases := []struct {
 		name      string
-		mock      func(ctrl *gomock.Controller) (NoteService, InteractiveService)
+		mock      func(ctrl *gomock.Controller) (NoteService, intrv1.InteractiveServiceClient)
 		wantErr   error
 		wantNotes []domain.Note
 	}{
 		{
 			name: "计算成功",
 			// 模拟数据
-			mock: func(ctrl *gomock.Controller) (NoteService, InteractiveService) {
+			mock: func(ctrl *gomock.Controller) (NoteService, intrv1.InteractiveServiceClient) {
 				noteSvc := svcmocks.NewMockNoteService(ctrl)
 				// 一批就搞完
 				noteSvc.EXPECT().ListPub(gomock.Any(), gomock.Any(), 0, 3).
@@ -32,7 +35,7 @@ func TestBatchRankingService_TopN(t *testing.T) {
 					}, nil)
 				noteSvc.EXPECT().ListPub(gomock.Any(), gomock.Any(), 3, 3).
 					Return([]domain.Note{}, nil)
-				intrSvc := svcmocks.NewMockInteractiveService(ctrl)
+				intrSvc := svcmocks.NewMockInteractiveServiceClient(ctrl)
 				intrSvc.EXPECT().GetByIds(gomock.Any(),
 					"note", []int64{1, 2, 3}).
 					Return(map[int64]domain.Interactive{

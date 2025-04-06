@@ -3,6 +3,10 @@
 package main
 
 import (
+	repository2 "TestCopilot/TestEngine/interactive/repository"
+	cache2 "TestCopilot/TestEngine/interactive/repository/cache"
+	dao2 "TestCopilot/TestEngine/interactive/repository/dao"
+	service2 "TestCopilot/TestEngine/interactive/service"
 	events "TestCopilot/TestEngine/internal/events/note"
 	"TestCopilot/TestEngine/internal/repository"
 	"TestCopilot/TestEngine/internal/repository/cache"
@@ -18,8 +22,18 @@ import (
 	"github.com/google/wire"
 )
 
-var rankingServiceSet = wire.NewSet(repository.NewCacheRankingRepository,
-	cache.NewRankingRedisCache, service.NewBatchRankingService,
+var interactiveSvcProvider = wire.NewSet(
+	service2.NewInteractiveService,
+	repository2.NewCachedInteractiveRepository,
+	dao2.NewGORMInteractiveDAO,
+	cache2.NewRedisInteractiveCache,
+)
+
+var rankingServiceSet = wire.NewSet(
+	repository.NewCacheRankingRepository,
+	cache.NewRankingLocalCache,
+	cache.NewRankingRedisCache,
+	service.NewBatchRankingService,
 )
 
 func InitWebServer() *App {
@@ -30,36 +44,36 @@ func InitWebServer() *App {
 		ioc.InitKafka,
 		ioc.NewConsumers,
 		ioc.NewSyncProducer,
+		ioc.InitIntrGRPCClient,
 
+		interactiveSvcProvider,
 		rankingServiceSet,
 		ioc.InitJobs,
 		ioc.InitRankingJob,
 
 		// consumer
-		events.NewInteractiveReadEventBatchConsumer,
+		//events.NewInteractiveReadEventBatchConsumer,
 		events.NewKafkaProducer,
 
 		dao.NewUserDAO,
 		dao.NewAPIDAO,
-		dao.NewGORMInteractiveDAO,
 		noteDao.NewNoteDAO,
 		dao.NewGORMTaskDAO,
+
+		cache.NewRedisNoteCache,
 
 		noteDao.NewNoteAuthorDAO,
 		noteDao.NewNoteReaderDAO,
 		cache.NewUserCache,
-		cache.NewRedisInteractiveCache,
 
 		repository.NewUserRepository,
 		noteRepo.NewNoteRepository,
 		repository.NewAPIRepository,
-		repository.NewCachedInteractiveRepository,
 		repository.NewCacheTaskRepository,
 
 		service.NewUserService,
 		service.NewNoteService,
 		service.NewAPIService,
-		service.NewInteractiveService,
 
 		core.NewTaskService,
 		core.NewHttpService,

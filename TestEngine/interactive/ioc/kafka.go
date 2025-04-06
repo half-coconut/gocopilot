@@ -1,6 +1,7 @@
 package ioc
 
 import (
+	events "TestCopilot/TestEngine/interactive/events"
 	"TestCopilot/TestEngine/pkg/saramax"
 	"github.com/IBM/sarama"
 	"github.com/spf13/viper"
@@ -26,15 +27,15 @@ func InitKafka() sarama.Client {
 	return client
 }
 
-func NewSyncProducer(client sarama.Client) sarama.SyncProducer {
-	res, err := sarama.NewSyncProducerFromClient(client)
-	if err != nil {
-		panic(err)
-	}
-	return res
-}
+//func NewSyncProducer(client sarama.Client) sarama.SyncProducer {
+//	res, err := sarama.NewSyncProducerFromClient(client)
+//	if err != nil {
+//		panic(err)
+//	}
+//	return res
+//}
 
 // NewConsumers 面临的问题依旧是所有的 Consumer 在这里注册一下
-func NewConsumers() []saramax.Consumer {
-	return []saramax.Consumer{}
+func NewConsumers(c1 *events.InteractiveReadEventConsumer) []saramax.Consumer {
+	return []saramax.Consumer{c1}
 }

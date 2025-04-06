@@ -1,13 +1,13 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/internal/events"
+	"TestCopilot/TestEngine/pkg/saramax"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 )
 
 type App struct {
 	server    *gin.Engine
-	consumers []events.Consumer
+	consumers []saramax.Consumer
 	cron      *cron.Cron
 }

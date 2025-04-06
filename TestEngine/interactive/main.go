@@ -1,23 +1,40 @@
-package interactive
+package main
 
 import (
-	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
-	"TestCopilot/TestEngine/interactive/grpc"
-	grpc2 "google.golang.org/grpc"
+	"fmt"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"log"
-	"net"
 )
 
 func main() {
-	server := grpc2.NewServer()
-	intrSvc := &grpc.InteractiveServiceServer{}
-	intrv1.RegisterInteractiveServiceServer(server, intrSvc)
-	// 监听 8090 端口
-	l, err := net.Listen("tcp", ":8090")
+	initViperV1()
+
+	app := InitAPP()
+	for _, c := range app.consumers {
+		err := c.Start()
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	err := app.server.Serve(app.server.Addr)
+	log.Println(err)
+}
+
+func initViperV1() {
+	cfile := pflag.String("config",
+		"config/dev.yaml", "指定配置文件路径")
+	pflag.Parse()
+	viper.SetConfigFile(*cfile)
+	viper.WatchConfig()
+	viper.OnConfigChange(func(in fsnotify.Event) {
+		fmt.Println(in.Name, in.Op)
+		fmt.Println(viper.GetString("db.dsn"))
+	})
+	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
 	}
-	// 这边会阻塞，类似于 gin.Run
-	err = server.Serve(l)
-	log.Println(err)
 }

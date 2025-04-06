@@ -1,6 +1,7 @@
 package web
 
 import (
+	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/service"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
@@ -18,11 +19,11 @@ import (
 type NoteHandler struct {
 	l       logger.LoggerV1
 	svc     service.NoteService
-	intrSvc service.InteractiveService
+	intrSvc intrv1.InteractiveServiceClient
 	biz     string
 }
 
-func NewNoteHandler(svc service.NoteService, l logger.LoggerV1, intrSvc service.InteractiveService) *NoteHandler {
+func NewNoteHandler(svc service.NoteService, l logger.LoggerV1, intrSvc intrv1.InteractiveServiceClient) *NoteHandler {
 	return &NoteHandler{
 		svc:     svc,
 		l:       l,
@@ -222,9 +223,13 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	})
 
 	// 获得这篇文章的全部计数
-	var intr domain.Interactive
+	var getResp *intrv1.GetResponse
 	eg.Go(func() error {
-		intr, err = n.intrSvc.Get(ctx, n.biz, id, uc.Id)
+		getResp, err = n.intrSvc.Get(ctx, &intrv1.GetRequest{
+			Biz:   n.biz,
+			BizId: id,
+			Uid:   uc.Id,
+		})
 		return err
 	})
 
@@ -242,11 +247,15 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 	// 增加阅读计数
 	go func() {
 		// 最好不要在gorutine 里面复用外面的 error
-		er := n.intrSvc.IncrReadCnt(ctx, n.biz, id)
+		_, er := n.intrSvc.IncrReadCnt(ctx, &intrv1.IncrReadCntRequest{
+			Biz:   n.biz,
+			BizId: id,
+		})
 		if er != nil {
 			n.l.Error("增加阅读计数失败", logger.Int64("noteId: ", note.Id), logger.Error(er))
 		}
 	}()
+	intr := getResp.Intr
 
 	ctx.JSON(http.StatusOK, Result{
 		Data: NoteV0{
@@ -269,9 +278,17 @@ func (n *NoteHandler) PubDetail(ctx *gin.Context) {
 func (n *NoteHandler) Like(ctx *gin.Context, req LikeReq, uc ijwt.UserClaims) (ginx.Result, error) {
 	var err error
 	if req.Like {
-		err = n.intrSvc.Like(ctx, n.biz, req.Id, uc.Id)
+		_, err = n.intrSvc.Like(ctx, &intrv1.LikeRequest{
+			Biz:   n.biz,
+			BizId: req.Id,
+			Uid:   uc.Id,
+		})
 	} else {
-		err = n.intrSvc.CancelLike(ctx, n.biz, req.Id, uc.Id)
+		_, err = n.intrSvc.CancelLike(ctx, &intrv1.CancelLikeRequest{
+			Biz:   n.biz,
+			BizId: req.Id,
+			Uid:   uc.Id,
+		})
 	}
 
 	if err != nil {

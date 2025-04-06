@@ -2,7 +2,6 @@ package note
 
 import (
 	"TestCopilot/TestEngine/interactive/repository"
-	"TestCopilot/TestEngine/internal/events"
 	"TestCopilot/TestEngine/pkg/logger"
 	"TestCopilot/TestEngine/pkg/saramax"
 	"context"
@@ -10,7 +9,7 @@ import (
 	"time"
 )
 
-var _ events.Consumer = &InteractiveReadEventConsumer{}
+var _ saramax.Consumer = &InteractiveReadEventConsumer{}
 
 type InteractiveReadEventConsumer struct {
 	client sarama.Client

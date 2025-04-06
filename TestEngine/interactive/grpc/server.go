@@ -5,23 +5,27 @@ import (
 	"TestCopilot/TestEngine/interactive/domain"
 	"TestCopilot/TestEngine/interactive/service"
 	"context"
+	"google.golang.org/grpc"
 )
 
 type InteractiveServiceServer struct {
 	intrv1.UnimplementedInteractiveServiceServer
-	// 这里的业务逻辑都是限定在  Service 层
-	// Service 是业务逻辑的入口
+	// 这里的业务逻辑都是限定在 Service层，是业务逻辑的入口
 	svc service.InteractiveService
+}
+
+func NewInteractiveServiceServer(svc service.InteractiveService) InteractiveServiceServer {
+	return InteractiveServiceServer{svc: svc}
+}
+
+// Register 用于 interactiveServiceServer 注册
+func (i *InteractiveServiceServer) Register(server *grpc.Server) {
+	intrv1.RegisterInteractiveServiceServer(server, i)
 }
 
 func (i *InteractiveServiceServer) IncrReadCnt(ctx context.Context, request *intrv1.IncrReadCntRequest) (*intrv1.IncrReadCntResponse, error) {
 	// request.GetBiz() 会判断是否为空
-
 	err := i.svc.IncrReadCnt(ctx, request.GetBiz(), request.BizId)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//return &intrv1.IncrReadCntResponse{}, nil
 	return &intrv1.IncrReadCntResponse{}, err
 }
 

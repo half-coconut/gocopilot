@@ -1,25 +1,21 @@
 package note
 
 import (
-	"TestCopilot/TestEngine/internal/repository"
 	"TestCopilot/TestEngine/pkg/logger"
 	"TestCopilot/TestEngine/pkg/saramax"
 	"context"
 	"github.com/IBM/sarama"
-	"time"
 )
 
 type HistoryReadEventConsumer struct {
 	client sarama.Client
-	repo   repository.InteractiveRepository
 	l      logger.LoggerV1
 }
 
-func NewHistoryReadEventConsumer(l logger.LoggerV1, repo repository.InteractiveRepository, client sarama.Client) *HistoryReadEventConsumer {
+func NewHistoryReadEventConsumer(l logger.LoggerV1, client sarama.Client) *HistoryReadEventConsumer {
 	return &HistoryReadEventConsumer{
 		client: client,
 		l:      l,
-		repo:   repo,
 	}
 }
 
@@ -42,7 +38,8 @@ func (k *HistoryReadEventConsumer) Start() error {
 
 // Consume 这个不是幂等
 func (k *HistoryReadEventConsumer) Consume(msg *sarama.ConsumerMessage, t ReadEvent) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	return k.repo.AddRecord(ctx, t.Nid, t.Nid)
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	//defer cancel()
+	//return k.repo.AddRecord(ctx, t.Nid, t.Nid)
+	panic("implement me")
 }

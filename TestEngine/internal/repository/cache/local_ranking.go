@@ -15,7 +15,7 @@ type RankingLocalCache struct {
 	expiration time.Duration
 }
 
-func NewRankingLocalCache(expiration time.Duration) *RankingLocalCache {
+func NewRankingLocalCache() *RankingLocalCache {
 	return &RankingLocalCache{
 		topN: atomicx.NewValue[[]domain.Note](),
 		ddl:  atomicx.NewValueOf(time.Now()),

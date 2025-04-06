@@ -1,18 +1,25 @@
 //go:build wireinject
 
-package startup
+package main
 
 import (
+	events "TestCopilot/TestEngine/interactive/events"
 	"TestCopilot/TestEngine/interactive/grpc"
+	"TestCopilot/TestEngine/interactive/ioc"
 	"TestCopilot/TestEngine/interactive/repository"
 	"TestCopilot/TestEngine/interactive/repository/cache"
 	"TestCopilot/TestEngine/interactive/repository/dao"
 	"TestCopilot/TestEngine/interactive/service"
+
 	"github.com/google/wire"
 )
 
-var thirdProvider = wire.NewSet(InitRedis,
-	InitTestDB, InitLog)
+var thirdPartySet = wire.NewSet(
+	ioc.InitDB,
+	ioc.InitLogger,
+	ioc.InitRedis,
+	ioc.InitKafka)
+
 var interactiveSvcProvider = wire.NewSet(
 	service.NewInteractiveService,
 	repository.NewCachedInteractiveRepository,
@@ -20,12 +27,15 @@ var interactiveSvcProvider = wire.NewSet(
 	cache.NewRedisInteractiveCache,
 )
 
-func InitInteractiveService() service.InteractiveService {
-	wire.Build(thirdProvider, interactiveSvcProvider)
-	return service.NewInteractiveService(nil, nil)
-}
-
-func InitInteractiveGRPCServer() *grpc.InteractiveServiceServer {
-	wire.Build(thirdProvider, interactiveSvcProvider, grpc.NewInteractiveServiceServer)
-	return new(grpc.InteractiveServiceServer)
+func InitAPP() *App {
+	wire.Build(
+		interactiveSvcProvider,
+		thirdPartySet,
+		events.NewInteractiveReadEventConsumer,
+		grpc.NewInteractiveServiceServer,
+		ioc.NewConsumers,
+		ioc.InitGRPCxServer,
+		wire.Struct(new(App), "*"),
+	)
+	return new(App)
 }

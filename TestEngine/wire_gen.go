@@ -7,6 +7,10 @@
 package main
 
 import (
+	repository2 "TestCopilot/TestEngine/interactive/repository"
+	cache2 "TestCopilot/TestEngine/interactive/repository/cache"
+	dao2 "TestCopilot/TestEngine/interactive/repository/dao"
+	service2 "TestCopilot/TestEngine/interactive/service"
 	note3 "TestCopilot/TestEngine/internal/events/note"
 	"TestCopilot/TestEngine/internal/repository"
 	"TestCopilot/TestEngine/internal/repository/cache"
@@ -55,20 +59,24 @@ func InitWebServer() *App {
 	noteDAO := note.NewNoteDAO(loggerV1, db)
 	authorDAO := note.NewNoteAuthorDAO(loggerV1, db)
 	readerDAO := note.NewNoteReaderDAO(loggerV1, db)
-	noteRepository := note2.NewNoteRepository(noteDAO, authorDAO, readerDAO, loggerV1)
+	noteCache := cache.NewRedisNoteCache(cmdable)
+	noteRepository := note2.NewNoteRepository(noteDAO, userRepository, authorDAO, readerDAO, noteCache, loggerV1)
 	client := ioc.InitKafka()
 	syncProducer := ioc.NewSyncProducer(client)
 	producer := note3.NewKafkaProducer(syncProducer)
 	noteService := service.NewNoteService(noteRepository, loggerV1, producer)
-	interactiveDAO := dao.NewGORMInteractiveDAO(db)
-	interactiveCache := cache.NewRedisInteractiveCache(cmdable)
-	interactiveRepository := repository.NewCachedInteractiveRepository(interactiveDAO, interactiveCache, loggerV1)
-	interactiveService := service.NewInteractiveService(interactiveRepository, loggerV1)
-	noteHandler := web.NewNoteHandler(noteService, loggerV1, interactiveService)
+	interactiveDAO := dao2.NewGORMInteractiveDAO(db)
+	interactiveCache := cache2.NewRedisInteractiveCache(cmdable)
+	interactiveRepository := repository2.NewCachedInteractiveRepository(interactiveDAO, interactiveCache, loggerV1)
+	interactiveService := service2.NewInteractiveService(interactiveRepository, loggerV1)
+	interactiveServiceClient := ioc.InitIntrGRPCClient(interactiveService)
+	noteHandler := web.NewNoteHandler(noteService, loggerV1, interactiveServiceClient)
 	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, taskHandler, noteHandler)
-	interactiveReadEventBatchConsumer := note3.NewInteractiveReadEventBatchConsumer(client, interactiveRepository, loggerV1)
-	v2 := ioc.NewConsumers(interactiveReadEventBatchConsumer)
-	rankingService := service.NewBatchRankingService(noteService, interactiveService)
+	v2 := ioc.NewConsumers()
+	rankingLocalCache := cache.NewRankingLocalCache()
+	rankingRedisCache := cache.NewRankingRedisCache(cmdable)
+	rankingRepository := repository.NewCacheRankingRepository(rankingLocalCache, rankingRedisCache)
+	rankingService := service.NewBatchRankingService(noteService, interactiveServiceClient, rankingRepository)
 	rlockClient := ioc.InitRLockClient(cmdable)
 	rankingJob := ioc.InitRankingJob(rankingService, rlockClient, loggerV1)
 	cron := ioc.InitJobs(loggerV1, rankingJob)
@@ -82,4 +90,6 @@ func InitWebServer() *App {
 
 // wire.go:
 
-var rankingServiceSet = wire.NewSet(repository.NewCacheRankingRepository, cache.NewRankingRedisCache, service.NewBatchRankingService)
+var interactiveSvcProvider = wire.NewSet(service2.NewInteractiveService, repository2.NewCachedInteractiveRepository, dao2.NewGORMInteractiveDAO, cache2.NewRedisInteractiveCache)
+
+var rankingServiceSet = wire.NewSet(repository.NewCacheRankingRepository, cache.NewRankingLocalCache, cache.NewRankingRedisCache, service.NewBatchRankingService)

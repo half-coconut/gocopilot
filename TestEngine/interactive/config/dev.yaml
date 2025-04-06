@@ -1,0 +1,16 @@
+db:
+  dsn: "root:root@tcp(localhost:13316)/testengine"
+
+redis:
+  addr: "localhost:6379"
+
+kafka:
+  addrs:
+    - "localhost:9094"
+
+grpc:
+  server:
+    addr: ":8090"
+#  client:
+#    user:
+#      addr: "user.my_company.com:8090"

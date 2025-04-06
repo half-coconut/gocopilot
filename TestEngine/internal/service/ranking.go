@@ -1,9 +1,11 @@
 package service
 
 import (
+	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/repository"
 	"context"
+	"errors"
 	"github.com/ecodeclub/ekit/queue"
 	"github.com/ecodeclub/ekit/slice"
 	"math"
@@ -16,7 +18,7 @@ type RankingService interface {
 
 type BatchRankingService struct {
 	noteSvc   NoteService
-	intrSvc   InteractiveService
+	intrSvc   intrv1.InteractiveServiceClient
 	repo      repository.RankingRepository
 	batchSize int
 	// 优先队列的容量
@@ -25,10 +27,11 @@ type BatchRankingService struct {
 	scoreFunc func(t time.Time, likeCnt int64) float64
 }
 
-func NewBatchRankingService(noteSvc NoteService, intrSvc InteractiveService) RankingService {
+func NewBatchRankingService(noteSvc NoteService, intrSvc intrv1.InteractiveServiceClient, repo repository.RankingRepository) RankingService {
 	return &BatchRankingService{
 		noteSvc:   noteSvc,
 		intrSvc:   intrSvc,
+		repo:      repo,
 		batchSize: 100,
 		n:         100,
 		scoreFunc: func(t time.Time, likeCnt int64) float64 {
@@ -78,14 +81,20 @@ func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error)
 				return src.Id
 			})
 		// 找对应的点赞数据
-		intrs, err := svc.intrSvc.GetByIds(ctx, "note", ids)
+		intrs, err := svc.intrSvc.GetByIds(ctx, &intrv1.GetByIdsRequest{
+			Biz:    "note",
+			BizIds: ids,
+		})
 		if err != nil {
 			return nil, err
+		}
+		if len(intrs.Intrs) == 0 {
+			return nil, errors.New("没有数组")
 		}
 		// 合并计算 score
 		// 排序
 		for _, note := range notes {
-			intr := intrs[note.Id]
+			intr := intrs.Intrs[note.Id]
 			//if !ok{
 			//	// 没有数据
 			//	continue
