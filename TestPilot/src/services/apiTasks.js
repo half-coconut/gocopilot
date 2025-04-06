@@ -13,6 +13,26 @@ export default async function getTasks() {
   return resp;
 }
 
+export async function getTask(id) {
+  const resp = await taskService.detail(id);
+  return resp;
+}
+
+export async function debugInterfaces(id) {
+  const resp = await taskService.debugInterfaces(id);
+  return resp;
+}
+
+export async function debugTask(id) {
+  const resp = await taskService.debugTask(id);
+  return resp;
+}
+
+export async function executeTask(id) {
+  const resp = await taskService.executeTask(id);
+  return resp;
+}
+
 export async function getBookings({ filter, sortBy, page }) {
   let query = supabase
     .from("bookings")

@@ -29,6 +29,7 @@ func (c CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.T
 	task, err := c.dao.FindByTId(ctx, tid)
 
 	if err != nil {
+		c.l.Error("FindByTId 失败：", logger.Error(err))
 		return domain.Task{}, nil
 	}
 

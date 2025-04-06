@@ -18,13 +18,14 @@ import (
 
 type TaskService interface {
 	InterfacesDebug(ctx context.Context, tid int64) []TaskDebugLog
-	PerformanceRun(ctx context.Context, tid int64, duration time.Duration, rate float64) string
+	PerformanceRun(ctx context.Context, tid int64) string
 	PerformanceDebug(ctx context.Context, tid int64, result chan []*HttpResult, wg *sync.WaitGroup) []*HttpResult
 
 	DebugForAPI(ctx context.Context, task domain.Task) TaskDebugLog
 
 	Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error)
 	List(ctx context.Context, uid int64) ([]domain.Task, error)
+	GetDetailByTid(ctx context.Context, tid int64) (domain.Task, error)
 	SetBegin(ctx context.Context)
 }
 
@@ -34,6 +35,10 @@ type taskService struct {
 	httpSvc HttpService
 	l       logger.LoggerV1
 	subtask *Subtask
+}
+
+func (t *taskService) GetDetailByTid(ctx context.Context, tid int64) (domain.Task, error) {
+	return t.repo.FindByTId(ctx, tid)
 }
 
 type Subtask struct {
@@ -171,15 +176,16 @@ func (t *taskService) PerformanceDebug(ctx context.Context, tid int64, result ch
 	return res
 }
 
-func (t *taskService) PerformanceRun(ctx context.Context, tid int64, duration time.Duration, rate float64) string {
+func (t *taskService) PerformanceRun(ctx context.Context, tid int64) string {
 	t.SetBegin(ctx)
 	// 这里将 task 中的所有接口，按照一个goroutine 去请求，
 	// 创建限速器
-	limiter := rate2.NewLimiter(rate2.Limit(rate), 1)
+
 	task := t.getTask(ctx, tid)
+	limiter := rate2.NewLimiter(rate2.Limit(task.Rate), 1)
 
 	// 创建上下文，用于控制压测持续时间
-	ctx, cancel := context.WithTimeout(context.Background(), duration)
+	ctx, cancel := context.WithTimeout(context.Background(), task.Durations)
 	defer cancel()
 
 	var wg sync.WaitGroup

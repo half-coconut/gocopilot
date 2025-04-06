@@ -1,9 +1,45 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBookings } from "../../services/apiTasks";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { PAGE_SIZE } from "../../utils/constants";
 
-import getTasks from "../../services/apiTasks";
+import getTasks, { getTask } from "../../services/apiTasks";
+
+export function useTasks() {
+  const {
+    isLoading,
+    data: taskData,
+    error,
+  } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: getTasks,
+  });
+
+  const taskItems = taskData?.data?.data?.tasks;
+  const total = taskData?.data?.data?.total;
+
+  return { isLoading, error, taskItems, total };
+}
+
+export function useTask() {
+  const { taskId } = useParams();
+  const {
+    isLoading,
+    data: taskData,
+    error,
+  } = useQuery({
+    queryKey: ["task", taskId],
+    queryFn: () => getTask(taskId),
+    retry: false,
+  });
+
+  const taskItem = taskData?.data;
+
+  // console.log("taskItem: ", taskItem);
+  // console.log(JSON.stringify(taskItem, null, 2));
+
+  return { isLoading, error, taskItem };
+}
 
 export function useBookings() {
   const queryClient = useQueryClient();
@@ -51,22 +87,4 @@ export function useBookings() {
     });
 
   return { isLoading, error, bookings, count };
-}
-
-export function useTasks() {
-  const {
-    isLoading,
-    data: taskData,
-    error,
-  } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: getTasks,
-  });
-
-  const taskItems = taskData?.data?.data?.tasks;
-  const total = taskData?.data?.data?.total;
-
-  console.log("taskItems: ", taskItems);
-
-  return { isLoading, error, taskItems, total };
 }

@@ -9,7 +9,7 @@ function Tasks() {
   return (
     <>
       <Row type="horizontal">
-        <Heading as="h1">Performance testing tasks</Heading>
+        <Heading as="h1">All Tasks</Heading>
         {/* <TaskTableOperations /> */}
         <AddTask />
       </Row>

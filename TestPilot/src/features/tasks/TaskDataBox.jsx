@@ -1,17 +1,33 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { format, isToday } from "date-fns";
+import { JsonEditor, githubLightTheme } from "json-edit-react";
+// import { JsonEditor, monoLightTheme } from "json-edit-react";
+
 import {
-  HiOutlineChatBubbleBottomCenterText,
-  HiOutlineCheckCircle,
-  HiOutlineCurrencyDollar,
-  HiOutlineHomeModern,
+  HiOutlineClock,
+  HiOutlineUserPlus,
+  // HiOutlineChatBubbleBottomCenterText,
+  // HiOutlineCheckCircle,
+  HiOutlineRocketLaunch,
+  HiOutlineClipboardDocumentList,
+  HiOutlineArchiveBox,
+  HiOutlineUser,
 } from "react-icons/hi2";
 
-import DataItem from "../../ui/DataItem.jsx";
-import { Flag } from "../../ui/Flag.jsx";
+import { TbReportAnalytics } from "react-icons/tb";
 
-import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers.js";
+import {
+  MdOutlineFaceUnlock,
+  MdOutlineFaceRetouchingNatural,
+} from "react-icons/md";
+
+import DataItem from "../../ui/DataItem.jsx";
+import { convertNanosecondsToHMS } from "../../utils/helpers.js";
+import {
+  useDebugInterfaces,
+  useDebugTask,
+  useExecuteTask,
+} from "./useExecuteTask.js";
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -69,7 +85,7 @@ const Guest = styled.div`
   }
 `;
 
-const Price = styled.div`
+const Result = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -78,9 +94,9 @@ const Price = styled.div`
   margin-top: 2.4rem;
 
   background-color: ${(props) =>
-    props.isPaid ? "var(--color-green-100)" : "var(--color-yellow-100)"};
+    props.isPassed ? "var(--color-green-100)" : "var(--color-yellow-100)"};
   color: ${(props) =>
-    props.isPaid ? "var(--color-green-700)" : "var(--color-yellow-700)"};
+    props.isPassed ? "var(--color-green-700)" : "var(--color-yellow-700)"};
 
   & p:last-child {
     text-transform: uppercase;
@@ -95,6 +111,33 @@ const Price = styled.div`
   }
 `;
 
+const StyledNote = styled.div`
+  /* Box */
+  background-color: var(--color-grey-0);
+  border: 1px solid var(--color-grey-100);
+  border-radius: var(--border-radius-md);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem 3.2rem;
+  border-radius: var(--border-radius-sm);
+  /* margin-top: 2.4rem; */
+  /* height: 300px; */
+  overflow: auto;
+
+  flex-direction: column;
+  gap: 2.4rem;
+  grid-column: 1 / span 2;
+  /* padding-top: 2.4rem; */
+`;
+
+const StyleUl = styled.ul`
+  margin-top: 10px;
+  color: var(--color-grey-500);
+  gap: 2.4rem;
+`;
+
 const Footer = styled.footer`
   padding: 1.6rem 4rem;
   font-size: 1.2rem;
@@ -102,107 +145,162 @@ const Footer = styled.footer`
   text-align: right;
 `;
 
-// A purely presentational component
-function TaskDataBox({ booking }) {
+function TaskDataBox({ taskItem, status }) {
+  const { isLoading, debugInterfacesItem } = useDebugInterfaces();
+  const { isLoading: isDebugTaskLoading, debugTaskItem } = useDebugTask();
+  const { isLoading: isExecuteLoading, executeTaskItem } = useExecuteTask();
+
+  // if (!isLoading && status == "api") {
+  //   console.log(
+  //     "box 页面显示的内容 debuggingApis",
+  //     JSON.stringify(debugInterfacesItem, null, 2)
+  //   );
+  // }
+
+  // if (!isDebugTaskLoading && status == "task") {
+  //   console.log(
+  //     "box 页面显示的内容 debuggingTask",
+  //     JSON.stringify(debugTaskItem, null, 2)
+  //   );
+  // }
+
+  // if (!isExecuteLoading && status == "execute") {
+  //   console.log(
+  //     "box 页面显示的内容 executeTaskItem",
+  //     JSON.stringify(executeTaskItem, null, 2)
+  //   );
+  // }
+
   const {
-    created_at,
-    startDate,
-    endDate,
-    numNights,
-    numGuests,
-    cabinPrice,
-    extrasPrice,
-    totalPrice,
-    hasBreakfast,
-    observations,
-    isPaid,
-    guests: { fullName: guestName, email, country, countryFlag, nationalID },
-    cabins: { name: cabinName },
-  } = booking;
+    id,
+    name,
+    a_ids,
+    // apis,
+    durations,
+    workers,
+    max_workers,
+    rate,
+    creator,
+    updater,
+    ctime,
+    utime,
+  } = taskItem;
 
   return (
     <StyledBookingDataBox>
       <Header>
         <div>
-          <HiOutlineHomeModern />
-          <p>
-            {numNights} nights in Cabin <span>{cabinName}</span>
-          </p>
+          <HiOutlineClipboardDocumentList />
+          <p>{name}</p>
         </div>
-
-        <p>
-          {format(new Date(startDate), "EEE, MMM dd yyyy")} (
-          {isToday(new Date(startDate))
-            ? "Today"
-            : formatDistanceFromNow(startDate)}
-          ) &mdash; {format(new Date(endDate), "EEE, MMM dd yyyy")}
-        </p>
       </Header>
 
       <Section>
         <Guest>
-          {countryFlag && <Flag src={countryFlag} alt={`Flag of ${country}`} />}
-          <p>
-            {guestName} {numGuests > 1 ? `+ ${numGuests - 1} guests` : ""}
-          </p>
+          <HiOutlineArchiveBox />
+          <p>{id}</p>
           <span>&bull;</span>
-          <p>{email}</p>
+          <p>{name}</p>
+          <HiOutlineUser />
+          <p>creator</p>
           <span>&bull;</span>
-          <p>National ID {nationalID}</p>
+          <p>{creator}</p>
         </Guest>
 
-        {observations && (
-          <DataItem
-            icon={<HiOutlineChatBubbleBottomCenterText />}
-            label="Observations"
-          >
-            {observations}
-          </DataItem>
-        )}
-
-        <DataItem icon={<HiOutlineCheckCircle />} label="Breakfast included?">
-          {hasBreakfast ? "Yes" : "No"}
+        <DataItem icon={<HiOutlineClock />} label="Durations">
+          <span>&bull;</span>
+          <p>{convertNanosecondsToHMS(durations)}</p>
         </DataItem>
 
-        <Price isPaid={isPaid}>
-          <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
-            {formatCurrency(totalPrice)}
+        <DataItem icon={<HiOutlineUserPlus />} label="Workers Scope">
+          <span>&bull;</span>
+          workers:
+          <p>{workers}</p>
+          <span>&bull;</span>
+          max workers:
+          <p>{max_workers}</p>
+        </DataItem>
+        <DataItem icon={<HiOutlineRocketLaunch />} label="Rate">
+          <span>&bull;</span>
+          <p>{rate}</p>
+          <span>&bull;</span>
+          Number of interfaces:
+          <p>{a_ids.length}</p>
+        </DataItem>
 
-            {hasBreakfast &&
-              ` (${formatCurrency(cabinPrice)} cabin + ${formatCurrency(
-                extrasPrice
-              )} breakfast)`}
-          </DataItem>
+        {/* <DataItem icon={<HiOutlineCheckCircle />} label="apis">
+          <pre>
+            {apis.map((item, index) => (
+              <p key={index}>{item}</p>
+            ))}
+          </pre>
+        </DataItem> */}
 
-          <p>{isPaid ? "Paid" : "Will pay at property"}</p>
-        </Price>
+        <Result isPassed={status}>
+          <DataItem
+            icon={<TbReportAnalytics />}
+            label={
+              status == "api"
+                ? `Interfaces Debug Result`
+                : status == "task"
+                ? `Task Debug Result`
+                : `Task Execute Result`
+            }
+          ></DataItem>
+        </Result>
+
+        <StyledNote>
+          <StyleUl>
+            {!isLoading && status == "api" ? (
+              <JsonEditor
+                data={JSON.stringify(debugInterfacesItem, null, 2)}
+                theme={githubLightTheme}
+              />
+            ) : (
+              ""
+            )}
+            {!isDebugTaskLoading && status == "task" ? (
+              <pre>{debugTaskItem?.data}</pre>
+            ) : (
+              ""
+            )}
+            {!isExecuteLoading && status == "execute" ? (
+              <pre>{executeTaskItem?.data}</pre>
+            ) : (
+              ""
+            )}
+          </StyleUl>
+        </StyledNote>
       </Section>
 
       <Footer>
-        <p>Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p>
+        <p>
+          <MdOutlineFaceUnlock /> {creator} Created on {ctime}
+        </p>
+        <p>
+          <MdOutlineFaceRetouchingNatural /> {updater} Updated on {utime}
+        </p>
       </Footer>
     </StyledBookingDataBox>
   );
 }
 
 TaskDataBox.propTypes = {
-  booking: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    created_at: PropTypes.string,
-    startDate: PropTypes.string,
-    endDate: PropTypes.string,
-    numNights: PropTypes.number,
-    numGuests: PropTypes.number,
-    cabinPrice: PropTypes.number,
-    extrasPrice: PropTypes.number,
-    totalPrice: PropTypes.number,
-    hasBreakfast: PropTypes.bool,
-    observations: PropTypes.node,
-    isPaid: PropTypes.bool,
-    status: PropTypes.string,
-    guests: PropTypes.node,
-    cabins: PropTypes.number,
-  }),
+  taskItem: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string,
+    a_ids: PropTypes.List,
+    apis: PropTypes.List,
+    durations: PropTypes.string,
+    workers: PropTypes.number,
+    max_workers: PropTypes.number,
+    rate: PropTypes.string,
+    creator: PropTypes.string,
+    updater: PropTypes.string,
+    ctime: PropTypes.string,
+    utime: PropTypes.string,
+  }).isRequired,
+  status: PropTypes.string,
 };
 
 export default TaskDataBox;

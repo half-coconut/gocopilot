@@ -27,9 +27,9 @@ import Jobs from "./pages/Jobs";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // 数据自动刷新的时间 0s
-      staleTime: 0,
-      // 缓存时间 1h
+      // 数据自动刷新的时间 5min
+      staleTime: 1000 * 60 * 5,
+      // 缓存时间 10min
       cacheTime: 1000 * 60 * 10,
     },
   },

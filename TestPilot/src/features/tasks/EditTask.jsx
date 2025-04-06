@@ -13,6 +13,7 @@ function EditTask({ onCloseModal }) {
   const { isLoading, interfaceItems } = useInterfaces();
 
   const { isCreating, createTask } = useCreateTask();
+
   const isWorking = isCreating || isLoading;
 
   const interfaces = !isLoading
@@ -23,12 +24,12 @@ function EditTask({ onCloseModal }) {
     : [];
 
   const initialData = {
-    name: "task-01",
+    name: "task-default",
     a_ids: [],
-    durations: "10m0s",
+    durations: "1m0s",
     workers: 5,
-    max_workers: 100,
-    rate: 10,
+    max_workers: 10,
+    rate: 5,
   };
 
   const { register, handleSubmit, control, reset, formState } = useForm({
@@ -36,10 +37,6 @@ function EditTask({ onCloseModal }) {
   });
 
   const { errors } = formState;
-
-  const handleChange = (value) => {
-    console.log(`Selected: ${value}`);
-  };
 
   function onSubmit(data) {
     console.log("onsubmit 的 data:", data);
@@ -52,6 +49,7 @@ function EditTask({ onCloseModal }) {
       }
     );
   }
+
   function onError(errors) {
     console.log(errors);
   }
@@ -89,7 +87,6 @@ function EditTask({ onCloseModal }) {
                 placeholder="Tags Mode"
                 onChange={(value) => {
                   field.onChange(value); // 更新 Controller 的值
-                  handleChange(value); // 进行其他处理
                 }}
                 options={interfaces}
               />

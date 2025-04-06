@@ -108,27 +108,6 @@ function TaskRow({ taskItem }) {
             >
               See details
             </Menus.Button>
-            {/* 
-            {status === "unconfirmed" && (
-              <Menus.Button
-                icon={<HiArrowDownOnSquare />}
-                onClick={() => navigate(`/checkin/${taskId}`)}
-              >
-                Check in
-              </Menus.Button>
-            )}
-
-            {status === "checked-in" && (
-              <Menus.Button
-                icon={<HiArrowUpOnSquare />}
-                onClick={() => {
-                  checkout(taskId);
-                }}
-                disabled={isCheckingOut}
-              >
-                Check out
-              </Menus.Button>
-            )} */}
 
             <Modal.Open opens="delete">
               <Menus.Button icon={<HiTrash />}>Delete task</Menus.Button>

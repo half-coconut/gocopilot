@@ -36,14 +36,15 @@ func NewTaskHandler(l logger.LoggerV1, svc core.TaskService, userSvc service.Use
 func (t *TaskHandler) RegisterRoutes(server *gin.Engine) {
 	task := server.Group("/task")
 	// 创建任务
-	// 设置或者修改 rate 和 duration，执行性能测试
-	// 包含 PerformanceRun 的执行
+	// 设置或者修改 rate 和 duration，并执行性能测试
 	task.POST("/edit", ginx.WrapToken[ijwt.UserClaims](t.Edit))
 
-	// 执行一次，设置 rate 和 duration ，生成性能测试报告
-	task.GET("/run/once/:id", ginx.WrapToken[ijwt.UserClaims](t.PerformanceDebug))
-	// 用于某个任务的接口调试，生成接口测试报告
-	task.GET("/debug/:id", ginx.WrapToken[ijwt.UserClaims](t.InterfaceDebug))
+	// 执行性能测试， 按照持续时间和 rate limit 来执行
+	task.GET("/execute/:id", ginx.WrapToken[ijwt.UserClaims](t.Execute))
+	// 执行一次性能测试，设置 rate 和 duration ，生成性能测试报告
+	task.GET("/debug/:id", ginx.WrapToken[ijwt.UserClaims](t.PerformanceDebug))
+	// 执行一次接口测试，某个任务的接口调试，生成接口测试报告
+	task.GET("/debug/interfaces/:id", ginx.WrapToken[ijwt.UserClaims](t.InterfaceDebug))
 
 	task.GET("/list", ginx.WrapToken[ijwt.UserClaims](t.List))
 	task.GET("/detail/:id", ginx.WrapToken[ijwt.UserClaims](t.Detail))
@@ -87,20 +88,12 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 		}, nil
 	} else {
 		if (req.Id > 0) && (req.Execute) {
-			//duration, err = time.ParseDuration(req.Durations)
-			//if err != nil {
-			//	t.l.Info(fmt.Sprintf("duration 时间有误：%v", req.Durations), logger.Error(err))
-			//	return ginx.Result{
-			//		Code:    errs.TaskInvalidInput,
-			//		Message: "Durations 输入有误",
-			//	}, err
-			//}
-			report := t.svc.PerformanceRun(ctx, req.Id,
-				1*time.Minute, req.Rate)
+
+			report := t.svc.PerformanceRun(ctx, req.Id)
 
 			return ginx.Result{
 				Code:    1,
-				Message: fmt.Sprintf("%v, OK", req.Id),
+				Message: fmt.Sprintf("OK"),
 				Data:    report,
 			}, nil
 		}
@@ -173,7 +166,99 @@ func (t *TaskHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 }
 
 func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
-	panic("implement me")
+	tid := ctx.Param("id")
+
+	type TaskReq struct {
+		tid int64 `json:"id"`
+	}
+	var req TaskReq
+
+	err := ctx.Bind(&req)
+	if err != nil {
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+	req.tid, err = strconv.ParseInt(tid, 10, 64)
+	if err != nil {
+		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+
+	tasks, err := t.svc.GetDetailByTid(ctx, req.tid)
+
+	if err != nil {
+		t.l.Info("用户校验，系统错误", logger.Error(err), logger.Int64("Id", uc.Id))
+		return ginx.Result{
+			Code:    errs.TaskInternalServerError,
+			Message: "系统错误",
+		}, err
+	}
+
+	var aidsList []string
+	for _, id := range tasks.AIds {
+		aidsList = append(aidsList, strconv.FormatInt(id, 10))
+	}
+	var apiNameList []string
+	for _, api := range tasks.APIs {
+		apiNameList = append(apiNameList, api.Name)
+	}
+	response := Task0{
+		Id:         tasks.Id,
+		Name:       tasks.Name,
+		AIds:       aidsList, // 把接口 Name 返给前端
+		APIs:       apiNameList,
+		Durations:  jsonx.JsonMarshal(tasks.Durations),
+		Workers:    tasks.Workers,
+		MaxWorkers: tasks.MaxWorkers,
+		Rate:       tasks.Rate,
+		Creator:    tasks.Creator.Name,
+		Updater:    tasks.Updater.Name,
+		Ctime:      tasks.Ctime.Format(time.DateTime),
+		Utime:      tasks.Utime.Format(time.DateTime),
+	}
+
+	return ginx.Result{
+		Code:    1,
+		Message: "OK",
+		Data:    response}, nil
+}
+
+func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	tid := ctx.Param("id")
+
+	type TaskReq struct {
+		tid int64 `json:"id"`
+	}
+	var req TaskReq
+
+	err := ctx.Bind(&req)
+	if err != nil {
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+	req.tid, err = strconv.ParseInt(tid, 10, 64)
+	if err != nil {
+		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+
+	report := t.svc.PerformanceRun(ctx, req.tid)
+
+	return ginx.Result{
+		Code:    1,
+		Message: fmt.Sprintf("OK"),
+		Data:    report,
+	}, nil
 }
 
 // PerformanceDebug 设置并发数等，执行一次，生成性能测试报告

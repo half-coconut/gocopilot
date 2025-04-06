@@ -19,6 +19,45 @@ const taskService = {
       throw error;
     }
   },
+  detail: async (id) => {
+    try {
+      const res = await instance.get("/task/detail/" + id);
+      return res;
+    } catch (error) {
+      console.error("Task Detail error:", error);
+      throw error;
+    }
+  },
+
+  debugInterfaces: async (id) => {
+    try {
+      const res = await instance.get("/task/debug/interfaces/" + id);
+      return res;
+    } catch (error) {
+      console.error("Task Debug Interface error:", error);
+      throw error;
+    }
+  },
+
+  debugTask: async (id) => {
+    try {
+      const res = await instance.get("/task/debug/" + id);
+      return res;
+    } catch (error) {
+      console.error("Task Debug Task error:", error);
+      throw error;
+    }
+  },
+
+  executeTask: async (id) => {
+    try {
+      const res = await instance.get("/task/execute/" + id);
+      return res;
+    } catch (error) {
+      console.error("Task Debug Task error:", error);
+      throw error;
+    }
+  },
 };
 
 export default taskService;

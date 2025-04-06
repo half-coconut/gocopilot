@@ -44,3 +44,6 @@ https://nvbtdjgdbhgsgccuwkap.supabase.co/storage/v1/object/public/avatars//avata
     - a1,a2 成功了,a3 成功无所谓 任务, 执行成功，-> 任务 B
 - 负载均衡
 
+2025-04-07 
+- 完成了 taskService 的 api,task debug, execute task，和前端页面展示;
+- 计划下一步完成 report 和 task 服务的解耦，完成更清晰的 implement;
