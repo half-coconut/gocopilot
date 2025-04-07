@@ -14,8 +14,8 @@ type InteractiveServiceServer struct {
 	svc service.InteractiveService
 }
 
-func NewInteractiveServiceServer(svc service.InteractiveService) InteractiveServiceServer {
-	return InteractiveServiceServer{svc: svc}
+func NewInteractiveServiceServer(svc service.InteractiveService) *InteractiveServiceServer {
+	return &InteractiveServiceServer{svc: svc}
 }
 
 // Register 用于 interactiveServiceServer 注册

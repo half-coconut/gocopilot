@@ -8,7 +8,7 @@ import (
 )
 
 // InitGRPCxServer 类似 web 里的加 handle 一样
-func InitGRPCxServer(intrServer grpc2.InteractiveServiceServer) *grpcx.Server {
+func InitGRPCxServer(intrServer *grpc2.InteractiveServiceServer) *grpcx.Server {
 	type Config struct {
 		Addr string `yaml:"addr"`
 	}
