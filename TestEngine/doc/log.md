@@ -104,6 +104,7 @@ sudo nano /etc/docker/daemon.json
 docker-compose up -d
 # 安装 golang-go
 apt  install golang-go
+go build -o testengine .
 
 ```
 
@@ -124,8 +125,22 @@ server {
         location / {
                 try_files $uri $uri/ /index.html;
         }
+        
+        location /api/ {
+        proxy_pass http://localhost:3002/; # 后端服务器地址
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
+sudo nginx -t
+sudo systemctl restart nginx
+
+npm install
+npm run build
 ```
+
 
 前端: http://47.239.187.141/login
 后端: http://47.239.187.141:3002/users/login
