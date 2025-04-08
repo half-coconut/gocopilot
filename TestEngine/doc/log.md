@@ -112,6 +112,9 @@ go build -o testengine .
 nginx 
 
 vim /etc/nginx/sites-available/default
+- 
+- nginx 日志
+/var/log/nginx/error.log
 ```shell
 server {
         listen 80;
@@ -123,16 +126,33 @@ server {
         index index.html;
 
         location / {
-                try_files $uri $uri/ /index.html;
+            try_files $uri $uri/ /index.html;
         }
-        
+
         location /api/ {
-        proxy_pass http://localhost:3002/; # 后端服务器地址
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+       proxy_pass http://localhost:3002/;
+       proxy_set_header Host $http_host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+
+       # 添加 CORS 头部
+       add_header 'Access-Control-Allow-Origin' '*' always;
+       add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+       add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+       add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
+       if ($request_method = OPTIONS) {
+           add_header 'Access-Control-Allow-Origin' '*' always;
+           add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+           add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+           add_header 'Access-Control-Max-Age' 3600 always;
+           add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+           add_header 'Content-Length' 0 always;
+           return 204;
+       }
+   }
+
 }
 sudo nginx -t
 sudo systemctl restart nginx
@@ -144,3 +164,46 @@ npm run build
 
 前端: http://47.239.187.141/login
 后端: http://47.239.187.141:3002/users/login
+
+
+```shell
+server {
+    listen 80;
+    server_name 47.239.187.141;
+    
+    # 静态文件路径
+    root /root/TestCopilot/TestPilot/dist;
+    index index.html;
+
+    # 处理前端路由
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 代理 API 请求到 Go 后端
+    location /api/ {
+        proxy_pass http://localhost:3002/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 添加 CORS 头部
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
+
+        # 处理 OPTIONS 预检请求
+        if ($request_method = OPTIONS) {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
+            add_header 'Access-Control-Max-Age' 1728000 always;
+            add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+            add_header 'Content-Length' 0 always;
+            return 204;
+        }
+    }
+}
+
+```

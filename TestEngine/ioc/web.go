@@ -60,10 +60,10 @@ func InitMiddleware(redisClients redis.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		//c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		//c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		//c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -92,11 +92,8 @@ func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userH
 func corsHandler() gin.HandlerFunc {
 	// 使用middleware 处理跨域问题
 	return cors.New(cors.Config{
-		//AllowAllOrigins: true,          // 允许所有来源
-		AllowedMethods: []string{"*"}, // 允许所有方法
-		//AllowedHeaders: []string{"*"}, // 允许所有头
-		//AllowedOrigins:  []string{"*"},
-		//AllowedMethods: []string{"POST", "GET"},
+		//AllowedOrigins: []string{"*"},
+		//AllowMethods: []string{"POST", "GET"},
 		AllowedHeaders: []string{"Content-Type", "Authorization"},
 		// 你不加这个，前端是拿不到的
 		ExposedHeaders: []string{"x-jwt-token", "x-refresh-token"},
