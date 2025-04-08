@@ -32,7 +32,7 @@ https://api.infstones.com/core/mainnet/6e97213d22994a2fae3917c0e00715d6
 ```shell
 https://nvbtdjgdbhgsgccuwkap.supabase.co/storage/v1/object/public/avatars//avatar-e71dbd5f-bb33-4443-ade3-b6379c11555f-0.1510105863854192
 ```
- 
+
 2025-04-03 关于为何使用基于MySQL抢占式分布式定时任务框架
 1.redis 分布式锁
 2.根据节点动态的调整-负载均衡
@@ -44,12 +44,14 @@ https://nvbtdjgdbhgsgccuwkap.supabase.co/storage/v1/object/public/avatars//avata
     - a1,a2 成功了,a3 成功无所谓 任务, 执行成功，-> 任务 B
 - 负载均衡
 
-2025-04-07 
+2025-04-07
+
 - 完成了 taskService 的 api,task debug, execute task，和前端页面展示;
 - 计划下一步完成 report 和 task 服务的解耦，完成更清晰的 implement;
 
 
 - 数据迁移方案
+
 ```shell
 # 8.4 版本之后，客户端登录会有问题，记得安装指定版本的mysql
 brew install mysql-client@8.4
@@ -72,3 +74,58 @@ create database if not exists testengine_intr;
 use testengine_intr;
 source intr_4.7.sql
 ```
+
+- 在ecs中操作：
+- ssh root@47.239.187.141
+
+```shell
+# 安装 apt, git, docker, npm, 下载 github 仓库
+# 安装 docker 
+ping google.com
+sudo rm /usr/share/keyrings/docker-archive-keyring.gpg
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo apt update
+sudo apt install docker.io
+# 启动 docker 服务
+sudo systemctl status docker
+sudo systemctl start docker
+sudo usermod -aG docker ubuntu
+
+
+sudo nano /etc/docker/daemon.json
+{
+  "registry-mirrors": ["https://i44jb9ta.mirror.aliyuncs.com"]
+}
+
+docker-compose up -d
+# 安装 golang-go
+apt  install golang-go
+
+```
+
+
+nginx 
+
+vim /etc/nginx/sites-available/default
+```shell
+server {
+        listen 80;
+        listen [::]:80;
+
+        server_name 47.239.187.141;
+
+        root /root/TestCopilot/TestPilot/dist;
+        index index.html;
+
+        location / {
+                try_files $uri $uri/ /index.html;
+        }
+}
+```
+
+前端: http://47.239.187.141/login
+后端: http://47.239.187.141:3002/users/login

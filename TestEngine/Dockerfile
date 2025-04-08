@@ -1,5 +1,5 @@
 # 基础镜像
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 # 把编译后的打包进来这个镜像，放到工作目录 /app
 COPY testengine /app/testengine
 WORKDIR /app
