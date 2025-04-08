@@ -181,29 +181,31 @@ server {
     }
 
     # 代理 API 请求到 Go 后端
-    location /api/ {
-        proxy_pass http://localhost:3002/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # 添加 CORS 头部
-        add_header 'Access-Control-Allow-Origin' '*' always;
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
-
-        # 处理 OPTIONS 预检请求
-        if ($request_method = OPTIONS) {
-            add_header 'Access-Control-Allow-Origin' '*' always;
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
-            add_header 'Access-Control-Max-Age' 1728000 always;
-            add_header 'Content-Type' 'text/plain charset=UTF-8' always;
-            add_header 'Content-Length' 0 always;
-            return 204;
-        }
-    }
+     location /api/ {
+      proxy_pass http://localhost:3002/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+  
+      # 添加 CORS 头部
+      add_header 'Access-Control-Allow-Origin' 'http://47.239.187.141' always;
+      add_header 'Access-Control-Allow-Credentials' 'true' always;  
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+      add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
+  
+      # 处理 OPTIONS 预检请求
+      if ($request_method = OPTIONS) {
+          add_header 'Access-Control-Allow-Origin' 'http://47.239.187.141' always;
+          add_header 'Access-Control-Allow-Credentials' 'true' always;
+          add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+          add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
+          add_header 'Access-Control-Max-Age' 1728000 always;
+          add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+          add_header 'Content-Length' 0 always;
+          return 204;
+      }
+}
 }
 
 ```
