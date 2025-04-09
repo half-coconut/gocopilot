@@ -47,11 +47,13 @@ func (r *RankingJob) Run() error {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		// 设置一个比较短的时间
+		// 分布式锁的过期时间，设置一个比较短的时间
 		lock, err := r.client.Lock(ctx, r.key, r.timeout, &rlock.FixIntervalRetry{
+			// 固定间隔重试
 			Interval: time.Millisecond * 100,
-			Max:      0,
-		}, time.Second)
+			// 重试次数
+			Max: 0,
+		}, time.Second) // 单一 一次调用 redis 的超时时间
 		if err != nil {
 			// 没有拿到锁
 			return nil

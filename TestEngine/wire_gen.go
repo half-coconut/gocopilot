@@ -55,7 +55,7 @@ func InitWebServer() *App {
 	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1, userRepository, apiRepository)
 	taskService := core.NewTaskService(taskRepository, loggerV1, httpService)
 	apiHandler := web.NewAPIHandler(apiService, taskService, userService, loggerV1)
-	taskHandler := web.NewTaskHandler(loggerV1, taskService, userService)
+	taskHandler := web.NewTaskHandler(loggerV1, taskService)
 	noteDAO := note.NewNoteDAO(loggerV1, db)
 	authorDAO := note.NewNoteAuthorDAO(loggerV1, db)
 	readerDAO := note.NewNoteReaderDAO(loggerV1, db)

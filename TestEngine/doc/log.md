@@ -108,63 +108,22 @@ go build -o testengine .
 
 ```
 
+nginx
 
-nginx 
-
-vim /etc/nginx/sites-available/default
-- 
-- nginx 日志
-/var/log/nginx/error.log
 ```shell
-server {
-        listen 80;
-        listen [::]:80;
-
-        server_name 47.239.187.141;
-
-        root /root/TestCopilot/TestPilot/dist;
-        index index.html;
-
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
-
-        location /api/ {
-       proxy_pass http://localhost:3002/;
-       proxy_set_header Host $http_host;
-       proxy_set_header X-Real-IP $remote_addr;
-       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-       proxy_set_header X-Forwarded-Proto $scheme;
-
-       # 添加 CORS 头部
-       add_header 'Access-Control-Allow-Origin' '*' always;
-       add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-       add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
-       add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
-
-       if ($request_method = OPTIONS) {
-           add_header 'Access-Control-Allow-Origin' '*' always;
-           add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-           add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
-           add_header 'Access-Control-Max-Age' 3600 always;
-           add_header 'Content-Type' 'text/plain charset=UTF-8' always;
-           add_header 'Content-Length' 0 always;
-           return 204;
-       }
-   }
-
-}
+vim /etc/nginx/sites-available/default
 sudo nginx -t
 sudo systemctl restart nginx
+
+# nginx 日志
+/var/log/nginx/error.log
 
 npm install
 npm run build
 ```
 
-
 前端: http://47.239.187.141/login
 后端: http://47.239.187.141:3002/users/login
-
 
 ```shell
 server {
@@ -209,3 +168,8 @@ server {
 }
 
 ```
+
+2025-04-09
+设计任务调度服务，web，创建 job，
+job 分类，http 请求任务，内部方法任务(使用svc.func()内部调用)，定时任务，需要提取出来 schedule 来执行
+

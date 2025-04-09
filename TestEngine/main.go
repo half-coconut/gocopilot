@@ -26,6 +26,7 @@ func main() {
 			panic(err)
 		}
 	}
+	// 定时任务的开启
 	//app.cron.Start()
 
 	server := app.server

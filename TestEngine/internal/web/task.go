@@ -3,7 +3,6 @@ package web
 import (
 	"TestCopilot/TestEngine/internal/domain"
 	"TestCopilot/TestEngine/internal/errs"
-	"TestCopilot/TestEngine/internal/service"
 	"TestCopilot/TestEngine/internal/service/core"
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"TestCopilot/TestEngine/pkg/ginx"
@@ -18,19 +17,18 @@ import (
 )
 
 // Task 接口测试，性能测试的任务
-// 性能测试，就需要定义清楚并发数，done
+// 性能测试任务，创建与执行
 
 type TaskHandler struct {
-	l       logger.LoggerV1
-	svc     core.TaskService
-	userSvc service.UserService
+	l   logger.LoggerV1
+	svc core.TaskService
 }
 
-func NewTaskHandler(l logger.LoggerV1, svc core.TaskService, userSvc service.UserService) *TaskHandler {
+func NewTaskHandler(l logger.LoggerV1, svc core.TaskService) *TaskHandler {
 	return &TaskHandler{
-		l:       l,
-		svc:     svc,
-		userSvc: userSvc}
+		l:   l,
+		svc: svc,
+	}
 }
 
 func (t *TaskHandler) RegisterRoutes(server *gin.Engine) {
@@ -39,8 +37,10 @@ func (t *TaskHandler) RegisterRoutes(server *gin.Engine) {
 	// 设置或者修改 rate 和 duration，并执行性能测试
 	task.POST("/edit", ginx.WrapToken[ijwt.UserClaims](t.Edit))
 
+	// Execute
 	// 执行性能测试， 按照持续时间和 rate limit 来执行
 	task.GET("/execute/:id", ginx.WrapToken[ijwt.UserClaims](t.Execute))
+	// Debug
 	// 执行一次性能测试，设置 rate 和 duration ，生成性能测试报告
 	task.GET("/debug/:id", ginx.WrapToken[ijwt.UserClaims](t.PerformanceDebug))
 	// 执行一次接口测试，某个任务的接口调试，生成接口测试报告

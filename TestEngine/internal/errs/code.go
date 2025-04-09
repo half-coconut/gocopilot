@@ -23,11 +23,16 @@ const (
 
 // 任务模块
 const (
-	// TaskInvalidInput 用户模块输入错误，含糊的错误
 	TaskInvalidInput        = 403001
 	TaskInternalServerError = 503001
-	// TaskInvalidOrNotExist 用户不存在，或者密码错误
-	TaskInvalidOrNotExist = 403002
+	TaskInvalidOrNotExist   = 403002
+)
+
+// Job模块
+const (
+	JobInvalidInput        = 404001
+	JobInternalServerError = 504001
+	JobInvalidOrNotExist   = 404002
 )
 
 var (

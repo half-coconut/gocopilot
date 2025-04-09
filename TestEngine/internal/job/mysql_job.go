@@ -18,6 +18,7 @@ type Executor interface {
 	Exec(ctx context.Context, j domain.Job) error
 }
 
+// HttpExecutor 执行
 type HttpExecutor struct {
 }
 
@@ -47,12 +48,14 @@ func (h HttpExecutor) Exec(ctx context.Context, j domain.Job) error {
 	return nil
 }
 
+// LocalFuncExecutor 本地方法调用
 type LocalFuncExecutor struct {
 	funcs map[string]func(ctx context.Context, j domain.Job) error
 }
 
 func NewLocalFuncExecutor() *LocalFuncExecutor {
-	return &LocalFuncExecutor{funcs: make(map[string]func(ctx context.Context, j domain.Job) error)}
+	return &LocalFuncExecutor{
+		funcs: make(map[string]func(ctx context.Context, j domain.Job) error)}
 }
 
 func (l *LocalFuncExecutor) Name() string {
@@ -70,7 +73,7 @@ func (l *LocalFuncExecutor) Exec(ctx context.Context, j domain.Job) error {
 	return fn(ctx, j)
 }
 
-// Schedule 调度器
+// Schedule 调度器, mysql-job
 type Schedule struct {
 	svc     service.JobService
 	l       logger.LoggerV1
