@@ -16,7 +16,7 @@ import (
 
 func main() {
 	initViperV1()
-	initLogger()
+	//initLogger()
 	initPrometheus()
 
 	app := InitWebServer()

@@ -10,6 +10,7 @@ import (
 	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"time"
 )
 
@@ -23,26 +24,56 @@ func NewCronJobHandler(l logger.LoggerV1, svc service.CronJobService, taskSvc co
 	return &CronJobHandler{l: l, svc: svc, taskSvc: taskSvc}
 }
 
-type CronJobReq struct {
-	Id          int64  `json:"id"`
-	Name        string `json:"name"`                  // 任务名称
-	Description string `json:"description,omitempty"` // 任务描述
-	Type        string `json:"type"`                  // 类型: 定时任务(短任务)，持续任务(长任务)
-	Cron        string `json:"cron"`                  // 定时任务: Cron "*/1 * * * *" 表达式
-	HttpCfg     string `json:"http_cfg"`              // HTTP请求：endpoint 和 method
-	TaskId      int64  `json:"task_id"`               // 测试任务 ID，按照 svc 的内部方法直接调用，注意一次任务执行时间和定时任务的时间不要冲突
-	TimeZone    string `json:"timezone,omitempty"`    // 时区?
-	Duration    string `json:"duration"`              // 持续任务: 运行时间，超时退出，用于 http 请求
-	Retry       bool   `json:"retry,omitempty"`       // 是否重试
-	MaxRetries  uint64 `json:"maxRetries"`            // 最大重试次数
-}
-
-// t.svc.PerformanceRun(ctx, req.tid)
 func (c *CronJobHandler) RegisterRoutes(server *gin.Engine) {
 	job := server.Group("/job")
 	job.POST("/add", ginx.WrapToken[ijwt.UserClaims](c.AddAll))
 	job.POST("/add/task", ginx.WrapToken[ijwt.UserClaims](c.AddInternalTask))
 	job.POST("/add/http", ginx.WrapToken[ijwt.UserClaims](c.AddHttpMode))
+
+	// 开启就是执行
+	job.GET("/open/:id", ginx.WrapToken[ijwt.UserClaims](c.Open))
+	job.GET("/close/:id", ginx.WrapToken[ijwt.UserClaims](c.Close))
+}
+
+func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	jid := ctx.Param("id")
+
+	type JobReq struct {
+		jid int64 `json:"id"`
+	}
+	var req JobReq
+	err := ctx.Bind(&req)
+	if err != nil {
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+	req.jid, err = strconv.ParseInt(jid, 10, 64)
+	if err != nil {
+		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
+		return ginx.Result{
+			Code:    0,
+			Message: "系统错误",
+		}, err
+	}
+	// 先设置 next_time
+	err = c.svc.ResetNextTime(ctx, req.jid)
+	if err != nil {
+		return ginx.Result{}, err
+	}
+	// 异步调用执行定时任务
+	go c.svc.ExecOne(ctx, req.jid)
+
+	return ginx.Result{
+		Code:    1,
+		Message: "OK",
+		Data:    jid,
+	}, err
+}
+
+func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	panic("implement me")
 }
 
 // AddHttpMode 添加Http请求类型

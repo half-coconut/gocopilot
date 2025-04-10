@@ -33,6 +33,7 @@ func (g *GORMJobDAO) UpdateUtime(ctx context.Context, id int64) error {
 	}).Error
 }
 
+// Release job 结束，将 job 状态变为 waiting
 func (g *GORMJobDAO) Release(ctx context.Context, id int64) error {
 	return g.db.WithContext(ctx).Model(&Job{}).Where("id=?", id).
 		Updates(map[string]any{

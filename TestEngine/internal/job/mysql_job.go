@@ -95,7 +95,7 @@ func (s *Schedule) RegisterExecutor(exec Executor) {
 }
 
 func (s *Schedule) Schedule(ctx context.Context) error {
-	// 调度器
+	// 调度器，是一个 for 循环，一直开启的服务
 	for {
 
 		if ctx.Err() != nil {
@@ -120,7 +120,7 @@ func (s *Schedule) Schedule(ctx context.Context) error {
 			s.l.Error("未找到对应的执行器", logger.String("executor", j.Executor))
 			continue
 		}
-		// 抢完了就执行
+		// 抢完了就执行，先Preempt
 		// 执行完毕
 		go func() {
 			defer func() {

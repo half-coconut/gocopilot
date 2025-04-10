@@ -7,8 +7,6 @@ import (
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"database/sql"
-	"encoding/json"
-	"net/http"
 	"time"
 )
 
@@ -152,30 +150,4 @@ func (c *CacheAPIRepository) entityToDomain(api dao.API, creator, updater domain
 		Ctime: time.UnixMilli(api.Ctime),
 		Utime: time.UnixMilli(api.Utime),
 	}
-}
-
-func headerToJSON(header http.Header) string {
-	headerJSON, err := json.Marshal(header)
-	if err != nil {
-		return ""
-	}
-	return string(headerJSON)
-}
-
-// 从JSON字符串转换回http.Header
-func jsonToHeader(headerJSON string) http.Header {
-	// 创建一个用于解析的map
-	var headerMap map[string][]string
-	err := json.Unmarshal([]byte(headerJSON), &headerMap)
-	if err != nil {
-		return nil
-	}
-	// 将map转换为http.Header
-	header := make(http.Header)
-	for key, values := range headerMap {
-		for _, value := range values {
-			header.Add(key, value)
-		}
-	}
-	return header
 }

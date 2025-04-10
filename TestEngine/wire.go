@@ -59,6 +59,7 @@ func InitWebServer() *App {
 		dao.NewAPIDAO,
 		noteDao.NewNoteDAO,
 		dao.NewGORMTaskDAO,
+		dao.NewGORMCronJobDAO,
 
 		cache.NewRedisNoteCache,
 
@@ -70,10 +71,12 @@ func InitWebServer() *App {
 		noteRepo.NewNoteRepository,
 		repository.NewAPIRepository,
 		repository.NewCacheTaskRepository,
+		repository.NewCacheCronJobRepository,
 
 		service.NewUserService,
 		service.NewNoteService,
 		service.NewAPIService,
+		service.NewCronJobServiceImpl,
 
 		core.NewTaskService,
 		core.NewHttpService,
@@ -84,6 +87,7 @@ func InitWebServer() *App {
 		web.NewAPIHandler,
 		web.NewAIHandler,
 		web.NewTaskHandler,
+		web.NewCronJobHandler,
 
 		ijwt.NewRedisJWTHandler,
 

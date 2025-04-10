@@ -12,11 +12,7 @@ func InitTable(db *gorm.DB) error {
 		&note.PublishedNote{},
 		&API{},
 		&Task{},
-
-		//&Interactive{},
-		//&UserLikeBiz{},
-		//&Collection{},
-		//&UserCollectionBiz{},
 		&Job{},
+		&CronJob{},
 	)
 }

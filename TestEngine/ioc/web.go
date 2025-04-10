@@ -74,7 +74,13 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userHandler *web.UserHandler, apiHandler *web.APIHandler, taskHandler *web.TaskHandler, notehandler *web.NoteHandler) *gin.Engine {
+func InitWebServer(middleware []gin.HandlerFunc,
+	aiHandler *web.AIHandler,
+	userHandler *web.UserHandler,
+	apiHandler *web.APIHandler,
+	taskHandler *web.TaskHandler,
+	notehandler *web.NoteHandler,
+	cronJobhandler *web.CronJobHandler) *gin.Engine {
 	server := gin.Default()
 	server.Use(CORSMiddleware())
 
@@ -85,6 +91,7 @@ func InitWebServer(middleware []gin.HandlerFunc, aiHandler *web.AIHandler, userH
 	taskHandler.RegisterRoutes(server)
 	aiHandler.RegisterRoutes(server)
 	notehandler.RegisterRoutes(server)
+	cronJobhandler.RegisterRoutes(server)
 	// 仅仅用于测试，不需要依赖注入
 	(&web.ObservabilityHandler{}).RegisterRoutes(server)
 	return server
