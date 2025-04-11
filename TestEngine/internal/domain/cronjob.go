@@ -18,6 +18,7 @@ type CronJob struct {
 	Retry       bool          `json:"retry,omitempty"`       // 是否重试
 	MaxRetries  uint64        `json:"maxRetries"`            // 最大重试次数
 	NextTime    time.Time     `json:"next_time"`
+	Status      int           `json:"status"`
 
 	Creator Editor `json:"creator"`
 	Ctime   time.Time

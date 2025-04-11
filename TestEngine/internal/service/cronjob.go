@@ -6,6 +6,7 @@ import (
 	"TestCopilot/TestEngine/internal/service/core"
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -14,47 +15,92 @@ import (
 type CronJobService interface {
 	Save(ctx context.Context, job domain.CronJob, uid int64) (int64, error)
 	ResetNextTime(ctx context.Context, jid int64) error
+	Release(ctx context.Context, jid int64) error
 	ExecOne(ctx *gin.Context, jid int64) error
+	StopOne(ctx *gin.Context, jid int64) error
 }
 
 type cronJobServiceImpl struct {
-	l       logger.LoggerV1
-	repo    repository.CronJobRepository
-	taskSvc core.TaskService
+	l        logger.LoggerV1
+	repo     repository.CronJobRepository
+	taskSvc  core.TaskService
+	interval time.Duration
+	//limiter  *semaphore.Weighted
 }
 
 func NewCronJobServiceImpl(l logger.LoggerV1, repo repository.CronJobRepository, taskSvc core.TaskService) CronJobService {
-	return &cronJobServiceImpl{l: l, repo: repo, taskSvc: taskSvc}
+	return &cronJobServiceImpl{
+		l:        l,
+		repo:     repo,
+		taskSvc:  taskSvc,
+		interval: time.Second * 10,
+		//limiter:  semaphore.NewWeighted(200),
+	}
+}
+
+const (
+	// 等待，准备进入
+	cronjobStatusWaiting = iota
+	// 执行中
+	cronjobStatusRunning
+	// 暂停调度
+	cronjobStatusPaused
+)
+
+func (svc *cronJobServiceImpl) StopOne(ctx *gin.Context, jid int64) error {
+	return svc.repo.Stop(ctx, jid)
 }
 
 func (svc *cronJobServiceImpl) ExecOne(ctx *gin.Context, jid int64) error {
-	// 某个任务的调度器
+	// 使用一个goroutine 执行某个任务
 	// 如果任务少，可以这样 一条一条独立执行
 	// 如果任务多，并且是多实例部署，就需要抢占式，通过 MySQl分布式锁抢中某个任务，然后再执行
+
 	for {
 		if ctx.Err() != nil {
 			// 退出调度循环
 			return ctx.Err()
 		}
+		//err := svc.limiter.Acquire(ctx, 1)
+		//if err != nil {
+		//	return err
+		//}
+
 		dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 		defer cancel()
+		status, err := svc.repo.GetJobStatusById(dbCtx, jid)
+		if status == cronjobStatusPaused {
+			return errors.New("任务已暂停")
+		}
 
-		j, err := svc.repo.GetJobById(dbCtx, jid)
+		j, err := svc.repo.PreemptByJId(dbCtx, jid)
 		if err != nil {
 			svc.l.Error("获取任务失败", logger.Error(err))
 		}
-		if time.Now().After(j.NextTime) && j.TaskId != 0 {
-			report := svc.taskSvc.PerformanceRun(ctx, j.TaskId)
-
-			svc.l.Info(fmt.Sprintf("定时任务执行结果：%v", report))
-
-			err = svc.ResetNextTime(ctx, jid)
-			if err != nil {
-				svc.l.Error("设置下一次执行时间失败", logger.Error(err))
+		go func() {
+			defer func() {
+				//svc.limiter.Release(1)
+				err = svc.repo.Release(ctx, jid)
+				if err != nil {
+					svc.l.Error("释放 job 失败", logger.Error(err))
+				}
+				err = svc.ResetNextTime(ctx, jid)
+				if err != nil {
+					svc.l.Error("设置下一次执行时间失败", logger.Error(err))
+				}
+			}()
+			if j.TaskId != 0 {
+				report := svc.taskSvc.PerformanceRun(ctx, j.TaskId)
+				svc.l.Info(fmt.Sprintf("定时任务执行结果：%v", report))
 			}
-		}
-		time.Sleep(time.Second * 30)
+		}()
+
+		time.Sleep(svc.interval)
 	}
+}
+
+func (svc *cronJobServiceImpl) Release(ctx context.Context, jid int64) error {
+	return svc.repo.Release(ctx, jid)
 }
 
 func (svc *cronJobServiceImpl) ResetNextTime(ctx context.Context, jid int64) error {
@@ -63,10 +109,10 @@ func (svc *cronJobServiceImpl) ResetNextTime(ctx context.Context, jid int64) err
 		svc.l.Error("通过 jid，获取 job 失败")
 	}
 	next := j.SetNextTime()
-	//if next.IsZero() {
-	//	// 没有下一次，不用更新
-	//	return svc.repo.Stop(ctx, j.Id)
-	//}
+	if next.IsZero() {
+		// 没有下一次，不用更新
+		return svc.repo.Stop(ctx, j.Id)
+	}
 	return svc.repo.UpdateNextTime(ctx, j.Id, next)
 }
 

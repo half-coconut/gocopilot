@@ -45,22 +45,33 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    0,
-			Message: "系统错误",
+			Code:    errs.TaskInvalidInput,
+			Message: "输入格式不正确",
 		}, err
 	}
 	req.jid, err = strconv.ParseInt(jid, 10, 64)
 	if err != nil {
 		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.JobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
-	// 先设置 next_time
+	// 先释放任务
+	err = c.svc.Release(ctx, req.jid)
+	if err != nil {
+		return ginx.Result{
+			Code:    errs.JobInternalServerError,
+			Message: "系统错误",
+		}, err
+	}
+
 	err = c.svc.ResetNextTime(ctx, req.jid)
 	if err != nil {
-		return ginx.Result{}, err
+		return ginx.Result{
+			Code:    errs.JobInternalServerError,
+			Message: "系统错误",
+		}, err
 	}
 	// 异步调用执行定时任务
 	go c.svc.ExecOne(ctx, req.jid)
@@ -73,7 +84,41 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 }
 
 func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
-	panic("implement me")
+	jid := ctx.Param("id")
+
+	type JobReq struct {
+		jid int64 `json:"id"`
+	}
+	var req JobReq
+	err := ctx.Bind(&req)
+	if err != nil {
+		return ginx.Result{
+			Code:    errs.TaskInvalidInput,
+			Message: "输入格式不正确",
+		}, err
+	}
+	req.jid, err = strconv.ParseInt(jid, 10, 64)
+	if err != nil {
+		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
+		return ginx.Result{
+			Code:    errs.JobInternalServerError,
+			Message: "系统错误",
+		}, err
+	}
+
+	err = c.svc.StopOne(ctx, req.jid)
+	if err != nil {
+		c.l.Error(fmt.Sprintf("暂停任务失败: %v", err))
+		return ginx.Result{
+			Code:    errs.JobInternalServerError,
+			Message: "系统错误",
+		}, err
+	}
+	return ginx.Result{
+		Code:    1,
+		Message: "OK",
+		Data:    jid,
+	}, err
 }
 
 // AddHttpMode 添加Http请求类型

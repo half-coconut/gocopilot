@@ -11,10 +11,14 @@ import (
 
 type CronJobDAO interface {
 	Preempt(ctx context.Context) (CronJob, error)
+	PreemptByJId(ctx context.Context, jid int64) (CronJob, error)
 	Insert(ctx context.Context, job CronJob) (int64, error)
 	UpdateById(ctx context.Context, job CronJob) error
 	GetJobById(ctx context.Context, jid int64) (CronJob, error)
+	GetJobStatusById(ctx context.Context, jid int64) (int, error)
 	UpdateNextTime(ctx context.Context, id int64, next time.Time) error
+	Stop(ctx context.Context, id int64) error
+	Release(ctx context.Context, id int64) error
 }
 
 type GORMCronJobDAO struct {
@@ -27,32 +31,65 @@ func NewGORMCronJobDAO(db *gorm.DB, l logger.LoggerV1) CronJobDAO {
 		db: db,
 		l:  l}
 }
-
+func (dao *GORMCronJobDAO) GetJobStatusById(ctx context.Context, jid int64) (int, error) {
+	var job CronJob
+	err := dao.db.WithContext(ctx).Where("id=?", jid).Find(&job).Error
+	return job.Status, err
+}
 func (dao *GORMCronJobDAO) GetJobById(ctx context.Context, jid int64) (CronJob, error) {
 	var job CronJob
 	err := dao.db.WithContext(ctx).Where("id=?", jid).Find(&job).Error
 	return job, err
 }
 
+func (dao *GORMCronJobDAO) PreemptByJId(ctx context.Context, jid int64) (CronJob, error) {
+	db := dao.db.WithContext(ctx)
+	for {
+		now := time.Now().UnixMilli()
+		var j CronJob
+		err := db.Model(&CronJob{}).Where("id = ? AND status = ? AND next_time <= ?", jid, cronjobStatusWaiting, now).
+			First(&j).Error
+		if err != nil {
+			return CronJob{}, err
+		}
+		// 使用乐观锁
+		res := db.Where("id =? AND version=?", jid, j.Version).Model(&CronJob{}).
+			Updates(map[string]any{
+				"status":  cronjobStatusRunning,
+				"version": j.Version + 1,
+				"utime":   now,
+			})
+		if res.Error != nil {
+			return CronJob{}, err
+		}
+		if res.RowsAffected == 0 {
+			return CronJob{}, errors.New("没抢到")
+		}
+		return j, err
+	}
+
+}
+
 func (dao *GORMCronJobDAO) Preempt(ctx context.Context) (CronJob, error) {
 	db := dao.db.WithContext(ctx)
+	// for 循环通过允许重试来提高了任务抢占的成功率
 	for {
 
 		now := time.Now()
 		var j CronJob
 		// 在所有即将满足条件的 job, 获取 first
-		err := db.Model(&Job{}).Where("status = ? AND next_time <= ?", cronjobStatusWaiting, now).
+		err := db.Model(&CronJob{}).Where("status = ? AND next_time <= ?", cronjobStatusWaiting, now).
 			First(&j).Error
 		if err != nil {
 			return CronJob{}, err
 		}
 
 		// 乐观锁，CAS 操作，compare and swap
-		res := db.Where("id=? AND version=?", j.Id, j.Version).Model(&Job{}).
+		res := db.Where("id=? AND version=?", j.Id, j.Version).Model(&CronJob{}).
 			Updates(map[string]any{
 				"status":  cronjobStatusRunning,
 				"version": j.Version + 1, // 乐观锁，用于并发控制
-				"utime":   now,
+				"utime":   now.UnixMilli(),
 			})
 		if res.Error != nil {
 			return CronJob{}, err
@@ -66,9 +103,22 @@ func (dao *GORMCronJobDAO) Preempt(ctx context.Context) (CronJob, error) {
 	}
 }
 
+func (dao *GORMCronJobDAO) Release(ctx context.Context, id int64) error {
+	return dao.db.WithContext(ctx).Model(&CronJob{}).Where("id=?", id).Updates(map[string]any{
+		"utime":  time.Now().UnixMilli(),
+		"status": cronjobStatusWaiting,
+	}).Error
+}
+
 func (dao *GORMCronJobDAO) UpdateNextTime(ctx context.Context, id int64, next time.Time) error {
 	return dao.db.WithContext(ctx).Model(&CronJob{}).Where("id=?", id).Updates(map[string]any{
 		"next_time": next.UnixMilli(),
+	}).Error
+}
+func (dao *GORMCronJobDAO) Stop(ctx context.Context, id int64) error {
+	return dao.db.WithContext(ctx).Model(&CronJob{}).Where("id=?", id).Updates(map[string]any{
+		"status": cronjobStatusPaused,
+		"utime":  time.Now().UnixMilli(),
 	}).Error
 }
 
@@ -132,8 +182,10 @@ type CronJob struct {
 }
 
 const (
-	cronjobStatusWaiting = 0
-	cronjobStatusRunning = 1
+	// 等待，准备进入
+	cronjobStatusWaiting = iota
+	// 执行中
+	cronjobStatusRunning
 	// 暂停调度
-	cronjobStatusPaused = 2
+	cronjobStatusPaused
 )
