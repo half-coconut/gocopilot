@@ -167,6 +167,7 @@ server {
 }
 }
 
+scp root@47.239.187.141:/etc/nginx/sites-available/default /Users/chenchen/Desktop/default
 ```
 
 2025-04-09
