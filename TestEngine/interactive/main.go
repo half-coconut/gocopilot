@@ -19,7 +19,7 @@ func main() {
 		}
 	}
 
-	err := app.server.Serve(app.server.Addr)
+	err := app.server.Serve()
 	log.Println(err)
 }
 

@@ -44,9 +44,13 @@ func InitWebServer() *App {
 		ioc.InitKafka,
 		ioc.NewConsumers,
 		ioc.NewSyncProducer,
-		ioc.InitIntrGRPCClient,
+		//ioc.InitIntrGRPCClient,
+		// 放一起，启用了 etcd 作为配置中心
+		ioc.InitEtcd,
+		ioc.InitIntrGRPCClientV1,
 
-		interactiveSvcProvider,
+		// 这是流量控制用的
+		//interactiveSvcProvider,
 		rankingServiceSet,
 		ioc.InitJobs,
 		ioc.InitRankingJob,

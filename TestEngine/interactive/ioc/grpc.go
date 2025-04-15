@@ -3,14 +3,16 @@ package ioc
 import (
 	grpc2 "TestCopilot/TestEngine/interactive/grpc"
 	"TestCopilot/TestEngine/pkg/grpcx"
+	"TestCopilot/TestEngine/pkg/logger"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 
 // InitGRPCxServer 类似 web 里的加 handle 一样
-func InitGRPCxServer(intrServer *grpc2.InteractiveServiceServer) *grpcx.Server {
+func InitGRPCxServer(l logger.LoggerV1, intrServer *grpc2.InteractiveServiceServer) *grpcx.Server {
 	type Config struct {
-		Addr string `yaml:"addr"`
+		Port     int      `yaml:"port"`
+		EtcdAddr []string `yaml:"etcdAddr"`
 	}
 
 	var cfg Config
@@ -23,7 +25,10 @@ func InitGRPCxServer(intrServer *grpc2.InteractiveServiceServer) *grpcx.Server {
 	intrServer.Register(server)
 
 	return &grpcx.Server{
-		Server: server,
-		Addr:   cfg.Addr,
+		Server:   server,
+		Port:     cfg.Port,
+		EtcdAddr: cfg.EtcdAddr,
+		Name:     "interactive",
+		L:        l,
 	}
 }

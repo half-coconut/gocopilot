@@ -184,3 +184,22 @@ scp root@47.239.187.141:/etc/nginx/sites-available/default /Users/chenchen/Deskt
 - 完成开启、关闭的功能
 - 开启时释放任务，设置下一次运行时间，抢占式获取执行锁，运行任务后，释放任务，设置下一次运行时间
 - 关闭功能，调用关闭后，状态为 cronjobStatusPaused，此时运行任务的 goroutine 在间隔后执行任务暂停
+
+2025-04-14
+```shell
+#列出当前使用端口 8090 的所有进程
+lsof -i:8090
+
+brew install etcd
+etcdctl --version
+etcdctl --endpoints=localhost:12379 get service/user/127.0.0.1:8090
+
+➜  ~ etcdctl --endpoints=localhost:12379 get service/user/127.0.0.1:8090
+service/user/127.0.0.1:8090
+{"Op":0,"Addr":"127.0.0.1:8090","Metadata":"2025-04-14 13:58:11.399592417 +0800 CST m=+464.031308876"}
+
+➜  ~ etcdctl --endpoints=localhost:12379 get service/user --prefix      
+service/user/198.18.0.1:8090
+{"Op":0,"Addr":"198.18.0.1:8090","Metadata":"2025-04-14 15:31:02.734662959 +0800 CST m=+57.030341418"}
+➜  ~ 
+```

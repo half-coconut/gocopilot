@@ -38,9 +38,9 @@ func (n *NoteHandler) RegisterRoutes(server *gin.Engine) {
 	note.POST("/publish", n.Publish)
 	note.POST("/withdraw", n.Withdraw)
 	note.POST("/list", ginx.WrapBodyAndToken[ListReq, ijwt.UserClaims](n.List))
-	note.GET("/detail:id", ginx.WrapToken[ijwt.UserClaims](n.Detail))
+	note.GET("/detail/:id", ginx.WrapToken[ijwt.UserClaims](n.Detail))
 
-	pub := server.Group("/pub")
+	pub := note.Group("/pub")
 	pub.GET("/:id", n.PubDetail, func(ctx *gin.Context) {})
 	pub.POST("/like", ginx.WrapBodyAndToken[LikeReq, ijwt.UserClaims](n.Like))
 	pub.POST("/reward", ginx.WrapBodyAndToken[RewardReq, ijwt.UserClaims](n.Reward))
