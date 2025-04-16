@@ -219,12 +219,12 @@ bash
 2 Vim IDE 安装和配置
 
 ```shell
-rm -rf $HOME/.vim; mkdir -p ~/.vim/pack/plugins/start/
+rm -rf $HOME/.vim; mkdir -p $HOME/.vim/pack/plugins/start/
 
-git clone https://github.com/colin404/vim-go ~./vim/pack/plugins/start/vim-go
-git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-git clone --depth=1 https://github.com/colin404/vimrc.git ~/.vim_runtime
-sh ~/.vim_runtime/install_awesome_vimrc.sh
+git clone https://github.com/colin404/vim-go $HOME/.vim/pack/plugins/start/vim-go
+git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
+git clone --depth=1 https://github.com/colin404/vimrc.git $HOME/.vim_runtime
+sh $HOME/.vim_runtime/install_awesome_vimrc.sh
 git clone https://github.com/onexstack/vimrc /tmp/vimrc
 cp /tmp/vimrc/vimrc $HOME/.vim_runtime/my_configs.vim
 

@@ -65,6 +65,10 @@ func (s *EtcdTestSuite) TestServer() {
 	defer cancel()
 	err = em.AddEndpoint(ctx, key, endpoints.Endpoint{
 		Addr: addr,
+		// 在这里添加权重
+		Metadata: map[string]any{
+			"weight": 100,
+		},
 	}, etcdv3.WithLease(leaseResp.ID))
 	require.NoError(s.T(), err)
 
@@ -86,8 +90,13 @@ func (s *EtcdTestSuite) TestServer() {
 			ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 
 			err = em.AddEndpoint(ctx, key, endpoints.Endpoint{
-				Addr:     addr,
-				Metadata: now.String(),
+				Addr: addr,
+				//Metadata: now.String(),
+				// 注意：更新，也需要在这里添加权重
+				Metadata: map[string]any{
+					"weight": 200,
+					"time":   now.String(),
+				},
 				// 注意：更新注册信息时，需要把 lease ID 带上
 			}, etcdv3.WithLease(leaseResp.ID))
 			if err != nil {

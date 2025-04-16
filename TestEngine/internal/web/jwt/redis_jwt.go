@@ -103,6 +103,6 @@ func (h *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid int64, ssid string) 
 		return err
 	}
 	ctx.Header("x-jwt-token", tokenStr)
-	fmt.Printf("JWT Token: %v\n", tokenStr)
+	//fmt.Printf("JWT Token: %v\n", tokenStr)
 	return nil
 }
