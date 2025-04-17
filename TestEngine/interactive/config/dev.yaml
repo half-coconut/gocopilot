@@ -13,6 +13,7 @@ grpc:
     port: 8090
     etcdAddr:
       - "localhost:12379"
+
 #  client:
 #    user:
 #      addr: "user.my_company.com:8090"

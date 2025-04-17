@@ -3,6 +3,7 @@ package grpc
 import (
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
+	"math/rand"
 	"sync"
 	"testing"
 )
@@ -89,4 +90,16 @@ func (b *Balance) wrr() *Node {
 	target.currentWeight = target.currentWeight - total
 	b.t.Log("选中的节点的当前权重，减去总权重后", target)
 	return target
+}
+
+func (b *Balance) randomPick() *Node {
+	var total int32 = 60
+	r := rand.Int31n(total)
+	for _, n := range b.nodes {
+		r -= int32(n.weight)
+		if r < 0 {
+			return n
+		}
+	}
+	panic("abc")
 }

@@ -6,7 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/redis/go-redis/v9"
+	redis "github.com/redis/go-redis/v9"
 	"strconv"
 	"time"
 )

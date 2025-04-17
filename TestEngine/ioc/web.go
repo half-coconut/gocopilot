@@ -20,13 +20,11 @@ import (
 	"os"
 	"strings"
 
-	//"github.com/gin-contrib/sessions"
-	//"github.com/gin-contrib/sessions/redis"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 	"time"
 )
 
-func InitMiddleware(redisClients redis.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.Handler) []gin.HandlerFunc {
+func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.Handler) []gin.HandlerFunc {
 	ginx.InitCounter(prometheus.CounterOpts{
 		Namespace: "test_copilot",
 		Subsystem: "test_engine",

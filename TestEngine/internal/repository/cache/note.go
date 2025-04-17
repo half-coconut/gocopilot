@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 	"time"
 )
 
@@ -24,10 +24,10 @@ type NoteCache interface {
 }
 
 type RedisNoteCache struct {
-	client redis.Cmdable
+	client redisv9.Cmdable
 }
 
-func NewRedisNoteCache(client redis.Cmdable) NoteCache {
+func NewRedisNoteCache(client redisv9.Cmdable) NoteCache {
 	return &RedisNoteCache{
 		client: client,
 	}

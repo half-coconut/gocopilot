@@ -23,13 +23,15 @@ func (s *EtcdTestSuite) SetupSuite() {
 	client, err := etcdv3.New(etcdv3.Config{
 		Endpoints: []string{"localhost:12379"},
 	})
+
 	require.NoError(s.T(), err)
 	s.client = client
 }
 
 func (s *EtcdTestSuite) TestClient() {
 	bd, err := resolver.NewBuilder(s.client)
-	require.NoError(s.T(), err)
+	//require.NoError(s.T(), err)
+	require.NoError((*testing.T)(s.T()), err)
 	cc, err := grpc.Dial("etcd:///service/user",
 		grpc.WithResolvers(bd),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))

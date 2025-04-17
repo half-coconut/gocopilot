@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 	"time"
 )
 
@@ -15,7 +15,7 @@ type UserCache interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-func NewUserCache(cmd redis.Cmdable) UserCache {
+func NewUserCache(cmd redisv9.Cmdable) UserCache {
 	return &RedisUserCache{
 		cmd:        cmd,
 		expiration: time.Minute * 5, // 5min 过期时间
@@ -23,7 +23,7 @@ func NewUserCache(cmd redis.Cmdable) UserCache {
 }
 
 type RedisUserCache struct {
-	cmd        redis.Cmdable
+	cmd        redisv9.Cmdable
 	expiration time.Duration
 }
 

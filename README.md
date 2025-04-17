@@ -14,7 +14,7 @@
 $ git clone https://github.com/half-coconut/TestCopilot.git
 $ cd TestCopilot/TestEngine
 $ docker-compose up -d # 安装依赖
-$ make docker # 生成可执行文件
+$ make docker 
 ```
 将容器镜像部署到k8s
 

@@ -2,14 +2,14 @@ package startup
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 )
 
-var redisClient redis.Cmdable
+var redisClient redisv9.Cmdable
 
-func InitRedis() redis.Cmdable {
+func InitRedis() redisv9.Cmdable {
 	if redisClient == nil {
-		redisClient = redis.NewClient(&redis.Options{
+		redisClient = redisv9.NewClient(&redisv9.Options{
 			Addr: "localhost:6379",
 		})
 

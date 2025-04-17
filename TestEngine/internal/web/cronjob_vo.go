@@ -11,5 +11,5 @@ type CronJobReq struct {
 	TimeZone    string `json:"timezone,omitempty"`    // 时区?
 	Duration    string `json:"duration"`              // 持续任务: 运行时间，超时退出，用于 http 请求
 	Retry       bool   `json:"retry,omitempty"`       // 是否重试
-	MaxRetries  uint64 `json:"maxRetries"`            // 最大重试次数
+	MaxRetries  uint64 `json:"max_retries"`           // 最大重试次数
 }

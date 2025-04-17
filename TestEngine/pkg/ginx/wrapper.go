@@ -3,7 +3,7 @@ package ginx
 import (
 	"TestCopilot/TestEngine/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strconv"
@@ -23,7 +23,7 @@ func InitCounter(opt prometheus.CounterOpts) {
 	prometheus.MustRegister(vector)
 }
 
-func WrapToken[C jwt.Claims](fn func(ctx *gin.Context, uc C) (Result, error)) gin.HandlerFunc {
+func WrapToken[C jwtv5.Claims](fn func(ctx *gin.Context, uc C) (Result, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		cl, ok := ctx.Get("users")
 		if !ok {
@@ -48,7 +48,7 @@ func WrapToken[C jwt.Claims](fn func(ctx *gin.Context, uc C) (Result, error)) gi
 	}
 }
 
-func WrapBodyAndToken[Req any, C jwt.Claims](fn func(ctx *gin.Context, req Req, uc C) (Result, error)) gin.HandlerFunc {
+func WrapBodyAndToken[Req any, C jwtv5.Claims](fn func(ctx *gin.Context, req Req, uc C) (Result, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req Req
 		err := ctx.Bind(&req)

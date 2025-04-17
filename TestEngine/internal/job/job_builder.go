@@ -4,7 +4,7 @@ import (
 	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/robfig/cron/v3"
+	cronv3 "github.com/robfig/cron/v3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"strconv"
@@ -32,7 +32,7 @@ func NewCronJobBuilder(l logger.LoggerV1) *CronJobBuilder {
 	}
 }
 
-func (b *CronJobBuilder) Build(job Job) cron.Job {
+func (b *CronJobBuilder) Build(job Job) cronv3.Job {
 	name := job.Name()
 	return cronJobFuncAdapter(func() error {
 		_, span := b.tracer.Start(context.Background(), name)

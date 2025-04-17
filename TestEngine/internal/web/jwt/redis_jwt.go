@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"strings"
 	"time"
 )
@@ -17,10 +18,10 @@ var (
 )
 
 type RedisJWTHandler struct {
-	cmd redis.Cmdable
+	cmd redisv9.Cmdable
 }
 
-func NewRedisJWTHandler(cmd redis.Cmdable) Handler {
+func NewRedisJWTHandler(cmd redisv9.Cmdable) Handler {
 	return &RedisJWTHandler{
 		cmd: cmd,
 	}
@@ -39,12 +40,12 @@ func (h *RedisJWTHandler) SetLoginToken(ctx *gin.Context, uid int64) error {
 func (h *RedisJWTHandler) setRefreshToken(ctx *gin.Context, uid int64, ssid string) error {
 	claims := RefreshClaims{
 		Ssid: ssid,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
+		RegisteredClaims: jwtv5.RegisteredClaims{
+			ExpiresAt: jwtv5.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
 		},
 		Uid: uid,
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString(RtKey)
 	if err != nil {
 		return err
@@ -90,14 +91,14 @@ func (h *RedisJWTHandler) ExtractToken(ctx *gin.Context) string {
 
 func (h *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid int64, ssid string) error {
 	claims := UserClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60 * 2)), // token 2小时 失效
+		RegisteredClaims: jwtv5.RegisteredClaims{
+			ExpiresAt: jwtv5.NewNumericDate(time.Now().Add(time.Minute * 60 * 2)), // token 2小时 失效
 		},
 		Id:        uid,
 		Ssid:      ssid,
 		UserAgent: ctx.Request.UserAgent(),
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString(AtKey)
 	if err != nil {
 		return err

@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 )
 
 type Handler interface {
@@ -16,11 +16,11 @@ type Handler interface {
 type RefreshClaims struct {
 	Uid  int64
 	Ssid string
-	jwt.RegisteredClaims
+	jwtv5.RegisteredClaims
 }
 
 type UserClaims struct {
-	jwt.RegisteredClaims
+	jwtv5.RegisteredClaims
 	// 声明你自己的要放进去 token 里面的数据
 	Id        int64  `json:"id"`
 	Ssid      string `json:"ssid"`

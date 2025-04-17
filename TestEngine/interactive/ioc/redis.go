@@ -2,11 +2,11 @@ package ioc
 
 import (
 	"TestCopilot/TestEngine/config"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 )
 
-func InitRedis() redis.Cmdable {
-	redisClient := redis.NewClient(&redis.Options{
+func InitRedis() redisv9.Cmdable {
+	redisClient := redisv9.NewClient(&redisv9.Options{
 		Addr: config.Config.Redis.Addr,
 	})
 	return redisClient

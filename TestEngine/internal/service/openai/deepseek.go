@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
-	"github.com/mitchellh/go-homedir"
+	gohomedir "github.com/mitchellh/go-homedir"
 	"log"
 	"net/http"
 	"os"
@@ -64,7 +64,7 @@ func (d *deepSeekService) DeepSeekClient(prompt, userInput string) (string, erro
 }
 
 func (d *deepSeekService) getApiAndEndpoint() (string, string) {
-	home, err := homedir.Dir()
+	home, err := gohomedir.Dir()
 	if err != nil {
 		log.Fatal(err)
 	}

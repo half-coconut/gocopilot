@@ -3,7 +3,7 @@ package middleware
 import (
 	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
@@ -36,7 +36,7 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 		tokenStr := l.ExtractToken(ctx)
 		claims := ijwt.UserClaims{}
 		// ParseWithClaims 里面，一定要传入指针
-		token, err := jwt.ParseWithClaims(tokenStr, &claims, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwtv5.ParseWithClaims(tokenStr, &claims, func(token *jwtv5.Token) (interface{}, error) {
 			return []byte("95osj3fUD7fo0mlYdDbncXz4VD2igvf0"), nil
 		})
 		if err != nil {

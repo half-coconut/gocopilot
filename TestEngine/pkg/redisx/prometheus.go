@@ -3,7 +3,8 @@ package redisx
 import (
 	"context"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"net"
 	"strconv"
 	"time"
@@ -23,14 +24,14 @@ func NewPrometheusHook(opt prometheus.SummaryOpts) *PrometheusHook {
 	}
 }
 
-func (p *PrometheusHook) DialHook(next redis.DialHook) redis.DialHook {
+func (p *PrometheusHook) DialHook(next redisv9.DialHook) redisv9.DialHook {
 	return func(ctx context.Context, network, addr string) (net.Conn, error) {
 		// 相当于什么也没干
 		return next(ctx, network, addr)
 	}
 }
 
-func (p *PrometheusHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
+func (p *PrometheusHook) ProcessHook(next redisv9.ProcessHook) redisv9.ProcessHook {
 	// 在这里监控
 	return func(ctx context.Context, cmd redis.Cmder) error {
 		// 在 redis 执行之前

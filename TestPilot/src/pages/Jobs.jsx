@@ -1,5 +1,6 @@
 import Heading from "../ui/Heading";
 import Row from "../ui/Row";
+import AddJob from "../features/jobs/AddJob";
 
 function Jobs() {
   return (
@@ -9,9 +10,8 @@ function Jobs() {
       </Row>
 
       <Row>
-        Here is your jobs list...
-        {/* <InterfaceTable />
-        <AddInterface /> */}
+        {/* <InterfaceTable />*/}
+        <AddJob />
       </Row>
     </>
   );

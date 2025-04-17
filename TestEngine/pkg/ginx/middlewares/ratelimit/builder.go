@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 	"log"
 	"net/http"
 	"time"
@@ -12,7 +12,7 @@ import (
 
 type Builder struct {
 	prefix   string
-	cmd      redis.Cmdable
+	cmd      redisv9.Cmdable
 	interval time.Duration
 	// 阈值
 	rate int
@@ -21,7 +21,7 @@ type Builder struct {
 //go:embed slide_window.lua
 var luaScript string
 
-func NewBuilder(cmd redis.Cmdable, interval time.Duration, rate int) *Builder {
+func NewBuilder(cmd redisv9.Cmdable, interval time.Duration, rate int) *Builder {
 	return &Builder{
 		cmd:      cmd,
 		prefix:   "ip-limiter",

@@ -20,7 +20,8 @@ type GoZeroTestSuite struct {
 }
 
 // TestGoZeroClient 启动 grpc 客户端
-func (s *GoZeroTestSuite) TestGoZeroClient() {
+func (s *GoZeroTestSuite) TestGoZeroClient(t *testing.T) {
+	suite.Run(t, new(GoZeroTestSuite))
 	zClient := zrpc.MustNewClient(zrpc.RpcClientConf{
 		Etcd: discov.EtcdConf{
 			Hosts: []string{"localhost:12379"},

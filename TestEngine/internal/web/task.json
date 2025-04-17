@@ -19,5 +19,5 @@
   "timezone": "UTC",
   "duration": "30s",
   "retry": false,
-  "maxRetries": 0
+  "max_retries": 0
 }

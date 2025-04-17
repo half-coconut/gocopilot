@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/robfig/cron/v3"
+	cronv3 "github.com/robfig/cron/v3"
 	"time"
 )
 
@@ -16,7 +16,7 @@ type Job struct {
 	CancelFunc func() error
 }
 
-var parser = cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+var parser = cronv3.NewParser(cronv3.Minute | cronv3.Hour | cronv3.Dom | cronv3.Month | cronv3.Dow | cronv3.Descriptor)
 
 func (j Job) NextTime() time.Time {
 	s, _ := parser.Parse(j.Cron)

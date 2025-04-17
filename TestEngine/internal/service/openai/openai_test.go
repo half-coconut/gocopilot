@@ -2,7 +2,7 @@ package openai
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/mitchellh/go-homedir"
+	gohomedir "github.com/mitchellh/go-homedir"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,7 +11,7 @@ import (
 
 func TestEnv(t *testing.T) {
 	// 加载 .env 文件
-	home, err := homedir.Dir()
+	home, err := gohomedir.Dir()
 	if err != nil {
 		log.Fatal(err)
 	}

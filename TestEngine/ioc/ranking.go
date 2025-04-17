@@ -5,7 +5,7 @@ import (
 	"TestCopilot/TestEngine/internal/service"
 	"TestCopilot/TestEngine/pkg/logger"
 	rlock "github.com/gotomicro/redis-lock"
-	"github.com/robfig/cron/v3"
+	cronv3 "github.com/robfig/cron/v3"
 	"time"
 )
 
@@ -14,8 +14,8 @@ func InitRankingJob(svc service.RankingService, client *rlock.Client, l logger.L
 
 }
 
-func InitJobs(l logger.LoggerV1, rankingJob *job.RankingJob) *cron.Cron {
-	res := cron.New(cron.WithSeconds())
+func InitJobs(l logger.LoggerV1, rankingJob *job.RankingJob) *cronv3.Cron {
+	res := cronv3.New(cronv3.WithSeconds())
 	cbd := job.NewCronJobBuilder(l)
 	// 每 3 分钟执行一次
 	_, err := res.AddJob("0 */3 * * * ?", cbd.Build(rankingJob))

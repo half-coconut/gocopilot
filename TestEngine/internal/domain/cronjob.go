@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/robfig/cron/v3"
+	cronv3 "github.com/robfig/cron/v3"
 	"time"
 )
 
@@ -26,7 +26,7 @@ type CronJob struct {
 	Version int
 }
 
-var cronjob_parser = cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+var cronjob_parser = cronv3.NewParser(cronv3.Minute | cronv3.Hour | cronv3.Dom | cronv3.Month | cronv3.Dow | cronv3.Descriptor)
 
 func (j CronJob) SetNextTime() time.Time {
 	s, _ := cronjob_parser.Parse(j.Cron)

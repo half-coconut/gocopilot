@@ -4,7 +4,7 @@ import (
 	"TestCopilot/TestEngine/internal/domain"
 	"context"
 	"encoding/json"
-	"github.com/redis/go-redis/v9"
+	redisv9 "github.com/redis/go-redis/v9"
 	"time"
 )
 
@@ -14,11 +14,11 @@ type RankingCache interface {
 }
 
 type RankingRedisCache struct {
-	client redis.Cmdable
+	client redisv9.Cmdable
 	key    string
 }
 
-func NewRankingRedisCache(client redis.Cmdable) *RankingRedisCache {
+func NewRankingRedisCache(client redisv9.Cmdable) *RankingRedisCache {
 	return &RankingRedisCache{
 		client: client,
 		key:    "ranking",
