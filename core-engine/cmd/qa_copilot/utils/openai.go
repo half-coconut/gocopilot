@@ -1,11 +1,11 @@
-package openai
+package utils
 
 import (
 	"context"
 	"errors"
 	"github.com/joho/godotenv"
-	gohomedir "github.com/mitchellh/go-homedir"
-	goopenai "github.com/sashabaranov/go-openai"
+	"github.com/mitchellh/go-homedir"
+	"github.com/sashabaranov/go-openai"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,18 +13,18 @@ import (
 
 // OpenAI 初始化 openai client
 type OpenAI struct {
-	Client *goopenai.Client
+	Client *openai.Client
 	ctx    context.Context
 }
 
 func NewOpenAIClient() (ai *OpenAI, err error) {
-	home, err := gohomedir.Dir()
+	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatal(err)
 	}
 	// 构建 .env 文件的路径
-	envPath := filepath.Join(home, "Desktop", "TestCopilot", "TestEngine", "cmd", "qa_copilot", ".env")
-	//envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "TestEngine", "cmd", "qa_copilot", ".env")
+	// /Users/chenchen/Desktop/TestCopilot/core-engine/pkg/qa_copilot/.env
+	envPath := filepath.Join(home, "Desktop", "TestCopilot", "core-engine", "pkg", "qa_copilot", ".env")
 	err = godotenv.Load(envPath)
 	if err != nil {
 		log.Println(err)
@@ -35,9 +35,9 @@ func NewOpenAIClient() (ai *OpenAI, err error) {
 	if apiKey == "" {
 		return nil, errors.New("OPENAI_API_KEY environment variable is not set")
 	}
-	config := goopenai.DefaultConfig(apiKey)
+	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = os.Getenv("OPENAI_API_BASE")
-	client := goopenai.NewClientWithConfig(config)
+	client := openai.NewClientWithConfig(config)
 
 	ctx := context.Background()
 	return &OpenAI{
@@ -47,9 +47,9 @@ func NewOpenAIClient() (ai *OpenAI, err error) {
 }
 
 func (o *OpenAI) SendMessage(prompt, content string) (string, error) {
-	req := goopenai.ChatCompletionRequest{
-		Model: goopenai.GPT4o,
-		Messages: []goopenai.ChatCompletionMessage{
+	req := openai.ChatCompletionRequest{
+		Model: openai.GPT4o,
+		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    "system",
 				Content: prompt,

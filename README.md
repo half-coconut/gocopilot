@@ -1,4 +1,4 @@
-# TestCopilot
+# testcopilot
 
 
 ![testengine drawio](https://github.com/user-attachments/assets/b12b1ac1-a31a-418b-8095-ef353373f883)
@@ -12,7 +12,7 @@
 快速部署&&本地调试
 ```shell
 $ git clone https://github.com/half-coconut/TestCopilot.git
-$ cd TestCopilot/TestEngine
+$ cd TestCopilot/core-engine
 $ docker-compose up -d # 安装依赖
 $ make docker 
 ```

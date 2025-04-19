@@ -28,7 +28,7 @@ func NewCronJobBuilder(l logger.LoggerV1) *CronJobBuilder {
 	return &CronJobBuilder{
 		l:      l,
 		p:      p,
-		tracer: otel.GetTracerProvider().Tracer("/Users/chenchen/Downloads/TestCopilot-main/TestEngine/internal/job"),
+		tracer: otel.GetTracerProvider().Tracer("/Users/chenchen/Downloads/TestCopilot-main/core-engine/internal/job"),
 	}
 }
 

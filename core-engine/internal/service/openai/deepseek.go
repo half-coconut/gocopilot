@@ -69,8 +69,8 @@ func (d *deepSeekService) getApiAndEndpoint() (string, string) {
 		log.Fatal(err)
 	}
 	// 构建 .env 文件的路径
-	envPath := filepath.Join(home, "Desktop", "TestCopilot", "TestEngine", "cmd", "qa_copilot", ".env")
-	//envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "TestEngine", "cmd", "qa_copilot", ".env")
+	envPath := filepath.Join(home, "Desktop", "TestCopilot", "core-engine", "cmd", "qa_copilot", ".env")
+	//envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "core-engine", "cmd", "qa_copilot", ".env")
 	err = godotenv.Load(envPath)
 	if err != nil {
 		d.l.Error("Error loading .env file", logger.Error(err))

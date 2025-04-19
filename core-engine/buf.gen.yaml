@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: "TestCopilot/TestEngine/api/proto/gen"
+    default: "TestCopilot/core-engine/api/proto/gen"
 plugins:
   - plugin: buf.build/protocolbuffers/go
     out: api/proto/gen

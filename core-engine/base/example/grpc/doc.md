@@ -33,5 +33,5 @@ npm install @bufbuild/buf
 
 npx buf --version
 
-➜  TestEngine git:(main) ✗ npx buf generate api/proto
+➜  core-engine git:(main) ✗ npx buf generate api/proto
 ```

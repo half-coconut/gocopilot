@@ -131,7 +131,7 @@ server {
     server_name 47.239.187.141;
     
     # 静态文件路径
-    root /root/TestCopilot/TestPilot/dist;
+    root /root/TestCopilot/react-pilot/dist;
     index index.html;
 
     # 处理前端路由

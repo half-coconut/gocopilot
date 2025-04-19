@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "TestCopilot/TestEngine/base/example/grpc";
+option go_package = "TestCopilot/core-engine/base/example/grpc";
 
 message User {
   // Protobuf 对前几个字段有性能优化
