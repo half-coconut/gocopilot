@@ -58,17 +58,10 @@ func initViper() {
 	viper.SetConfigFile(*cfile)
 	// 实时监听配置变更
 	viper.WatchConfig()
-	// 只能告诉你文件变了，不能告诉你，文件的哪些内容变了
 	viper.OnConfigChange(func(in fsnotify.Event) {
-		// 比较好的设计，它会在 in 里面告诉你变更前的数据，和变更后的数据
-		// 更好的设计是，它会直接告诉你差异。
 		fmt.Println(in.Name, in.Op)
 		fmt.Println(viper.GetString("db.dsn"))
 	})
-	//viper.SetDefault("db.mysql.dsn",
-	//	"root:root@tcp(localhost:3306)/mysql")
-	//viper.SetConfigFile("config/dev.yaml")
-	//viper.KeyDelimiter("-")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)

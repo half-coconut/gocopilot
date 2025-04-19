@@ -1,24 +1,68 @@
-# testcopilot
+# gocopilot
 
+### Architecture
 
-![testengine drawio](https://github.com/user-attachments/assets/b12b1ac1-a31a-418b-8095-ef353373f883)
+![coreengine drawio](https://github.com/user-attachments/assets/b12b1ac1-a31a-418b-8095-ef353373f883)
 
+- 旧版架构图如上，缺少 Job 模块和消息队列的实现
+- 后期更新为微服务架构，新增缓存方案，消息队列，分布式任务调度等模块
 
+### Features
 
-- 旧版架构图如上，缺少 Job 模块和消息队列的实现；
-- 后期更新为微服务架构，新增缓存方案，消息队列，分布式任务调度等模块；
+- 接口测试 interface testing
+    - 录入接口和参数，复制接口和参数，调试和执行测试
+    - 支持 DeepSeek 生成接口，转化为接口测试用例集
+- 性能测试任务 performance testing tasks
+    - 复用接口测试，批量选择执行的接口
+    - 设置 rate limit, 并发量，最大并发量，持续时间
+    - 生成性能测试报告，包含性能指标：
+      ```shell
+      +++ Requests +++
+      [total 总请求数: 100]
+      [rate 请求速率: 9.64]
+      [throughput 吞吐量: 9.64]
+      
+      +++ Duration +++
+      [total 总持续时间: 10.378s]
+      
+      +++ Latencies +++
+      [min 最小响应时间: 249.259ms]
+      [mean 平均响应时间: 103.779ms]
+      [max 最大响应时间: 2.008s]
+      [P50 百分之50 响应时间 (中位数): 270.165ms]
+      [P90 百分之90 响应时间: 515.427ms]
+      [P95 百分之95 响应时间: 942.023ms]
+      [P99 百分之99 响应时间: 2.008s]
+      
+      +++ Success +++
+      [ratio 成功率: 100.00%]
+      [status codes:  200:100]
+      [passed: 100]
+      [failed: 0]
+      ```
+- 任务调度 cron jobs
+    - 支持多种类型，外部调用http任务，内部调用 tasks 任务调度
+    - 长短任务模式，按照超时时间或 cron 表达式执行
+    - 支持分布式、并发执行任务调度
+- 用户模块 users
+    - 身份鉴权，jwt 校验等
+- 工作日志 notes
+    - 编辑日志，发布等
 
-#### 后端 TestEngine 部署
+### Installation
+
+#### core-engine
+
 快速部署&&本地调试
-```shell
-$ git clone https://github.com/half-coconut/TestCopilot.git
-$ cd TestCopilot/core-engine
-$ docker-compose up -d # 安装依赖
-$ make docker 
-```
-将容器镜像部署到k8s
 
-Makefile 编译，Dockerfile 生成镜像，使用 k8s 集群部署应用
+```shell
+$ git clone https://github.com/half-coconut/gocopilot.git
+$ cd gocopilot/core-engine
+$ docker-compose up -d # 安装依赖
+$ make docker # Golang 1.24, Ubuntu 24.04
+```
+
+使用 k8s 集群部署应用
 
 - 本地安装 K8s 集群的办法 Kind
 - 安装 Kind：https://kind.sigs.k8s.io/docs/user/quick-start/#installation
@@ -48,14 +92,11 @@ serviceaccount/ingress-nginx-admission created
 ......
 ```
 
-- Pod 会被 Deployment 工作负载管理起来，例如创建和销毁等；
-- Service 相当于弹性伸缩组的负载均衡器，它能以**加权轮训**的方式将流量转发到多个 Pod 副本上；
-- Ingress 相当于集群的外网访问入口；
+#### react-pilot
 
+本地安装，启动：
 
-#### 前端 TestPilot 部署
-安装和启动：
 ```shell
-npm install
-npm run dev
+$ npm install # Node.js v20.10.0 以上
+$ npm run dev
 ```
