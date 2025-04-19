@@ -1,8 +1,8 @@
 package ioc
 
 import (
-	"TestCopilot/TestEngine/internal/repository/cache"
-	"TestCopilot/TestEngine/pkg/redisx"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/redisx"
 	"github.com/prometheus/client_golang/prometheus"
 	redisv9 "github.com/redis/go-redis/v9"
 )

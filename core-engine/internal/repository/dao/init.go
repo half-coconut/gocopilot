@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"TestCopilot/TestEngine/internal/repository/dao/note"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao/note"
 	"gorm.io/gorm"
 )
 

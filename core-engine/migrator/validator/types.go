@@ -1,11 +1,11 @@
 package validator
 
 import (
-	"TestCopilot/TestEngine/migrator/events"
-	"TestCopilot/TestEngine/pkg/logger"
-	"TestCopilot/TestEngine/pkg/migrator"
 	"context"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/half-coconut/gocopilot/core-engine/migrator/events"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/migrator"
 	"gorm.io/gorm"
 	"time"
 )

@@ -1,10 +1,10 @@
 package ioc
 
 import (
-	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
-	"TestCopilot/TestEngine/interactive/service"
-	"TestCopilot/TestEngine/internal/web/client"
 	"github.com/fsnotify/fsnotify"
+	intrv1 "github.com/half-coconut/gocopilot/core-engine/api/proto/gen/intr/v1"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/service"
+	"github.com/half-coconut/gocopilot/core-engine/internal/web/client"
 	"github.com/spf13/viper"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/resolver"

@@ -1,8 +1,8 @@
 package ioc
 
 import (
-	"TestCopilot/TestEngine/config"
 	rlock "github.com/gotomicro/redis-lock"
+	"github.com/half-coconut/gocopilot/core-engine/config"
 	redisv9 "github.com/redis/go-redis/v9"
 )
 

@@ -1,15 +1,15 @@
 package web
 
 import (
-	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/service"
-	ijwt "TestCopilot/TestEngine/internal/web/jwt"
-	"TestCopilot/TestEngine/pkg/ginx"
-	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	intrv1 "github.com/half-coconut/gocopilot/core-engine/api/proto/gen/intr/v1"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/ginx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"strconv"

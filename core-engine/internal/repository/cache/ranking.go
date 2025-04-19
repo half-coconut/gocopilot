@@ -1,9 +1,9 @@
 package cache
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
 	"context"
 	"encoding/json"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	redisv9 "github.com/redis/go-redis/v9"
 	"time"
 )

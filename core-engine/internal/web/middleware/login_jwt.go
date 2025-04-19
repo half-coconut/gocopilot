@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	ijwt "TestCopilot/TestEngine/internal/web/jwt"
 	"github.com/gin-gonic/gin"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
+	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
 	"net/http"
 )
 

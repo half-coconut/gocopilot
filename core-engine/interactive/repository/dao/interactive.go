@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"TestCopilot/TestEngine/pkg/migrator"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/migrator"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"time"

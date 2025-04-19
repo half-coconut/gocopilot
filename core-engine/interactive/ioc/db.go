@@ -1,10 +1,10 @@
 package ioc
 
 import (
-	dao "TestCopilot/TestEngine/interactive/repository/dao"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"fmt"
+	dao "github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	promesdk "github.com/prometheus/client_golang/prometheus"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,7 +56,7 @@ func InitDB(l logger.LoggerV1) *gorm.DB {
 	}
 
 	err = db.Use(prometheus.New(prometheus.Config{
-		DBName:          "testengine",
+		DBName:          "coreengine;",
 		RefreshInterval: 15,
 		StartServer:     false,
 		MetricsCollector: []prometheus.MetricsCollector{

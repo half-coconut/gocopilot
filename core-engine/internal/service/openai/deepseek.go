@@ -1,10 +1,10 @@
 package openai
 
 import (
-	"TestCopilot/TestEngine/internal/service/core"
-	"TestCopilot/TestEngine/pkg/logger"
 	"encoding/json"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service/core"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/joho/godotenv"
 	gohomedir "github.com/mitchellh/go-homedir"
 	"log"

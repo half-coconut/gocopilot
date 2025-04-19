@@ -1,9 +1,9 @@
 package integration
 
 import (
-	"TestCopilot/TestEngine/interactive/integration/startup"
-	"TestCopilot/TestEngine/interactive/repository/dao"
 	_ "embed"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/integration/startup"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
 
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"

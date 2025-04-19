@@ -5,8 +5,8 @@
 package mocks
 
 import (
-	domain "TestCopilot/TestEngine/internal/domain"
 	context "context"
+	domain "github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	reflect "reflect"
 	time "time"
 

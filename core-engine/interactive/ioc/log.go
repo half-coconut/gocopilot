@@ -1,7 +1,7 @@
 package ioc
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"go.uber.org/zap"
 )
 

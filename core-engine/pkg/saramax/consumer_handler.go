@@ -1,9 +1,9 @@
 package saramax
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"encoding/json"
 	"github.com/IBM/sarama"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 )
 
 type Handler[T any] struct {

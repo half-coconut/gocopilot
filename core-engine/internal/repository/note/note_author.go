@@ -1,8 +1,8 @@
 package note
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 )
 
 type NoteAuthorRepository interface {

@@ -1,11 +1,11 @@
 package service
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	events "TestCopilot/TestEngine/internal/events/note"
-	"TestCopilot/TestEngine/internal/repository/note"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	events "github.com/half-coconut/gocopilot/core-engine/internal/events/note"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/note"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"time"
 )
 

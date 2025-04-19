@@ -1,7 +1,7 @@
 package job
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"time"
 )

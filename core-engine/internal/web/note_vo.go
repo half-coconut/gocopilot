@@ -1,6 +1,6 @@
 package web
 
-import "TestCopilot/TestEngine/internal/domain"
+import "github.com/half-coconut/gocopilot/core-engine/internal/domain"
 
 // VO view object 面向前端的
 type ListReq struct {

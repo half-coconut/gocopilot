@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"TestEngine/pkg/qa_scopilot/utils"
+	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_scopilot/utils"
 	"testing"
 )
 

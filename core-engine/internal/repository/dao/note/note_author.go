@@ -1,9 +1,9 @@
 package note
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"errors"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"gorm.io/gorm"
 	"time"
 )

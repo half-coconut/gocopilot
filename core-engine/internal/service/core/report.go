@@ -1,8 +1,8 @@
 package core
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"log"
 	"sort"
 	"time"

@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"TestCopilot/TestEngine/internal/web"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/web"
 	"net/http"
 )
 

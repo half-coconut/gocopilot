@@ -1,8 +1,8 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/pkg/jsonx"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"testing"
 	"time"
 )

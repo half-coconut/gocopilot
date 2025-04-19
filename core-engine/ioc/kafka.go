@@ -1,8 +1,8 @@
 package ioc
 
 import (
-	"TestCopilot/TestEngine/pkg/saramax"
 	"github.com/IBM/sarama"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/saramax"
 	"github.com/spf13/viper"
 	"log"
 )

@@ -1,6 +1,6 @@
 package ioc
 
-import "TestCopilot/TestEngine/pkg/logger"
+import "github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 
 func InitLogger() logger.LoggerV1 {
 	logger.Init(nil)

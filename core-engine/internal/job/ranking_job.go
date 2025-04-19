@@ -1,10 +1,10 @@
 package job
 
 import (
-	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	rlock "github.com/gotomicro/redis-lock"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"sync"
 	"time"
 )

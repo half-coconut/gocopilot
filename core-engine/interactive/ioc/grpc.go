@@ -1,9 +1,9 @@
 package ioc
 
 import (
-	grpc2 "TestCopilot/TestEngine/interactive/grpc"
-	"TestCopilot/TestEngine/pkg/grpcx"
-	"TestCopilot/TestEngine/pkg/logger"
+	grpc2 "github.com/half-coconut/gocopilot/core-engine/interactive/grpc"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/grpcx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )

@@ -1,10 +1,10 @@
 package service
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/repository"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 )
 
 type APIService interface {

@@ -1,10 +1,10 @@
 package grpc
 
 import (
-	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
-	"TestCopilot/TestEngine/interactive/domain"
-	"TestCopilot/TestEngine/interactive/service"
 	"context"
+	intrv1 "github.com/half-coconut/gocopilot/core-engine/api/proto/gen/intr/v1"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/domain"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/service"
 	"google.golang.org/grpc"
 )
 

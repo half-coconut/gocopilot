@@ -1,8 +1,8 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/pkg/saramax"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/saramax"
 	cronv3 "github.com/robfig/cron/v3"
 )
 

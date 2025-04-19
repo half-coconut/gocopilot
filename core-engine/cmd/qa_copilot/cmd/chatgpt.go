@@ -4,11 +4,11 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"TestEngine/pkg/qa_scopilot/utils"
 	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_scopilot/utils"
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -1,10 +1,10 @@
 package saramax
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"encoding/json"
 	"github.com/IBM/sarama"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"time"
 )
 

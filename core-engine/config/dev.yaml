@@ -1,11 +1,9 @@
 db:
-  dsn: "root:root@tcp(localhost:13316)/testengine"
+  dsn: "root:root@tcp(localhost:13316)/coreengine"
 
 redis:
   addr: "localhost:6379"
 
-abc: "helloabc" # v1
-# abc: "helloabcdef" # v2
 
 kafka:
   addrs:
@@ -35,4 +33,4 @@ log:
   disable-stacktrace: false # 是否禁止在 panic 及以上级别打印堆栈信息
   level: debug # 指定日志级别，可选值：debug, info, warn, error, dpanic, panic, fatal
   format: console # 指定日志显示格式，可选值：console, json
-  output-paths: [./logfile.log, stdout] # 指定日志输出位置，多个输出，用 `逗号 + 空格` 分开。stdout：标准输出，
+  output-paths: [ ./logfile.log, stdout ] # 指定日志输出位置，多个输出，用 `逗号 + 空格` 分开。stdout：标准输出，

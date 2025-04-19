@@ -16,7 +16,7 @@ type CronJob struct {
 	TimeZone    string        `json:"timezone,omitempty"`    // 时区?
 	Duration    time.Duration `json:"duration"`              // 持续任务: 运行时间，可能用于 http 请求
 	Retry       bool          `json:"retry,omitempty"`       // 是否重试
-	MaxRetries  uint64        `json:"maxRetries"`            // 最大重试次数
+	MaxRetries  uint64        `json:"max_retries"`           // 最大重试次数
 	NextTime    time.Time     `json:"next_time"`
 	Status      int           `json:"status"`
 

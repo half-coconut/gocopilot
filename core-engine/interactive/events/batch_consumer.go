@@ -1,11 +1,11 @@
 package note
 
 import (
-	"TestCopilot/TestEngine/interactive/repository"
-	"TestCopilot/TestEngine/pkg/logger"
-	"TestCopilot/TestEngine/pkg/saramax"
 	"context"
 	"github.com/IBM/sarama"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/saramax"
 	"time"
 )
 

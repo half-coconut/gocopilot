@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"TestCopilot/TestEngine/interactive/domain"
-	"TestCopilot/TestEngine/interactive/repository/cache"
-	"TestCopilot/TestEngine/interactive/repository/dao"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/domain"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository/cache"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 
 	"github.com/ecodeclub/ekit/slice"
 )

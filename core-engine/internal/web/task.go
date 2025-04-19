@@ -1,23 +1,22 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/errs"
-	"TestCopilot/TestEngine/internal/service/core"
-	ijwt "TestCopilot/TestEngine/internal/web/jwt"
-	"TestCopilot/TestEngine/pkg/ginx"
-	"TestCopilot/TestEngine/pkg/jsonx"
-	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/errs"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service/core"
+	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/ginx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"strconv"
 	"sync"
 	"time"
 )
 
 // Task 接口测试，性能测试的任务
-// 性能测试任务，创建与执行
 
 type TaskHandler struct {
 	l   logger.LoggerV1

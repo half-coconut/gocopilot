@@ -1,9 +1,9 @@
 package ginx
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"github.com/gin-gonic/gin"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strconv"

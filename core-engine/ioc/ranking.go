@@ -1,10 +1,10 @@
 package ioc
 
 import (
-	"TestCopilot/TestEngine/internal/job"
-	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/pkg/logger"
 	rlock "github.com/gotomicro/redis-lock"
+	"github.com/half-coconut/gocopilot/core-engine/internal/job"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	cronv3 "github.com/robfig/cron/v3"
 	"time"
 )

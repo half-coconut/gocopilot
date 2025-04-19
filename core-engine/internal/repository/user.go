@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/repository/cache"
-	"TestCopilot/TestEngine/internal/repository/dao"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"database/sql"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"time"
 )
 

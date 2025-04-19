@@ -1,8 +1,8 @@
 package core
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"bytes"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"io"
 	"net/http"
 	"time"

@@ -1,11 +1,11 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/service/openai"
-	ijwt "TestCopilot/TestEngine/internal/web/jwt"
-	"TestCopilot/TestEngine/pkg/ginx"
-	"TestCopilot/TestEngine/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service/openai"
+	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/ginx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 )
 
 type AIHandler struct {

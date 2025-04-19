@@ -17,7 +17,7 @@ AllowedHeaders:   []string{"Content-Type", "Authorization"},
 osedHeaders:   []string{"x-jwt-token"}
   ```
 
-3. 增加 init.sql
+3. 增加 data.sql
 4. k8s 部署，JWT 接口安全等
 5. wrk 压测：Login, Signup, Profile等接口
 

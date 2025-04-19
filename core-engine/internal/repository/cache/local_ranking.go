@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
 	"context"
 	"errors"
 	"github.com/ecodeclub/ekit/syncx/atomicx"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	"time"
 )
 

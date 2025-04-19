@@ -757,8 +757,8 @@ const file_intr_v1_intr_proto_rawDesc = "" +
 	"CancelLike\x12\x1a.intr.v1.CancelLikeRequest\x1a\x1b.intr.v1.CancelLikeResponse\x12<\n" +
 	"\aCollect\x12\x17.intr.v1.CollectRequest\x1a\x18.intr.v1.CollectResponse\x120\n" +
 	"\x03Get\x12\x13.intr.v1.GetRequest\x1a\x14.intr.v1.GetResponse\x12?\n" +
-	"\bGetByIds\x12\x18.intr.v1.GetByIdsRequest\x1a\x19.intr.v1.GetByIdsResponseB\x8a\x01\n" +
-	"\vcom.intr.v1B\tIntrProtoP\x01Z3TestCopilot/core-engine/api/proto/gen/intr/v1;intrv1\xa2\x02\x03IXX\xaa\x02\aIntr.V1\xca\x02\aIntr\\V1\xe2\x02\x13Intr\\V1\\GPBMetadata\xea\x02\bIntr::V1b\x06proto3"
+	"\bGetByIds\x12\x18.intr.v1.GetByIdsRequest\x1a\x19.intr.v1.GetByIdsResponseB\x8b\x01\n" +
+	"\vcom.intr.v1B\tIntrProtoP\x01Z4TestCopilot/core-engine/api/proto/gen/intr/v1;intrv1\xa2\x02\x03IXX\xaa\x02\aIntr.V1\xca\x02\aIntr\\V1\xe2\x02\x13Intr\\V1\\GPBMetadata\xea\x02\bIntr::V1b\x06proto3"
 
 var (
 	file_intr_v1_intr_proto_rawDescOnce sync.Once

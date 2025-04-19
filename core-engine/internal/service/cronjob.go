@@ -1,14 +1,14 @@
 package service
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/repository"
-	"TestCopilot/TestEngine/internal/service/core"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service/core"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"time"
 )
 

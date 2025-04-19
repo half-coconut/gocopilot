@@ -1,14 +1,14 @@
 package note
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/repository"
-	"TestCopilot/TestEngine/internal/repository/cache"
-	dao "TestCopilot/TestEngine/internal/repository/dao/note"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
+	dao "github.com/half-coconut/gocopilot/core-engine/internal/repository/dao/note"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"time"
 )
 

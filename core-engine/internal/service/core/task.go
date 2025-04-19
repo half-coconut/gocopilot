@@ -1,13 +1,13 @@
 package core
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/repository"
-	"TestCopilot/TestEngine/pkg/jsonx"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	rate2 "golang.org/x/time/rate"
 	"log"
 	"net/http"

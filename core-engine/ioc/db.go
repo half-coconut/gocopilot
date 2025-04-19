@@ -1,11 +1,11 @@
 package ioc
 
 import (
-	dao2 "TestCopilot/TestEngine/interactive/repository/dao"
-	"TestCopilot/TestEngine/internal/repository/dao"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"fmt"
+	dao2 "github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	promesdk "github.com/prometheus/client_golang/prometheus"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -36,14 +36,14 @@ func InitMongoDB() *mongo.Database {
 		if err != nil {
 			panic(err)
 		}
-		mongoDB = client.Database("testengine")
+		mongoDB = client.Database("coreengine")
 	}
 	return mongoDB
 }
 
 func InitDB(l logger.LoggerV1) *gorm.DB {
 	// 使用 gorm 打印日志
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/testengine"), &gorm.Config{
+	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/coreengine"), &gorm.Config{
 		Logger: glogger.New(gormLoggerFunc(l.Debug), glogger.Config{
 			// 慢查询阈值，只有查询时间超过这个阈值，才会使用
 			// 50ms, 100ms
@@ -60,7 +60,7 @@ func InitDB(l logger.LoggerV1) *gorm.DB {
 	}
 
 	err = db.Use(prometheus.New(prometheus.Config{
-		DBName:          "testengine",
+		DBName:          "coreengine",
 		RefreshInterval: 15,
 		StartServer:     false,
 		MetricsCollector: []prometheus.MetricsCollector{
@@ -108,12 +108,12 @@ func (pcb *Callbacks) Initialize(db *gorm.DB) error {
 func newCallbacks() *Callbacks {
 	vector := promesdk.NewSummaryVec(promesdk.SummaryOpts{
 		// 设施各种 namespace
-		Namespace: "test_copilot",
-		Subsystem: "test_engine",
+		Namespace: "go_copilot",
+		Subsystem: "core_engine",
 		Name:      "gorm_query_time",
 		Help:      "统计 GORM 的 执行时间",
 		ConstLabels: map[string]string{
-			"db": "testengine",
+			"db": "coreengine",
 		},
 		Objectives: map[float64]float64{
 			0.5:   0.01,

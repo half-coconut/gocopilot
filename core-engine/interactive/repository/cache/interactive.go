@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"TestCopilot/TestEngine/interactive/domain"
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/domain"
 
 	redis "github.com/redis/go-redis/v9"
 	"strconv"

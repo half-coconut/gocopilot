@@ -1,11 +1,11 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/service"
-	svcmocks "TestCopilot/TestEngine/internal/service/mocks"
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	svcmocks "github.com/half-coconut/gocopilot/core-engine/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

@@ -1,9 +1,9 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 )
 
 type ReportHandler struct {

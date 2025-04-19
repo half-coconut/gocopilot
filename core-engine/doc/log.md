@@ -210,3 +210,12 @@ service/user/198.18.0.1:8090
 
 2025-04-18
 - 新增日志输出配置项，标准输出，日志级别等
+
+
+2025-04-19
+- docker 镜像上传 Docker Hub
+```shell
+➜  core-engine git:(main) ✗ docker tag core-engine:v0.0.1 halfcoconut/gocopilot:core-engine
+➜  core-engine git:(main) ✗ docker push  halfcoconut/gocopilot:core-engine
+
+```

@@ -1,10 +1,10 @@
 package dao
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"gorm.io/gorm"
 	"time"
 )

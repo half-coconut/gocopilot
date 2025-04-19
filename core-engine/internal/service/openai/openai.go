@@ -23,8 +23,8 @@ func NewOpenAIClient() (ai *OpenAI, err error) {
 		log.Fatal(err)
 	}
 	// 构建 .env 文件的路径
-	envPath := filepath.Join(home, "Desktop", "TestCopilot", "core-engine", "cmd", "qa_copilot", ".env")
-	//envPath := filepath.Join(home, "Downloads", "TestCopilot-main", "core-engine", "cmd", "qa_copilot", ".env")
+	envPath := filepath.Join(home, "Desktop", "gocopilot", "core-engine", "cmd", "qa_copilot", ".env")
+	//envPath := filepath.Join(home, "Downloads", "gocopilot-main", "core-engine", "cmd", "qa_copilot", ".env")
 	err = godotenv.Load(envPath)
 	if err != nil {
 		log.Println(err)

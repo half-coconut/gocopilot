@@ -1,8 +1,8 @@
 package note
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"time"

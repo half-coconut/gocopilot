@@ -1,8 +1,8 @@
 package main
 
 import (
-	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
 	"context"
+	intrv1 "github.com/half-coconut/gocopilot/core-engine/api/proto/gen/intr/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

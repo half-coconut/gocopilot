@@ -1,13 +1,13 @@
 package job
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"golang.org/x/sync/semaphore"
 	"net/http"
 	"time"

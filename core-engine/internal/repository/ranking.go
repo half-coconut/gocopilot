@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/repository/cache"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
 )
 
 type RankingRepository interface {

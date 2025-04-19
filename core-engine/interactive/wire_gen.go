@@ -7,14 +7,14 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/interactive/events"
-	"TestCopilot/TestEngine/interactive/grpc"
-	"TestCopilot/TestEngine/interactive/ioc"
-	"TestCopilot/TestEngine/interactive/repository"
-	"TestCopilot/TestEngine/interactive/repository/cache"
-	"TestCopilot/TestEngine/interactive/repository/dao"
-	"TestCopilot/TestEngine/interactive/service"
 	"github.com/google/wire"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/events"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/grpc"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/ioc"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository/cache"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/service"
 )
 
 // Injectors from wire.go:

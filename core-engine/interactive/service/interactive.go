@@ -1,10 +1,10 @@
 package service
 
 import (
-	"TestCopilot/TestEngine/interactive/domain"
-	"TestCopilot/TestEngine/interactive/repository"
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/domain"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"golang.org/x/sync/errgroup"
 )
 

@@ -1,16 +1,16 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/errs"
-	"TestCopilot/TestEngine/internal/service"
-	ijwt "TestCopilot/TestEngine/internal/web/jwt"
-	"TestCopilot/TestEngine/pkg/logger"
 	"errors"
 	"fmt"
 	"github.com/dlclark/regexp2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/errs"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"log"
 	"net/http"
 	"time"

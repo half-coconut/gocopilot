@@ -1,7 +1,7 @@
 package startup
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 )
 
 func InitLog() logger.LoggerV1 {

@@ -1,9 +1,9 @@
 package ioc
 
 import (
-	events "TestCopilot/TestEngine/interactive/events"
-	"TestCopilot/TestEngine/pkg/saramax"
 	"github.com/IBM/sarama"
+	events "github.com/half-coconut/gocopilot/core-engine/interactive/events"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/saramax"
 	"github.com/spf13/viper"
 	"log"
 )

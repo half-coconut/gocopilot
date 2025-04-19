@@ -1,9 +1,9 @@
 package startup
 
 import (
-	"TestCopilot/TestEngine/interactive/repository/dao"
 	"context"
 	"database/sql"
+	"github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"

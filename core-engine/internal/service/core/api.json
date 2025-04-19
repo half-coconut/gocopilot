@@ -1,4 +1,4 @@
-a := {
+{
   "endpoint": "/users",
   "method": "POST",
   "requestBody": {

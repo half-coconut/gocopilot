@@ -1,9 +1,9 @@
 package client
 
 import (
-	intrv1 "TestCopilot/TestEngine/api/proto/gen/intr/v1"
 	"context"
 	"github.com/ecodeclub/ekit/syncx/atomicx"
+	intrv1 "github.com/half-coconut/gocopilot/core-engine/api/proto/gen/intr/v1"
 	"google.golang.org/grpc"
 	"math/rand"
 )

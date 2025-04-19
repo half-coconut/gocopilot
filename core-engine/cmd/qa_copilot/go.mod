@@ -1,4 +1,4 @@
-module TestEngine/pkg/qa_scopilot
+module github.com/half-coconut/gocopilot/core-engine/cmd/qa_scopilot
 
 go 1.24.0
 

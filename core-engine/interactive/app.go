@@ -1,8 +1,8 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/pkg/grpcx"
-	"TestCopilot/TestEngine/pkg/saramax"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/grpcx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/saramax"
 )
 
 type App struct {

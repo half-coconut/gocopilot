@@ -1,8 +1,8 @@
 package job
 
 import (
-	"TestCopilot/TestEngine/pkg/logger"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	cronv3 "github.com/robfig/cron/v3"
 	"go.opentelemetry.io/otel"

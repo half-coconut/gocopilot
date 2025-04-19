@@ -1,15 +1,15 @@
 package web
 
 import (
-	"TestCopilot/TestEngine/internal/domain"
-	"TestCopilot/TestEngine/internal/errs"
-	"TestCopilot/TestEngine/internal/service"
-	"TestCopilot/TestEngine/internal/service/core"
-	ijwt "TestCopilot/TestEngine/internal/web/jwt"
-	"TestCopilot/TestEngine/pkg/ginx"
-	"TestCopilot/TestEngine/pkg/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/errs"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service"
+	"github.com/half-coconut/gocopilot/core-engine/internal/service/core"
+	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/ginx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"strconv"
 	"time"
 )
