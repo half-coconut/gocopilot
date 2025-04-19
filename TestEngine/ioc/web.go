@@ -32,6 +32,7 @@ func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijw
 		Help:      "HTTPde 业务错误码",
 	})
 	return []gin.HandlerFunc{
+		CORSMiddleware(),
 		corsHandler(),
 		logger.NewBuilder(func(ctx context.Context, al *logger.AccessLog) {
 			l.Debug("Http请求", logger2.Field{Key: "al", Value: al})
@@ -57,13 +58,10 @@ func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijw
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//c.Header("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		//c.Writer.Header().Set("Access-Control-Allow-Origin", "http://47.239.187.141") // 允许指定域
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-
+		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PATCH, PUT, DELETE")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
@@ -80,7 +78,6 @@ func InitWebServer(middleware []gin.HandlerFunc,
 	notehandler *web.NoteHandler,
 	cronJobhandler *web.CronJobHandler) *gin.Engine {
 	server := gin.Default()
-	server.Use(CORSMiddleware())
 
 	server.Use(middleware...)
 	parameterExamples(server)
@@ -98,21 +95,23 @@ func InitWebServer(middleware []gin.HandlerFunc,
 func corsHandler() gin.HandlerFunc {
 	// 使用middleware 处理跨域问题
 	return cors.New(cors.Config{
-		//AllowedOrigins: []string{"*"},
-		//AllowMethods: []string{"POST", "GET"},
-		AllowedHeaders: []string{"Content-Type", "Authorization"},
-		// 你不加这个，前端是拿不到的
-		ExposedHeaders: []string{"x-jwt-token", "x-refresh-token"},
-		// 是否允许你带 cookie 之类的东西
-		AllowCredentials: true,
+		AllowCredentials: true, // 允许带 cookie
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		ExposedHeaders:   []string{"x-jwt-token", "x-refresh-token"}, // 允许前端获取到
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		MaxAge:           12 * time.Hour,
+
 		AllowOriginFunc: func(origin string) bool {
 			if strings.HasPrefix(origin, "http://localhost") {
-				// 你的开发环境
+				// 开发环境
 				return true
 			}
-			return strings.Contains(origin, "test-copilot.com")
+			// 允许其他特定域名，比如线上域名
+			if strings.Contains(origin, "test-copilot.com") {
+				return true
+			}
+			return false
 		},
-		MaxAge: 12 * time.Hour,
 	})
 }
 
