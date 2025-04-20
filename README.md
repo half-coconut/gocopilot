@@ -80,9 +80,6 @@ $ kubectl apply -f k8s-mysql-service.yaml
 $ kubectl apply -f k8s-coreengine-deployment.yaml
 $ kubectl apply -f k8s-coreengine-service.yaml
 $ kubectl logs <pod-name> 
-
-$ kubectl delete -f k8s-coreengine-deployment.yaml
-$ kubectl delete -f k8s-coreengine-service.yaml
 ```
 
 - 部署 redis
