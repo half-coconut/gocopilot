@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: testengine-live-redis
+  name: coreengine-redis
   labels:
-    app: testengine-live-redis
+    app: coreengine-redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: testengine-live-redis
+      app: coreengine-redis
   template:
     metadata:
-      name: testengine-live-redis
+      name: coreengine-redis
       labels:
-        app: testengine-live-redis
+        app: coreengine-redis
     spec:
       containers:
-        - name: testengine-live-redis
+        - name: coreengine-redis
           image: redis:latest
           imagePullPolicy: IfNotPresent
       restartPolicy: Always

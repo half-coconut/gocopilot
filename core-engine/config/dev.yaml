@@ -1,8 +1,10 @@
 db:
-  dsn: "root:root@tcp(localhost:13316)/coreengine"
+#  dsn: "root:root@tcp(localhost:13316)/coreengine"
+  dsn: "root:root@tcp(localhost:30002)/coreengine"
 
 redis:
-  addr: "localhost:6379"
+#  addr: "localhost:6379"
+  addr: "localhost:30003"
 
 
 kafka:

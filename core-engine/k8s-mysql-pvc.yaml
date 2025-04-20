@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: testengine-mysql-live-claim-v3
+  name: coreengine-mysql-claim-v3
 spec:
-  storageClassName: suibianv3
+  storageClassName: mystoragev3
   accessModes:
     - ReadWriteOnce
 #    多个读，一个写

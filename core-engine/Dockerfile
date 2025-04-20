@@ -1,9 +1,7 @@
-# 基础镜像
 FROM ubuntu:24.04
-# 把编译后的打包进来这个镜像，放到工作目录 /app
+
 COPY core-engine /app/core-engine
 WORKDIR /app
-# CMD 是执行命令
-# 最佳
+
 ENTRYPOINT ["/app/core-engine"]
 

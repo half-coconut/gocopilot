@@ -13,6 +13,11 @@ func InitKafka() sarama.Client {
 	}
 	saramaCfg := sarama.NewConfig()
 	saramaCfg.Producer.Return.Successes = true
+
+	//viper.SetConfigName("dev")
+	//viper.SetConfigType("yaml")
+	//viper.AddConfigPath("../config")
+	//err := viper.ReadInConfig()
 	var cfg Config
 
 	err := viper.UnmarshalKey("kafka", &cfg)

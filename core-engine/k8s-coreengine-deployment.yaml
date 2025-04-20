@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreengine
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: coreengine
+  template:
+    metadata:
+      labels:
+        app: coreengine
+    spec:
+      containers:
+        - name: coreengine
+          image: gocopilot/core-engine:v0.0.1
+          ports:
+            - containerPort: 3002

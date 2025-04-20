@@ -3,6 +3,7 @@ package ioc
 import (
 	"context"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/config"
 	dao2 "github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
@@ -43,7 +44,7 @@ func InitMongoDB() *mongo.Database {
 
 func InitDB(l logger.LoggerV1) *gorm.DB {
 	// 使用 gorm 打印日志
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/coreengine"), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(config.Config.DB.DSN), &gorm.Config{
 		Logger: glogger.New(gormLoggerFunc(l.Debug), glogger.Config{
 			// 慢查询阈值，只有查询时间超过这个阈值，才会使用
 			// 50ms, 100ms

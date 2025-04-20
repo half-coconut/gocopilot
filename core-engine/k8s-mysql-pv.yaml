@@ -3,12 +3,12 @@ kind: PersistentVolume
 metadata:
   name: my-local-pv-v3
 spec:
-  storageClassName: suibianv3
+  storageClassName: mystoragev3
   capacity:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/live"
+    path: "/mnt/data"
 
   

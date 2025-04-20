@@ -1,20 +1,20 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: testengine-live-ingress
+  name: coreengine-ingress
 spec:
   ingressClassName: nginx
   rules:
-#    host 是 live.testengine.com 的时候，命中这条
-    - host: live.testengine.com
+#    host 是 live.coreengine.com 的时候，命中这条
+    - host: live.coreengine.com
       http:
         paths:
 #          - 请求路径的前缀是 / 的时候
-#          - 将流量转发过去后面的 testengine-live 服务上
+#          - 将流量转发过去后面的 coreengine 服务上
 #          - 端口是 81
           - backend:
               service:
-                name: testengine-live
+                name: coreengine
                 port:
                   number: 81
             pathType: Prefix

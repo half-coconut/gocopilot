@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: testengine-live-mysql
+  name: coreengine-mysql
   labels:
-    app: testengine-live-mysql
+    app: coreengine-mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: testengine-live-mysql
+      app: coreengine-mysql
   template:
     metadata:
-      name: testengine-live-mysql
+      name: coreengine-mysql
       labels:
-        app: testengine-live-mysql
+        app: coreengine-mysql
     spec:
       containers:
-        - name: testengine-live-mysql
+        - name: coreengine-mysql
           image: mysql:8.0
           env:
             - name: MYSQL_ROOT_PASSWORD
@@ -29,14 +29,14 @@ spec:
               name: mysql-storage
           ports:
             - containerPort: 3306
-#        - name: testengine-live-hadoop
+#        - name: coreengine-live-hadoop
       restartPolicy: Always
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
-            claimName: testengine-mysql-live-claim-v3
+            claimName: coreengine-mysql-claim-v3
 #        - name: hadoop-storage
 #          persistentVolumeClaim:
-#            claimName: testengine-hadoop-live-claim
+#            claimName: coreengine-hadoop-live-claim
 
       

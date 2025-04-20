@@ -56,12 +56,15 @@ func initViper() {
 		"config/dev.yaml", "指定配置文件路径")
 	pflag.Parse()
 	viper.SetConfigFile(*cfile)
+	viper.SetConfigType("yaml")
 	// 实时监听配置变更
 	viper.WatchConfig()
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		fmt.Println(in.Name, in.Op)
 		fmt.Println(viper.GetString("db.dsn"))
 	})
+
+	fmt.Println("Config file:", *cfile) // 添加这行
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)

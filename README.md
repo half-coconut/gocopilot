@@ -59,9 +59,65 @@
 ```shell
 $ git clone https://github.com/half-coconut/gocopilot.git
 $ cd gocopilot/core-engine
-$ docker-compose up -d # 安装依赖
+$ docker-compose up -d # 安装依赖，注意 MYSQL 没有数据持久化
 $ make docker # Golang 1.24, Ubuntu 24.04
 ```
+
+使用 k8s 部署应用
+
+- 部署 mysql，并持久化数据
+
+```shell
+$ kubectl apply -f k8s-mysql-pv.yaml
+$ kubectl apply -f k8s-mysql-pvc.yaml
+$ kubectl apply -f k8s-mysql-deployment.yaml
+$ kubectl apply -f k8s-mysql-service.yaml
+```
+
+- 部署 core-engine
+
+```shell
+$ kubectl apply -f k8s-coreengine-deployment.yaml
+$ kubectl apply -f k8s-coreengine-service.yaml
+$ kubectl logs <pod-name> 
+
+$ kubectl delete -f k8s-coreengine-deployment.yaml
+$ kubectl delete -f k8s-coreengine-service.yaml
+```
+
+- 部署 redis
+
+```shell
+$ kubectl apply -f k8s-redis-deployment.yaml
+$ kubectl apply -f k8s-redis-service.yaml
+$ redis-cli -h <ip> -p 30003
+```
+
+安装 helm 和 ingress-nginx
+
+```shell
+# 安装 helm
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm- 3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+# 使用 helm 安装 ingress-nginx
+$ helm upgrade --install ingress-nginx ingress-nginx \
+--repo https://kubernetes.github.io/ingress-nginx \
+--namespace ingress-nginx --create-namespace
+```
+
+- 部署 nginx
+- 部署 ingress
+
+```shell
+$ kubectl apply -f k8s-ingress-nginx.yaml
+```
+
+Deployment, Pod, Service, Ingress 的关系
+
+- Pod 会被 Deployment 工作负载管理起来，例如创建和销毁等
+- Service 相当于弹性伸缩组的负载均衡器，它能以**加权轮训**的方式将流量转发到多个 Pod 副本上
+- Ingress 相当于集群的外网访问入口
 
 使用 k8s 集群部署应用
 
