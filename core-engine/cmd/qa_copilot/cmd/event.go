@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_scopilot/utils"
+	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_copilot/utils"
 	"github.com/sashabaranov/go-openai"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"

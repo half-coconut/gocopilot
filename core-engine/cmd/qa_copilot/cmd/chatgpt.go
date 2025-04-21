@@ -8,7 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_scopilot/utils"
+	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_copilot/utils"
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

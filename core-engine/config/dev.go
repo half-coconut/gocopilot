@@ -10,11 +10,11 @@ package config
 var Config = config{
 	DB: DBConfig{
 		// 本地连接
-		//DSN: "root:root@tcp(localhost:13316)/coreengine",
-		DSN: "root:root@tcp(localhost:30002)/coreengine",
+		DSN: "root:root@tcp(localhost:13316)/coreengine",
+		//DSN: "root:root@tcp(localhost:30002)/coreengine",
 	},
 	Redis: RedisConfig{
-		//Addr: "localhost:6379",
-		Addr: "localhost:30003",
+		Addr: "localhost:6379",
+		//Addr: "localhost:30003",
 	},
 }

@@ -22,7 +22,7 @@ THE SOFTWARE.
 package main
 
 import (
-	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_scopilot/cmd"
+	"github.com/half-coconut/gocopilot/core-engine/cmd/qa_copilot/cmd"
 )
 
 func main() {
