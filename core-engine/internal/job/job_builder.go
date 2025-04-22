@@ -19,8 +19,8 @@ type CronJobBuilder struct {
 
 func NewCronJobBuilder(l logger.LoggerV1) *CronJobBuilder {
 	p := prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace: "test_copilot",
-		Subsystem: "test_engine",
+		Namespace: "go_copilot",
+		Subsystem: "core_engine",
 		Help:      "统计定时任务的执行情况",
 		Name:      "cron_job",
 	}, []string{"name", "success"})
@@ -28,7 +28,7 @@ func NewCronJobBuilder(l logger.LoggerV1) *CronJobBuilder {
 	return &CronJobBuilder{
 		l:      l,
 		p:      p,
-		tracer: otel.GetTracerProvider().Tracer("/Users/chenchen/Downloads/TestCopilot-main/core-engine/internal/job"),
+		tracer: otel.GetTracerProvider().Tracer("/Users/chenchen/Downloads/gocopilot-main/core-engine/internal/job"),
 	}
 }
 

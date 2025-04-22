@@ -26,10 +26,10 @@ import (
 
 func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijwt.Handler) []gin.HandlerFunc {
 	ginx.InitCounter(prometheus.CounterOpts{
-		Namespace: "test_copilot",
-		Subsystem: "test_engine",
+		Namespace: "go_copilot",
+		Subsystem: "core_engine",
 		Name:      "http_biz_code",
-		Help:      "HTTPde 业务错误码",
+		Help:      "HTTP 业务错误码",
 	})
 	return []gin.HandlerFunc{
 		CORSMiddleware(),
@@ -39,8 +39,8 @@ func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijw
 		}).AllowReqBody().AllowRespBody().Build(),
 
 		(&metric.MiddlewareBuilder{
-			Namespace:  "test_copilot",
-			Subsystem:  "test_engine",
+			Namespace:  "go_copilot",
+			Subsystem:  "core_engine",
 			Name:       "gin_http",
 			Help:       "统计 GIN 的 HTTP 接口",
 			InstanceId: "my-instance-1",
@@ -51,7 +51,7 @@ func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijw
 			IgnorePath("/users/signup").
 			IgnorePath("/users/login").
 			IgnorePath("/test/metric").Build(),
-		// 限流的方案和 lua 脚本，注意这里限流 200个请求
+		// 限流的方案和 lua 脚本，注意这里限流 100个请求
 		ratelimit.NewBuilder(redisClients, time.Second, 100).Build(),
 	}
 }

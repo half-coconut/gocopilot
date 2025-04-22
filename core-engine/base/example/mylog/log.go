@@ -7,8 +7,8 @@
 package mylog
 
 import (
-	"TestCopilot/TestEngine/base/example/mylog/known"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/base/example/mylog/known"
 	"sync"
 	"time"
 

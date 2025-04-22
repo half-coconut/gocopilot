@@ -19,4 +19,4 @@ func (o *ObservabilityHandler) RegisterRoutes(server *gin.Engine) {
 	})
 }
 
-// test_copilot_test_engine_gin_http_resp_time_count{status="200"}
+// go_copilot_core_engine_gin_http_resp_time_count{status="200"}

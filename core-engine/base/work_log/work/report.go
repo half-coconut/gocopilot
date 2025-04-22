@@ -1,8 +1,8 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/base/exercise/log"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/base/work_log/log"
 	"sort"
 	"time"
 )

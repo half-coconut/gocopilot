@@ -61,17 +61,17 @@ brew link mysql-client@8.4
 docker exec -it <container_id_or_name> bash
 
 # 将原表的数据 dump 下来
-tmp mysqldump -h 127.0.0.1 --port 13316 -u root -p testengine interactives user_like_bizs user_collection_bizs collections > intr_4.7.sql
+tmp mysqldump -h 127.0.0.1 --port 13316 -u root -p coreengine interactives user_like_bizs user_collection_bizs collections > intr_4.7.sql
 # 将 docker 里的数据 cp 到本地目录文件
 docker cp <container_id_or_name>:/tmp/intr_4.7.sql ./intr_4.7.sql
 
-# 新建一个数据库 比如 testengine_intr
+# 新建一个数据库 比如 coreengine_intr
 # 登录 mysql 数据库
 mysql -h 127.0.0.1 --port 13316 -uroot -proot
 
 # 切换到新的数据库
-create database if not exists testengine_intr;
-use testengine_intr;
+create database if not exists coreengine_intr;
+use coreengine_intr;
 source intr_4.7.sql
 ```
 
@@ -104,7 +104,7 @@ sudo nano /etc/docker/daemon.json
 docker-compose up -d
 # 安装 golang-go
 apt  install golang-go
-go build -o testengine .
+go build -o coreengine .
 
 ```
 

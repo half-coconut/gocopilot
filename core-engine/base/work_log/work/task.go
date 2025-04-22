@@ -1,9 +1,9 @@
 package main
 
 import (
-	"TestCopilot/TestEngine/base/exercise/log"
 	"context"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/base/work_log/log"
 	rate2 "golang.org/x/time/rate"
 	"math"
 	"runtime"

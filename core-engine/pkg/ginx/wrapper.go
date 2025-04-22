@@ -74,6 +74,7 @@ func WrapBodyAndToken[Req any, C jwtv5.Claims](fn func(ctx *gin.Context, req Req
 				logger.String("route", ctx.FullPath()),
 				logger.Error(err))
 		}
+		vector.WithLabelValues(strconv.Itoa(int(res.Code))).Inc()
 		ctx.JSON(http.StatusOK, res)
 	}
 }

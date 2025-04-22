@@ -90,7 +90,7 @@ kafka doc
 - https://kafka.apache.org/documentation/#design # need to read
 - https://kafka.apache.org/documentation/#configuration
 
-![flow.png](flow.png)
+![flow.png](../api/flow.png)
 
 在这张图中，数据流转涉及 **MySQL**、**Redis**、**MongoDB** 和 **Kafka** 等组件。下面将分析每个组件的作用和它们之间的关系。
 

@@ -43,7 +43,6 @@ func (p *PrometheusHook) ProcessHook(next redisv9.ProcessHook) redisv9.ProcessHo
 			keyExist := err == redis.Nil
 			p.vector.WithLabelValues(
 				cmd.Name(),
-
 				strconv.FormatBool(keyExist)).Observe(float64(duration))
 		}()
 		err = next(ctx, cmd)

@@ -1,8 +1,8 @@
 package mylog_t
 
 import (
-	"TestCopilot/TestEngine/base/example/mylog"
 	"context"
+	"github.com/half-coconut/gocopilot/core-engine/base/example/mylog"
 	"github.com/spf13/viper"
 	"testing"
 	"time"

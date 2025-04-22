@@ -111,7 +111,7 @@ func (t *TaskHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -175,7 +175,7 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -183,7 +183,7 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -238,7 +238,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -246,7 +246,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -272,7 +272,7 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -280,7 +280,7 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -318,7 +318,7 @@ func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -326,7 +326,7 @@ func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    0,
+			Code:    errs.TaskInternalServerError,
 			Message: "系统错误",
 		}, err
 	}

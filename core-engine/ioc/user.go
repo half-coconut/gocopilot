@@ -10,8 +10,8 @@ import (
 // InitUserHook 配合 PrometheusHook 使用
 func InitUserHook(client *redisv9.Client) cache.UserCache {
 	client.AddHook(redisx.NewPrometheusHook(prometheus.SummaryOpts{
-		Namespace: "test_copilot",
-		Subsystem: "test_engine",
+		Namespace: "go_copilot",
+		Subsystem: "core_engine",
 		Name:      "gin_http",
 		Help:      "分业务监控 redis 缓存",
 		ConstLabels: map[string]string{

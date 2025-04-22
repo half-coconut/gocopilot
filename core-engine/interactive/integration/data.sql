@@ -1,5 +1,5 @@
-create database if not exists testengine;
-create table if not exists testengine.interactives
+create database if not exists coreengine;
+create table if not exists coreengine.interactives
 (
     id          bigint auto_increment
         primary key,
@@ -14,7 +14,7 @@ create table if not exists testengine.interactives
         unique (biz_id, biz)
 );
 
-create table if not exists testengine.user_collection_bizs
+create table if not exists coreengine.user_collection_bizs
 (
     id     bigint auto_increment
         primary key,
@@ -29,9 +29,9 @@ create table if not exists testengine.user_collection_bizs
 );
 
 create index idx_user_collection_bizs_cid
-    on webook.user_collection_bizs (cid);
+    on coreengine.user_collection_bizs (cid);
 
-create table if not exists testengine.user_like_bizs
+create table if not exists coreengine.user_like_bizs
 (
     id     bigint auto_increment
         primary key,

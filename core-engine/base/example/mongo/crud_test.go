@@ -32,7 +32,7 @@ func TestMongo(t *testing.T) {
 	client, err := mongo.Connect(ctx, opts)
 	assert.NoError(t, err)
 
-	mdb := client.Database("testengine")
+	mdb := client.Database("coreengine")
 	col := mdb.Collection("notes")
 
 	//defer func() {

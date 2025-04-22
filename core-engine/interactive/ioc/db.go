@@ -35,14 +35,14 @@ func InitMongoDB() *mongo.Database {
 		if err != nil {
 			panic(err)
 		}
-		mongoDB = client.Database("testengine")
+		mongoDB = client.Database("coreengine")
 	}
 	return mongoDB
 }
 
 func InitDB(l logger.LoggerV1) *gorm.DB {
 	// 使用 gorm 打印日志
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/testengine"), &gorm.Config{
+	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/coreengine"), &gorm.Config{
 		Logger: glogger.New(gormLoggerFunc(l.Debug), glogger.Config{
 			//SlowThreshold:             time.Millisecond * 100,
 			//Colorful:                  true,
@@ -100,12 +100,12 @@ func (pcb *Callbacks) Initialize(db *gorm.DB) error {
 func newCallbacks() *Callbacks {
 	vector := promesdk.NewSummaryVec(promesdk.SummaryOpts{
 		// 设施各种 namespace
-		Namespace: "test_copilot",
-		Subsystem: "test_engine",
+		Namespace: "go_copilot",
+		Subsystem: "core_engine",
 		Name:      "gorm_query_time",
 		Help:      "统计 GORM 的 执行时间",
 		ConstLabels: map[string]string{
-			"db": "testengine",
+			"db": "coreengine",
 		},
 		Objectives: map[float64]float64{
 			0.5:   0.01,
