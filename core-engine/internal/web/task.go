@@ -16,17 +16,21 @@ import (
 	"time"
 )
 
+var _ handler = (*TaskHandler)(nil)
+
 // Task 接口测试，性能测试的任务
 
 type TaskHandler struct {
-	l   logger.LoggerV1
-	svc core.TaskService
+	l         logger.LoggerV1
+	svc       core.TaskService
+	reportSvc core.ReportService
 }
 
-func NewTaskHandler(l logger.LoggerV1, svc core.TaskService) *TaskHandler {
+func NewTaskHandler(l logger.LoggerV1, svc core.TaskService, reportSvc core.ReportService) *TaskHandler {
 	return &TaskHandler{
-		l:   l,
-		svc: svc,
+		l:         l,
+		svc:       svc,
+		reportSvc: reportSvc,
 	}
 }
 
@@ -88,7 +92,7 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 	} else {
 		if (req.Id > 0) && (req.Execute) {
 
-			report := t.svc.PerformanceRun(ctx, req.Id)
+			report := t.svc.ExecutePerformanceTask(ctx, req.Id)
 
 			return ginx.Result{
 				Code:    1,
@@ -251,7 +255,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 		}, err
 	}
 
-	report := t.svc.PerformanceRun(ctx, req.tid)
+	report := t.svc.ExecutePerformanceTask(ctx, req.tid)
 
 	return ginx.Result{
 		Code:    1,
@@ -287,18 +291,18 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 
 	t.svc.SetBegin(ctx)
 	begin := time.Now()
-	results := make(chan []*core.HttpResult)
+	results := make(chan []*domain.HttpResult)
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	go t.svc.PerformanceDebug(ctx, req.tid, results, &wg)
+	go t.svc.RunPerformanceWithDebug(ctx, req.tid, results, &wg)
 
 	go func() {
 		wg.Wait()
 		close(results)
 	}()
 
-	content := core.FinalReport(begin, results)
+	content := t.reportSvc.GenerateReport(begin, results)
 	return ginx.Result{
 		Code:    1,
 		Message: "OK",
@@ -331,7 +335,7 @@ func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 		}, err
 	}
 
-	debug := t.svc.InterfacesDebug(ctx, req.tid)
+	debug := t.svc.GetAPIDebugLogs(ctx, req.tid)
 
 	return ginx.Result{
 		Code:    1,

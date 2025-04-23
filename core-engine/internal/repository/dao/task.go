@@ -21,7 +21,7 @@ type GORMTaskDAO struct {
 	l  logger.LoggerV1
 }
 
-func (dao GORMTaskDAO) Insert(ctx context.Context, task Task) (int64, error) {
+func (dao *GORMTaskDAO) Insert(ctx context.Context, task Task) (int64, error) {
 	now := time.Now().UnixMilli()
 	task.Ctime = now
 	task.Utime = now
@@ -30,7 +30,7 @@ func (dao GORMTaskDAO) Insert(ctx context.Context, task Task) (int64, error) {
 	return task.Id, err
 }
 
-func (dao GORMTaskDAO) UpdateById(ctx context.Context, task Task) error {
+func (dao *GORMTaskDAO) UpdateById(ctx context.Context, task Task) error {
 	now := time.Now().UnixMilli()
 	res := dao.db.WithContext(ctx).Model(&task).Where("id=?", task.Id).
 		Updates(map[string]interface{}{
@@ -54,13 +54,13 @@ func (dao GORMTaskDAO) UpdateById(ctx context.Context, task Task) error {
 	return err
 }
 
-func (dao GORMTaskDAO) FindByUId(ctx context.Context, id int64) ([]Task, error) {
+func (dao *GORMTaskDAO) FindByUId(ctx context.Context, id int64) ([]Task, error) {
 	var task []Task
 	err := dao.db.WithContext(ctx).Where("creator_id=?", id).Find(&task).Error
 	return task, err
 }
 
-func (dao GORMTaskDAO) FindByTId(ctx context.Context, tid int64) (Task, error) {
+func (dao *GORMTaskDAO) FindByTId(ctx context.Context, tid int64) (Task, error) {
 	var task Task
 	err := dao.db.WithContext(ctx).Where("id=?", tid).Find(&task).Error
 	return task, err

@@ -25,7 +25,7 @@ type CacheTaskRepository struct {
 	apiRepo  APIRepository
 }
 
-func (c CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.Task, error) {
+func (c *CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.Task, error) {
 	task, err := c.dao.FindByTId(ctx, tid)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func (c CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.T
 	return taskDomain, err
 }
 
-func (c CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domain.Task, error) {
+func (c *CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domain.Task, error) {
 	var task []dao.Task
 	task, err := c.dao.FindByUId(ctx, uid)
 	if err != nil {
@@ -96,11 +96,11 @@ func (c *CacheTaskRepository) findAPIListByAIds(ctx context.Context, aids []int6
 	return apiList, nil
 }
 
-func (c CacheTaskRepository) Create(ctx context.Context, task domain.Task) (int64, error) {
+func (c *CacheTaskRepository) Create(ctx context.Context, task domain.Task) (int64, error) {
 	return c.dao.Insert(ctx, c.domainToEntity(task))
 }
 
-func (c CacheTaskRepository) Update(ctx context.Context, task domain.Task) error {
+func (c *CacheTaskRepository) Update(ctx context.Context, task domain.Task) error {
 	return c.dao.UpdateById(ctx, c.domainToEntity(task))
 }
 

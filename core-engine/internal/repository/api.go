@@ -125,7 +125,7 @@ func (c *CacheAPIRepository) domainToEntity(api domain.API) dao.API {
 }
 
 func (c *CacheAPIRepository) entityToDomain(api dao.API, creator, updater domain.User) domain.API {
-	var debugRes domain.TaskDebugLog
+	var debugRes domain.DebugLog
 	return domain.API{
 		Id:   api.Id,
 		Name: api.Name.String,

@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+var _ handler = (*NoteHandler)(nil)
+
 type NoteHandler struct {
 	l       logger.LoggerV1
 	svc     service.NoteService

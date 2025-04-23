@@ -9,7 +9,6 @@ import (
 	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	rate2 "golang.org/x/time/rate"
-	"log"
 	"net/http"
 	"runtime"
 	"sync"
@@ -17,11 +16,11 @@ import (
 )
 
 type TaskService interface {
-	InterfacesDebug(ctx context.Context, tid int64) []TaskDebugLog
-	PerformanceRun(ctx context.Context, tid int64) string
-	PerformanceDebug(ctx context.Context, tid int64, result chan []*HttpResult, wg *sync.WaitGroup) []*HttpResult
+	GetAPIDebugLogs(ctx context.Context, tid int64) []domain.DebugLog
+	ExecutePerformanceTask(ctx context.Context, tid int64) string
+	RunPerformanceWithDebug(ctx context.Context, tid int64, result chan []*domain.HttpResult, wg *sync.WaitGroup) []*domain.HttpResult
 
-	DebugForAPI(ctx context.Context, task domain.Task) TaskDebugLog
+	DebugAPI(ctx context.Context, task domain.Task) domain.DebugLog
 
 	Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error)
 	List(ctx context.Context, uid int64) ([]domain.Task, error)
@@ -29,15 +28,16 @@ type TaskService interface {
 	SetBegin(ctx context.Context)
 }
 
-// taskService 任务结构体
-type taskService struct {
-	repo    repository.TaskRepository
-	httpSvc HttpService
-	l       logger.LoggerV1
-	subtask *Subtask
+// TaskServiceImpl 任务结构体
+type TaskServiceImpl struct {
+	repo      repository.TaskRepository
+	reportSvc ReportService
+	httpSvc   HttpService
+	l         logger.LoggerV1
+	subtask   *Subtask
 }
 
-func (t *taskService) GetDetailByTid(ctx context.Context, tid int64) (domain.Task, error) {
+func (t *TaskServiceImpl) GetDetailByTid(ctx context.Context, tid int64) (domain.Task, error) {
 	return t.repo.FindByTId(ctx, tid)
 }
 
@@ -47,24 +47,58 @@ type Subtask struct {
 	seq   uint64
 }
 
-func NewTaskService(repo repository.TaskRepository, l logger.LoggerV1, httpSvc HttpService) TaskService {
-	return &taskService{
-		repo:    repo,
-		l:       l,
-		subtask: &Subtask{},
-		httpSvc: httpSvc,
+func NewTaskService(repo repository.TaskRepository, reportSvc ReportService, l logger.LoggerV1, httpSvc HttpService) TaskService {
+	return &TaskServiceImpl{
+		repo:      repo,
+		reportSvc: reportSvc,
+		httpSvc:   httpSvc,
+		l:         l,
+		subtask:   &Subtask{},
 	}
 }
 
-func (t *taskService) List(ctx context.Context, uid int64) ([]domain.Task, error) {
+func (t *TaskServiceImpl) GetAPIDebugLogs(ctx context.Context, tid int64) []domain.DebugLog {
+	t.SetBegin(ctx)
+
+	task := t.getTask(ctx, tid)
+	var (
+		reports []domain.DebugLog
+		res     *domain.HttpResult
+	)
+	for _, api := range task.APIs {
+		if api.Type == "http" {
+			headers := http.Header{}
+			for key, value := range api.Header {
+				headers.Add(key, value)
+			}
+
+			t.httpSvc.SetHttpInput(api.Method,
+				api.URL, api.Params,
+				[]byte(jsonx.JsonMarshal(api.Body)),
+				headers)
+
+			res = t.httpSvc.Send(t.subtask)
+
+			res.TaskId = task.Id
+			res.AId = api.Id
+			res.AName = api.Name
+			content, _ := t.reportSvc.CreateDebugLog(ctx, true, res)
+			reports = append(reports, content)
+		}
+	}
+	// 一次任务的结果
+	return reports
+}
+
+func (t *TaskServiceImpl) List(ctx context.Context, uid int64) ([]domain.Task, error) {
 	return t.repo.FindByUId(ctx, uid)
 }
 
-func (t *taskService) SetBegin(ctx context.Context) {
+func (t *TaskServiceImpl) SetBegin(ctx context.Context) {
 	t.subtask.Began = time.Now()
 }
 
-func (t *taskService) Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error) {
+func (t *TaskServiceImpl) Save(ctx *gin.Context, task domain.Task, uid int64) (int64, error) {
 	if task.Id > 0 {
 		// 这里是修改
 		task.Updater = domain.Editor{
@@ -90,43 +124,12 @@ func (t *taskService) Save(ctx *gin.Context, task domain.Task, uid int64) (int64
 	return Id, err
 }
 
-func (t *taskService) InterfacesDebug(ctx context.Context, tid int64) []TaskDebugLog {
-	t.SetBegin(ctx)
-
-	task := t.getTask(ctx, tid)
-	var (
-		reports []TaskDebugLog
-		res     *HttpResult
-	)
-	for _, api := range task.APIs {
-		if api.Type == "http" {
-			headers := http.Header{}
-			for key, value := range api.Header {
-				headers.Add(key, value)
-			}
-
-			t.httpSvc.SetHttpInput(api.Method,
-				api.URL, api.Params,
-				[]byte(jsonx.JsonMarshal(api.Body)),
-				headers)
-
-			res = t.httpSvc.Send(t.subtask)
-
-			res.Task = task.Name
-			content := ExportDebugLogs(true, res)
-			reports = append(reports, content)
-		}
-	}
-	// 一次任务的结果
-	return reports
-}
-
-// DebugForAPI 这个接口是为了web api 服务，后期可以使用 InterfaceDebug
-func (t *taskService) DebugForAPI(ctx context.Context, task domain.Task) TaskDebugLog {
+// DebugAPI 这个接口是为了web api 服务，后期可以使用 GetAPIDebugLogs
+func (t *TaskServiceImpl) DebugAPI(ctx context.Context, task domain.Task) domain.DebugLog {
 	t.SetBegin(ctx)
 
 	api := task.APIs[0]
-	var res *HttpResult
+	var res *domain.HttpResult
 	if api.Type == "http" {
 		headers := http.Header{}
 		for key, value := range api.Header {
@@ -140,21 +143,22 @@ func (t *taskService) DebugForAPI(ctx context.Context, task domain.Task) TaskDeb
 		)
 
 		res = t.httpSvc.Send(t.subtask)
-
-		res.Task = task.Name
+		res.TaskId = task.Id
+		res.AId = api.Id
+		res.AName = api.Name
 	}
 
 	// 一次任务的结果
-	content := ExportDebugLogs(true, res)
+	content, _ := t.reportSvc.CreateDebugLog(ctx, true, res)
 	return content
 }
 
-func (t *taskService) PerformanceDebug(ctx context.Context, tid int64, result chan []*HttpResult, wg *sync.WaitGroup) []*HttpResult {
+func (t *TaskServiceImpl) RunPerformanceWithDebug(ctx context.Context, tid int64, result chan []*domain.HttpResult, wg *sync.WaitGroup) []*domain.HttpResult {
 	defer wg.Done()
 
 	task := t.getTask(ctx, tid)
 
-	res := make([]*HttpResult, 0)
+	res := make([]*domain.HttpResult, 0)
 	for _, api := range task.APIs {
 		if api.Type == "http" {
 			headers := http.Header{}
@@ -165,18 +169,22 @@ func (t *taskService) PerformanceDebug(ctx context.Context, tid int64, result ch
 			t.httpSvc.SetHttpInput(api.Method, api.URL, api.Params, []byte(jsonx.JsonMarshal(api.Body)), headers)
 			apiRes := t.httpSvc.Send(t.subtask)
 
-			apiRes.Task = task.Name
+			apiRes.TaskId = task.Id
+			apiRes.AId = api.Id
+			apiRes.AName = api.Name
+
 			res = append(res, apiRes)
 		}
 	}
 	// 一次任务的结果
-	TaskDebugLogs(true, res)
+	batchRes, _ := t.reportSvc.CreateDebugLogs(ctx, true, res)
+	t.l.Debug(fmt.Sprintf("任务 debug 的信息: %v", batchRes))
 
 	result <- res
 	return res
 }
 
-func (t *taskService) PerformanceRun(ctx context.Context, tid int64) string {
+func (t *TaskServiceImpl) ExecutePerformanceTask(ctx context.Context, tid int64) string {
 	t.SetBegin(ctx)
 	// 这里将 task 中的所有接口，按照一个goroutine 去请求，
 	// 创建限速器
@@ -195,12 +203,12 @@ func (t *taskService) PerformanceRun(ctx context.Context, tid int64) string {
 		worker = task.MaxWorkers
 	}
 
-	results := make(chan []*HttpResult)
+	results := make(chan []*domain.HttpResult)
 
 	for i := uint64(0); i < worker; i++ {
 		if limiter.Allow() {
 			wg.Add(1)
-			go t.PerformanceDebug(ctx, tid, results, &wg)
+			go t.RunPerformanceWithDebug(ctx, tid, results, &wg)
 		}
 	}
 
@@ -221,7 +229,7 @@ func (t *taskService) PerformanceRun(ctx context.Context, tid int64) string {
 				if limiter.Allow() {
 					// 启动 goroutine 发送请求
 					wg.Add(1)
-					go t.PerformanceDebug(ctx, tid, results, &wg)
+					go t.RunPerformanceWithDebug(ctx, tid, results, &wg)
 				}
 				//} else {
 				//	// 处理限速，例如记录日志或等待一段时间
@@ -231,68 +239,17 @@ func (t *taskService) PerformanceRun(ctx context.Context, tid int64) string {
 		}
 	}()
 
-	content := FinalReport(t.subtask.Began, results)
+	content := t.reportSvc.GenerateReport(t.subtask.Began, results)
 	t.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
 	t.l.Info(fmt.Sprintf("当前 http_load 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
 	return content
 
 }
 
-func (t *taskService) getTask(ctx context.Context, tid int64) domain.Task {
+func (t *TaskServiceImpl) getTask(ctx context.Context, tid int64) domain.Task {
 	task, err := t.repo.FindByTId(ctx, tid)
 	if err != nil {
 		t.l.Warn("查询任务失败", logger.Error(err))
 	}
 	return task
-}
-
-func TaskOnceDebugLogs(debug bool, re *HttpResult) string {
-	if debug {
-		content := fmt.Sprintf(`
-+++++ taskService InterfacesDebug Log: +++++
-[taskService: %s]
-[Code: %d]
-[Method: %s]
-[URL:%s]
-[Duration: %v]
-[Headers: %v]
-[Request: %s]
-[Response: %s]
-[Client IP: %s]
-[Error: %s]`, re.Task, re.Code, re.Method, re.URL, re.Duration, re.Headers, re.Req, re.Resp, re.ClientIp, re.Error)
-		log.Println(content)
-		return content
-	}
-	return ""
-}
-
-func ExportDebugLogs(debug bool, re *HttpResult) TaskDebugLog {
-	if debug {
-		return TaskDebugLog{
-			Name:     re.Task,
-			Code:     re.Code,
-			Method:   re.Method,
-			Url:      re.URL,
-			Duration: round(re.Duration),
-			Headers:  jsonx.JsonMarshal(re.Headers),
-			Request:  re.Req,
-			Response: re.Resp,
-			ClientIP: re.ClientIp,
-			Error:    re.Error,
-		}
-	}
-	return TaskDebugLog{}
-}
-
-type TaskDebugLog struct {
-	Name     string        `json:"name"`
-	Code     int64         `json:"code"`
-	Method   string        `json:"method"`
-	Url      string        `json:"url"`
-	Duration time.Duration `json:"duration"`
-	Headers  string        `json:"headers"`
-	Request  string        `json:"request"`
-	Response string        `json:"response"`
-	ClientIP string        `json:"client_ip"`
-	Error    string        `json:"error"`
 }

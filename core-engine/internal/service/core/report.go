@@ -1,8 +1,13 @@
 package core
 
 import (
+	"context"
 	"fmt"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/timex"
 	"log"
 	"sort"
 	"time"
@@ -10,9 +15,76 @@ import (
 
 // ReportService debug 报告，最终报告
 type ReportService interface {
+	CreateDebugLog(ctx context.Context, debug bool, re *domain.HttpResult) (domain.DebugLog, error)
+	CreateDebugLogs(ctx context.Context, debug bool, res []*domain.HttpResult) ([]domain.DebugLog, error)
+	GenerateReport(begin time.Time, resCh chan []*domain.HttpResult) string
 }
 
-type reportService struct {
+type reportServiceImpl struct {
+	l    logger.LoggerV1
+	repo repository.ReportRepository
+}
+
+func NewReportService(l logger.LoggerV1, repo repository.ReportRepository) ReportService {
+	return &reportServiceImpl{
+		l:    l,
+		repo: repo}
+}
+
+func (svc *reportServiceImpl) CreateDebugLog(ctx context.Context, debug bool, res *domain.HttpResult) (domain.DebugLog, error) {
+	// 一个任务里，一个接口的 debug 信息
+	if debug {
+		logs := domain.DebugLog{
+			TaskId:   res.TaskId,
+			AId:      res.AId,
+			AName:    res.AName,
+			Code:     res.Code,
+			Method:   res.Method,
+			Url:      res.URL,
+			Duration: timex.Round(res.Duration),
+			Headers:  jsonx.JsonMarshal(res.Headers),
+			Params:   res.Params,
+			Body:     res.Body,
+			Response: res.Resp,
+			ClientIP: res.ClientIp,
+			Error:    res.Error,
+		}
+		rid, err := svc.repo.CreateDebugLog(ctx, logs)
+		if err != nil {
+			svc.l.Info(fmt.Sprintf("保存 Debug日志失败，rid: %v", rid), logger.Error(err))
+			return domain.DebugLog{}, err
+		}
+		return logs, nil
+	}
+	return domain.DebugLog{}, nil
+}
+
+func (svc *reportServiceImpl) CreateDebugLogs(ctx context.Context, debug bool, res []*domain.HttpResult) ([]domain.DebugLog, error) {
+	// 这里的res 是一次任务里包含的所有接口，如果 10-20,这里就是 10-20个的 debug 信息
+	// 存入数据库，还是一个任务，一个接口的存放
+	var err error
+	batchRes := make([]domain.DebugLog, 0)
+	if debug {
+		for _, re := range res {
+			content, err := svc.CreateDebugLog(ctx, debug, re)
+			err = err
+			log.Println(content)
+			batchRes = append(batchRes, content)
+		}
+	}
+	return batchRes, err
+}
+
+func (svc *reportServiceImpl) GenerateReport(begin time.Time, resCh chan []*domain.HttpResult) string {
+	// 生成 Report String
+	var r Summary
+	b := r.generateBase(begin, resCh)
+	r.requests(&b)
+	r.latencies(&b)
+	return r.displayReport()
+}
+
+type Summary struct {
 	Total         int
 	Rate          float64
 	Throughput    float64
@@ -26,7 +98,6 @@ type reportService struct {
 	P99           time.Duration
 	Ratio         float64
 	StatusCodes   string
-	l             logger.LoggerV1
 	TestStatus    TestStatus
 }
 
@@ -47,14 +118,7 @@ type TestStatus struct {
 	Errors  int64
 }
 
-//func NewReport(l logger.LoggerV1) ReportService {
-//	return &reportService{
-//		l: l,
-//	}
-//}
-
-// FinalReport 生成 Report Base，并输出 Report
-func FinalReport(begin time.Time, resCh chan []*HttpResult) string {
+func (r *Summary) generateBase(begin time.Time, resCh chan []*domain.HttpResult) Base {
 	var b Base
 	b.Codes = make([]int64, 0)
 	b.SuccessRequests = make([]int64, 0)
@@ -82,20 +146,10 @@ func FinalReport(begin time.Time, resCh chan []*HttpResult) string {
 	b.TotalDuration = time.Since(begin)
 
 	b.TotalRequest = len(b.Codes)
-
-	//r.displayReportBase(b)
-	var r reportService
-	return r.generateReport(&b)
+	return b
 }
 
-func (r *reportService) generateReport(b *Base) string {
-	r.Requests(b)
-	r.Latencies(b)
-	log.Println(r.displayReport())
-	return r.displayReport()
-}
-
-func (r *reportService) Requests(b *Base) {
+func (r *Summary) requests(b *Base) {
 	r.Ratio = float64(len(b.SuccessRequests)) / float64(b.TotalRequest)
 	r.Total = b.TotalRequest
 	r.TotalDuration = b.TotalDuration
@@ -115,7 +169,7 @@ func (r *reportService) Requests(b *Base) {
 
 }
 
-func (r *reportService) Latencies(b *Base) {
+func (r *Summary) latencies(b *Base) {
 	sort.Slice(b.Durations, func(i, j int) bool {
 		return b.Durations[i] < b.Durations[j]
 	})
@@ -123,13 +177,13 @@ func (r *reportService) Latencies(b *Base) {
 	r.Max = b.Durations[len(b.Durations)-1]
 	r.Mean = time.Duration(int64(b.TotalDuration) / int64(len(b.Durations)))
 
-	r.P50 = index(50, b.Durations)
-	r.P90 = index(90, b.Durations)
-	r.P95 = index(95, b.Durations)
-	r.P99 = index(99, b.Durations)
+	r.P50 = timex.Index(50, b.Durations)
+	r.P90 = timex.Index(90, b.Durations)
+	r.P95 = timex.Index(95, b.Durations)
+	r.P99 = timex.Index(99, b.Durations)
 }
 
-func (r *reportService) displayReport() string {
+func (r *Summary) displayReport() string {
 	return fmt.Sprintf(`
 +++ Requests +++
 [total 总请求数: %d]
@@ -154,59 +208,20 @@ func (r *reportService) displayReport() string {
 [passed: %v]
 [failed: %v]
 `, r.Total, r.Rate, r.Throughput,
-		round(r.TotalDuration),
-		round(r.Min),
-		round(r.Mean),
-		round(r.Max),
-		round(r.P50),
-		round(r.P90),
-		round(r.P95),
-		round(r.P99),
+		timex.Round(r.TotalDuration),
+		timex.Round(r.Min),
+		timex.Round(r.Mean),
+		timex.Round(r.Max),
+		timex.Round(r.P50),
+		timex.Round(r.P90),
+		timex.Round(r.P95),
+		timex.Round(r.P99),
 		r.Ratio*100,
 		r.StatusCodes,
 		r.TestStatus.Passed,
 		r.TestStatus.Failed)
 
 }
-
-//func DisplayReportResult(s *model.subtask, res []*model.HttpResult) {
-//	var b Base
-//	b.Codes = make([]int, 0)
-//	b.SuccessRequests = make([]int, 0)
-//	b.FailedRequests = make([]int, 0)
-//	b.Durations = make([]time.Duration, 0)
-//
-//	for _, r := range res {
-//		// 暂定200为成功状态码
-//		if r.Code == 200 {
-//			b.SuccessRequests = append(b.SuccessRequests, r.Code)
-//		} else {
-//			// 还没有对错误码作分类
-//			b.FailedRequests = append(b.FailedRequests, r.Code)
-//		}
-//		b.Codes = append(b.Codes, r.Code)
-//		b.Durations = append(b.Durations, r.Duration)
-//	}
-//
-//	b.TotalDuration = time.Since(s.Began)
-//
-//	b.TotalRequest = len(b.Codes)
-//
-//	var r generateReport
-//	r.generateReport(&b)
-//}
-
-//func (r *reportService) displayReportBase(b Base) {
-//	r.l.Info(fmt.Sprintf(`
-//+++++ generateReport Base: +++++
-//[Codes: %v]
-//[TotalRequest: %d]
-//[SuccessRequests: %v]
-//[FailedRequests: %v]
-//[TotalDuration: %s]
-//[Durations:%v]
-//`, b.Codes, b.TotalRequest, b.SuccessRequests, b.FailedRequests, b.TotalDuration, b.Durations))
-//}
 
 // %.2f: 保留两位小数，例如输出 3.14。
 // %e: 使用科学计数法表示，例如输出 3.141590e+00。
@@ -215,26 +230,3 @@ func (r *reportService) displayReport() string {
 // %s 格式化字符串会将 time.Duration 类型的值转换为字符串，例如 10s、 1m30s、 2h5m10s 等。
 // time.Duration 类型的值会自动转换为合适的单位，例如秒、分钟、小时等。
 // %v: 等同于 %s， 输出可读的字符串格式。
-
-func TaskDebugLogs(debug bool, res []*HttpResult) {
-	//resList := make([]string, 0)
-	if debug {
-		for _, re := range res {
-			content := fmt.Sprintf(`
-+++++ taskService InterfacesDebug Log: +++++
-[taskService: %s]
-[Code: %d]
-[Method: %s]
-[URL:%s]
-[Duration: %v]
-[Headers: %v]
-[Request: %s]
-[Response: %s]
-[Client IP: %s]
-[Error: %s]`, re.Task, re.Code, re.Method, re.URL, re.Duration, re.Headers, re.Req, re.Resp, re.ClientIp, re.Error)
-			log.Println(content)
-			//resList = append(resList, content)
-		}
-	}
-	//return resList
-}

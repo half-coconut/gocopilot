@@ -18,6 +18,8 @@ import (
 	"time"
 )
 
+var _ handler = (*APIHandler)(nil)
+
 type APIHandler struct {
 	l       logger.LoggerV1
 	svc     service.APIService
@@ -127,7 +129,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Utime: time.UnixMilli(now),
 		}
 		display(task)
-		report := a.taskSvc.DebugForAPI(ctx, task)
+		report := a.taskSvc.DebugAPI(ctx, task)
 
 		// 把 debug 结果写入数据库
 		api = domain.API{
@@ -141,7 +143,7 @@ func (a *APIHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, er
 			Method:      strings.ToUpper(req.Method),
 			Project:     req.Project,
 			Debug:       req.Debug,
-			DebugResult: domain.TaskDebugLog(report),
+			DebugResult: report,
 		}
 
 		Id, err = a.svc.Save(ctx, api, uc.Id)
@@ -271,7 +273,7 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 func display(task domain.Task) string {
 
 	content := fmt.Sprintf(`
-+++++ task InterfacesDebug Log: +++++
++++++ task GetAPIDebugLogs Log: +++++
 [Id: %v]
 [Name: %v]
 [TaskAPI: %v]

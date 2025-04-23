@@ -186,8 +186,9 @@ scp root@47.239.187.141:/etc/nginx/sites-available/default /Users/chenchen/Deskt
 - 关闭功能，调用关闭后，状态为 cronjobStatusPaused，此时运行任务的 goroutine 在间隔后执行任务暂停
 
 2025-04-14
+
 ```shell
-#列出当前使用端口 8090 的所有进程
+# 列出当前使用端口 8090 的所有进程
 lsof -i:8090
 
 brew install etcd
@@ -204,18 +205,44 @@ service/user/198.18.0.1:8090
 ➜  ~ 
 ```
 
-
 2025-04-17
+
 - 新建前端 job 页面
 
 2025-04-18
+
 - 新增日志输出配置项，标准输出，日志级别等
 
-
 2025-04-19
+
 - docker 镜像上传 Docker Hub
+
 ```shell
 ➜  core-engine git:(main) ✗ docker tag core-engine:v0.0.1 halfcoconut/gocopilot:core-engine
 ➜  core-engine git:(main) ✗ docker push  halfcoconut/gocopilot:core-engine
 
 ```
+
+2025-04-23
+
+- 分离出 report service
+- 存入 mongoDB，集合 debug_logs，summary
+    - 使用雪花算法生成 id
+    - 雪花算法之所以被广泛使用，是因为它能够提供全局唯一、高性能、准有序、分布式友好和可配置的 ID 生成方案，满足了分布式系统中对
+      ID 生成的各种需求
+
+```shell
+# 查询某个任务的 debug_logs 有多少条
+$ db.getCollection("debug_logs").find({"task_id" : 2}).count()
+```
+
+计划明天完成：
+
+- summary 存入数据库
+- 完成使用消息队列，将 task 和 report 解耦，
+- 消息队列解决的问题：异步，削峰，解耦
+- 场景：秒杀，支付(支付失败，考虑延迟队列)，
+- 关于消息队列的应该设置多少个分区，生产者和消费者的计算：
+    - max(发送者总速率/单一分区写入速率，发送者总速率/单一消费者总速率) + buffer
+- 消息积压的问题：同一个分区，只能有一个消费者
+- 消息有序执行的问题：同一个分区，保证消息的有序

@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"io"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 type HttpService interface {
 	SetHttpInput(method, url, params string, body []byte, header http.Header)
-	Send(s *Subtask) *HttpResult
+	Send(s *Subtask) *domain.HttpResult
 }
 type httpService struct {
 	l  logger.LoggerV1
@@ -33,12 +34,12 @@ func (h *httpService) SetHttpInput(method, url, params string, body []byte, head
 	}
 }
 
-func (h *httpService) Send(s *Subtask) *HttpResult {
-	var res HttpResult
+func (h *httpService) Send(s *Subtask) *domain.HttpResult {
+	var res domain.HttpResult
 
 	res.Method = h.hc.Method
 	res.URL = h.hc.URL
-	res.Req = string(h.hc.Body)
+	res.Body = string(h.hc.Body)
 
 	s.seqmu.Lock()
 	res.Timestamp = s.Began.Add(time.Since(s.Began))

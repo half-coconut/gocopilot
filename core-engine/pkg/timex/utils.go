@@ -1,8 +1,8 @@
-package core
+package timex
 
 import "time"
 
-func index(percent float64, b []time.Duration) time.Duration {
+func Index(percent float64, b []time.Duration) time.Duration {
 	idx := int64(percent / 100.0 * float64(len(b)))
 	// 防止越界
 	if idx > int64(len(b)) {
@@ -20,7 +20,7 @@ var durations = [...]time.Duration{
 	time.Nanosecond,
 }
 
-func round(d time.Duration) time.Duration {
+func Round(d time.Duration) time.Duration {
 	for i, unit := range durations {
 		if d >= unit && i < len(durations)-1 {
 			return d.Round(durations[i+1])

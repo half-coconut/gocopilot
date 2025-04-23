@@ -20,7 +20,7 @@ type CronJobService interface {
 	StopOne(ctx *gin.Context, jid int64) error
 }
 
-type cronJobServiceImpl struct {
+type CronJobServiceImpl struct {
 	l        logger.LoggerV1
 	repo     repository.CronJobRepository
 	taskSvc  core.TaskService
@@ -28,8 +28,8 @@ type cronJobServiceImpl struct {
 	//limiter  *semaphore.Weighted
 }
 
-func NewCronJobServiceImpl(l logger.LoggerV1, repo repository.CronJobRepository, taskSvc core.TaskService) CronJobService {
-	return &cronJobServiceImpl{
+func NewCronJobService(l logger.LoggerV1, repo repository.CronJobRepository, taskSvc core.TaskService) CronJobService {
+	return &CronJobServiceImpl{
 		l:        l,
 		repo:     repo,
 		taskSvc:  taskSvc,
@@ -47,11 +47,11 @@ const (
 	cronjobStatusPaused
 )
 
-func (svc *cronJobServiceImpl) StopOne(ctx *gin.Context, jid int64) error {
+func (svc *CronJobServiceImpl) StopOne(ctx *gin.Context, jid int64) error {
 	return svc.repo.Stop(ctx, jid)
 }
 
-func (svc *cronJobServiceImpl) ExecOne(ctx *gin.Context, jid int64) error {
+func (svc *CronJobServiceImpl) ExecOne(ctx *gin.Context, jid int64) error {
 	// 使用一个goroutine 执行某个任务
 	// 如果任务少，可以这样 一条一条独立执行
 	// 如果任务多，并且是多实例部署，就需要抢占式，通过 MySQl分布式锁抢中某个任务，然后再执行
@@ -90,7 +90,7 @@ func (svc *cronJobServiceImpl) ExecOne(ctx *gin.Context, jid int64) error {
 				}
 			}()
 			if j.TaskId != 0 {
-				report := svc.taskSvc.PerformanceRun(ctx, j.TaskId)
+				report := svc.taskSvc.ExecutePerformanceTask(ctx, j.TaskId)
 				svc.l.Info(fmt.Sprintf("定时任务执行结果：%v", report))
 			}
 		}()
@@ -99,11 +99,11 @@ func (svc *cronJobServiceImpl) ExecOne(ctx *gin.Context, jid int64) error {
 	}
 }
 
-func (svc *cronJobServiceImpl) Release(ctx context.Context, jid int64) error {
+func (svc *CronJobServiceImpl) Release(ctx context.Context, jid int64) error {
 	return svc.repo.Release(ctx, jid)
 }
 
-func (svc *cronJobServiceImpl) ResetNextTime(ctx context.Context, jid int64) error {
+func (svc *CronJobServiceImpl) ResetNextTime(ctx context.Context, jid int64) error {
 	j, err := svc.repo.GetJobById(ctx, jid)
 	if err != nil {
 		svc.l.Error("通过 jid，获取 job 失败")
@@ -116,7 +116,7 @@ func (svc *cronJobServiceImpl) ResetNextTime(ctx context.Context, jid int64) err
 	return svc.repo.UpdateNextTime(ctx, j.Id, next)
 }
 
-func (svc *cronJobServiceImpl) Save(ctx context.Context, job domain.CronJob, uid int64) (int64, error) {
+func (svc *CronJobServiceImpl) Save(ctx context.Context, job domain.CronJob, uid int64) (int64, error) {
 	if job.Id > 0 {
 		// 这里是修改
 		err := svc.repo.Update(ctx, job)

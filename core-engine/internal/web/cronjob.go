@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+var _ handler = (*CronJobHandler)(nil)
+
 type CronJobHandler struct {
 	l       logger.LoggerV1
 	svc     service.CronJobService

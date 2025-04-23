@@ -39,7 +39,7 @@ var rankingServiceSet = wire.NewSet(
 func InitWebServer() *App {
 	wire.Build(
 		ioc.InitDB, ioc.InitRedis, ioc.InitRLockClient,
-		//ioc.InitMongoDB,
+		ioc.InitMongoDB,
 		ioc.InitLogger,
 		ioc.InitKafka,
 		ioc.NewConsumers,
@@ -64,6 +64,7 @@ func InitWebServer() *App {
 		noteDao.NewNoteDAO,
 		dao.NewGORMTaskDAO,
 		dao.NewGORMCronJobDAO,
+		dao.NewMongoDBReportDAO,
 
 		cache.NewRedisNoteCache,
 
@@ -76,12 +77,14 @@ func InitWebServer() *App {
 		repository.NewAPIRepository,
 		repository.NewCacheTaskRepository,
 		repository.NewCacheCronJobRepository,
+		repository.NewCacheReportRepository,
 
 		service.NewUserService,
 		service.NewNoteService,
 		service.NewAPIService,
-		service.NewCronJobServiceImpl,
+		service.NewCronJobService,
 
+		core.NewReportService,
 		core.NewTaskService,
 		core.NewHttpService,
 		openai.NewDeepSeekService,

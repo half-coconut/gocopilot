@@ -24,15 +24,19 @@ func InitMongoDB() *mongo.Database {
 	if mongoDB == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
+
 		monitor := &event.CommandMonitor{
-			Started: func(ctx context.Context,
-				startedEvent *event.CommandStartedEvent) {
+			Started: func(ctx context.Context, startedEvent *event.CommandStartedEvent) {
 				fmt.Println(startedEvent.Command)
 			},
+			Succeeded: func(ctx context.Context, succeededEvent *event.CommandSucceededEvent) {
+
+			},
+			Failed: func(ctx context.Context, failedEvent *event.CommandFailedEvent) {
+
+			},
 		}
-		opts := options.Client().
-			ApplyURI("mongodb://root:example@localhost:27017/").
-			SetMonitor(monitor)
+		opts := options.Client().ApplyURI("mongodb://root:root@localhost:27017").SetMonitor(monitor)
 		client, err := mongo.Connect(ctx, opts)
 		if err != nil {
 			panic(err)

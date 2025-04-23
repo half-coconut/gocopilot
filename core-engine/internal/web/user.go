@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+var _ handler = (*UserHandler)(nil)
+
 type UserHandler struct {
 	svc            service.UserService
 	emailRegexp    *regexp2.Regexp
@@ -97,7 +99,7 @@ func (u *UserHandler) SignUp(context *gin.Context) {
 		u.l.Info("邮箱冲突", logger.Error(err), logger.String("email", req.Email))
 		return
 	}
-	context.JSON(http.StatusOK, Result{Code: 1, Message: "注册成功！", Data: req})
+	context.JSON(http.StatusOK, Result{Code: 1, Message: "注册成功！", Data: req.Email})
 	fmt.Printf("%v\n", req)
 
 }

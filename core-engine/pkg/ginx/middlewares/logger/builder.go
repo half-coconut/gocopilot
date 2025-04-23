@@ -47,7 +47,7 @@ func (b *MiddlewareBuilder) Build() gin.HandlerFunc {
 			// Body 是个数据流，读完就没了
 			body, _ := ctx.GetRawData()
 			// ctx.GetRawData() 内部就是调用 io.ReadAll()
-			// body, _ := io.ReadAll(ctx.Request.Body)
+			// body, _ := io.ReadAll(ctx.Body.Body)
 			// 读完后还要方回去
 			ctx.Request.Body = io.NopCloser(bytes.NewReader(body))
 
