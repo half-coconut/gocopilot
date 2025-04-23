@@ -121,11 +121,6 @@ $ helm upgrade --install ingress-nginx ingress-nginx \
 $ kubectl apply -f k8s-ingress-nginx.yaml
 ```
 
-Deployment, Pod, Service, Ingress 的关系
-
-- Pod 会被 Deployment 工作负载管理起来，例如创建和销毁等
-- Service 相当于弹性伸缩组的负载均衡器，它能以**加权轮训**的方式将流量转发到多个 Pod 副本上
-- Ingress 相当于集群的外网访问入口
 
 使用 k8s 集群部署应用
 
