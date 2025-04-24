@@ -44,7 +44,7 @@ const taskService = {
       const res = await instance.get("/task/debug/" + id);
       return res;
     } catch (error) {
-      console.error("Task Debug Task error:", error);
+      console.error("Task Debug error:", error);
       throw error;
     }
   },
@@ -54,7 +54,7 @@ const taskService = {
       const res = await instance.get("/task/execute/" + id);
       return res;
     } catch (error) {
-      console.error("Task Debug Task error:", error);
+      console.error("Task Execute error:", error);
       throw error;
     }
   },

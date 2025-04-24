@@ -6,22 +6,22 @@ import (
 	"github.com/IBM/sarama"
 )
 
-type Producer interface {
+type NoteProducer interface {
 	ProducerReadEvent(ctx context.Context, evt ReadEvent) error
 	ProducerReadEventV1(ctx context.Context, v1 ReadEventV1)
 }
 
-type KafkaProducer struct {
+type KafkaNoteProducer struct {
 	producer sarama.SyncProducer
 }
 
-func (k KafkaProducer) ProducerReadEventV1(ctx context.Context, v1 ReadEventV1) {
+func (k *KafkaNoteProducer) ProducerReadEventV1(ctx context.Context, v1 ReadEventV1) {
 	//TODO implement me
 	panic("implement me")
 }
 
 // ProducerReadEvent 如果有复杂的重试逻辑，优先用装饰器，重试逻辑剥离出去，否则就放在这里
-func (k KafkaProducer) ProducerReadEvent(ctx context.Context, evt ReadEvent) error {
+func (k *KafkaNoteProducer) ProducerReadEvent(ctx context.Context, evt ReadEvent) error {
 	data, err := json.Marshal(evt)
 	if err != nil {
 		return err
@@ -33,8 +33,8 @@ func (k KafkaProducer) ProducerReadEvent(ctx context.Context, evt ReadEvent) err
 	return err
 }
 
-func NewKafkaProducer(pc sarama.SyncProducer) Producer {
-	return &KafkaProducer{
+func NewKafkaNoteProducer(pc sarama.SyncProducer) NoteProducer {
+	return &KafkaNoteProducer{
 		producer: pc,
 	}
 }

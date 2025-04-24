@@ -17,8 +17,8 @@ import (
 
 type TaskService interface {
 	GetAPIDebugLogs(ctx context.Context, tid int64) []domain.DebugLog
-	ExecutePerformanceTask(ctx context.Context, tid int64) string
-	RunPerformanceWithDebug(ctx context.Context, tid int64, result chan []*domain.HttpResult, wg *sync.WaitGroup) []*domain.HttpResult
+	ExecutePerformanceTask(ctx context.Context, tid int64, debug bool) string
+	RunPerformanceWithDebug(ctx context.Context, tid int64, result chan []*domain.HttpResult, wg *sync.WaitGroup, debug bool) []*domain.HttpResult
 
 	DebugAPI(ctx context.Context, task domain.Task) domain.DebugLog
 
@@ -82,6 +82,7 @@ func (t *TaskServiceImpl) GetAPIDebugLogs(ctx context.Context, tid int64) []doma
 			res.TaskId = task.Id
 			res.AId = api.Id
 			res.AName = api.Name
+			res.TName = task.Name
 			content, _ := t.reportSvc.CreateDebugLog(ctx, true, res)
 			reports = append(reports, content)
 		}
@@ -146,6 +147,7 @@ func (t *TaskServiceImpl) DebugAPI(ctx context.Context, task domain.Task) domain
 		res.TaskId = task.Id
 		res.AId = api.Id
 		res.AName = api.Name
+		res.TName = task.Name
 	}
 
 	// 一次任务的结果
@@ -153,7 +155,7 @@ func (t *TaskServiceImpl) DebugAPI(ctx context.Context, task domain.Task) domain
 	return content
 }
 
-func (t *TaskServiceImpl) RunPerformanceWithDebug(ctx context.Context, tid int64, result chan []*domain.HttpResult, wg *sync.WaitGroup) []*domain.HttpResult {
+func (t *TaskServiceImpl) RunPerformanceWithDebug(ctx context.Context, tid int64, result chan []*domain.HttpResult, wg *sync.WaitGroup, debug bool) []*domain.HttpResult {
 	defer wg.Done()
 
 	task := t.getTask(ctx, tid)
@@ -172,19 +174,22 @@ func (t *TaskServiceImpl) RunPerformanceWithDebug(ctx context.Context, tid int64
 			apiRes.TaskId = task.Id
 			apiRes.AId = api.Id
 			apiRes.AName = api.Name
+			apiRes.TName = task.Name
 
 			res = append(res, apiRes)
 		}
 	}
 	// 一次任务的结果
-	batchRes, _ := t.reportSvc.CreateDebugLogs(ctx, true, res)
-	t.l.Debug(fmt.Sprintf("任务 debug 的信息: %v", batchRes))
+	if debug {
+		batchRes, _ := t.reportSvc.CreateDebugLogs(ctx, debug, res)
+		t.l.Debug(fmt.Sprintf("任务 debug 的信息: %v", batchRes))
+	}
 
 	result <- res
 	return res
 }
 
-func (t *TaskServiceImpl) ExecutePerformanceTask(ctx context.Context, tid int64) string {
+func (t *TaskServiceImpl) ExecutePerformanceTask(ctx context.Context, tid int64, debug bool) string {
 	t.SetBegin(ctx)
 	// 这里将 task 中的所有接口，按照一个goroutine 去请求，
 	// 创建限速器
@@ -208,7 +213,7 @@ func (t *TaskServiceImpl) ExecutePerformanceTask(ctx context.Context, tid int64)
 	for i := uint64(0); i < worker; i++ {
 		if limiter.Allow() {
 			wg.Add(1)
-			go t.RunPerformanceWithDebug(ctx, tid, results, &wg)
+			go t.RunPerformanceWithDebug(ctx, tid, results, &wg, debug)
 		}
 	}
 
@@ -229,7 +234,7 @@ func (t *TaskServiceImpl) ExecutePerformanceTask(ctx context.Context, tid int64)
 				if limiter.Allow() {
 					// 启动 goroutine 发送请求
 					wg.Add(1)
-					go t.RunPerformanceWithDebug(ctx, tid, results, &wg)
+					go t.RunPerformanceWithDebug(ctx, tid, results, &wg, debug)
 				}
 				//} else {
 				//	// 处理限速，例如记录日志或等待一段时间
@@ -239,9 +244,9 @@ func (t *TaskServiceImpl) ExecutePerformanceTask(ctx context.Context, tid int64)
 		}
 	}()
 
-	content := t.reportSvc.GenerateReport(t.subtask.Began, results)
+	content := t.reportSvc.GenerateSummary(ctx, t.subtask.Began, results, debug)
 	t.l.Info(fmt.Sprintf("并发请求数：%d\n", worker))
-	t.l.Info(fmt.Sprintf("当前 http_load 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
+	t.l.Info(fmt.Sprintf("当前 ExecutePerformanceTask 的 goroutine 数量: %d\n", runtime.NumGoroutine()))
 	return content
 
 }

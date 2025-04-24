@@ -25,7 +25,7 @@ type noteService struct {
 	author   note.NoteAuthorRepository
 	reader   note.NoteReaderRepository
 	l        logger.LoggerV1
-	producer events.Producer
+	producer events.NoteProducer
 
 	ch chan readInfo
 }
@@ -84,7 +84,7 @@ func (svc *noteService) Withdraw(ctx context.Context, note domain.Note) error {
 	return svc.repo.SyncStatus(ctx, note.Id, note.Author.Id, domain.NoteStatusPrivate)
 }
 
-func NewNoteService(repo note.NoteRepository, l logger.LoggerV1, producer events.Producer) NoteService {
+func NewNoteService(repo note.NoteRepository, l logger.LoggerV1, producer events.NoteProducer) NoteService {
 	return &noteService{
 		repo:     repo,
 		l:        l,
@@ -92,7 +92,7 @@ func NewNoteService(repo note.NoteRepository, l logger.LoggerV1, producer events
 	}
 }
 
-func NewNoteServiceV2(repo note.NoteRepository, l logger.LoggerV1, producer events.Producer) NoteService {
+func NewNoteServiceV2(repo note.NoteRepository, l logger.LoggerV1, producer events.NoteProducer) NoteService {
 	ch := make(chan readInfo, 10)
 	go func() {
 		for {

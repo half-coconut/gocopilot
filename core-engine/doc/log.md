@@ -4,7 +4,7 @@
 
 2025-03-14
 
-- 修复了接口返回格式问题，`MiddlewareBuilder` 的 `responseWriter` 里对 `len(data) < 1024` 做了限制；
+- ⚠️修复了接口返回格式问题，`MiddlewareBuilder` 的 `responseWriter` 里对 `len(data) < 1024` 做了限制；
 - 增加 debug 到 edit 接口，实现 http接口运行, 前端加相应调整
 
 2025-03-30
@@ -220,7 +220,6 @@ service/user/198.18.0.1:8090
 ```shell
 ➜  core-engine git:(main) ✗ docker tag core-engine:v0.0.1 halfcoconut/gocopilot:core-engine
 ➜  core-engine git:(main) ✗ docker push  halfcoconut/gocopilot:core-engine
-
 ```
 
 2025-04-23
@@ -234,15 +233,45 @@ service/user/198.18.0.1:8090
 ```shell
 # 查询某个任务的 debug_logs 有多少条
 $ db.getCollection("debug_logs").find({"task_id" : 2}).count()
+# 清空 debug_logs 表的内容，保留索引等
+db.debug_logs.deleteMany({})
 ```
 
-计划明天完成：
+2025-04-24
 
 - summary 存入数据库
+- ⚠️注意：保存 summary 时，debug 模式不受影响，但是当压测时间到 case <-ctx.Done(): 超时退出时
+- 需要新建 ctx 超时时间，否则因为 ctx.Done()，summary 因超时而不能存入数据库
+
+```shell
+  ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*10)
+  summary, err := svc.repo.CreateSummary(ctxTimeout, *r)
+```
+
+kafka tools 文档
+
+```shell
+https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-producer-perf-test-sh
+```
+
+- ⚠️debug_logs 记录 2949条，summary 记录 2975 条，差了 26条
+- 改用消息队列后，提高了数据准确性，数据 5929 条，debug_logs 记录 2980条，summary 记录 2980 条，完全一致；
+    - 具体实现：在 ReportService 中，将生成 debuglog 作为生产者；
+    - 使用消费者，获取 debuglog event 消息，存入数据库；
+    - 解耦直接通过调用 repo 存入数据库。
+
 - 完成使用消息队列，将 task 和 report 解耦，
-- 消息队列解决的问题：异步，削峰，解耦
-- 场景：秒杀，支付(支付失败，考虑延迟队列)，
-- 关于消息队列的应该设置多少个分区，生产者和消费者的计算：
-    - max(发送者总速率/单一分区写入速率，发送者总速率/单一消费者总速率) + buffer
-- 消息积压的问题：同一个分区，只能有一个消费者
-- 消息有序执行的问题：同一个分区，保证消息的有序
+    - 消息队列解决的问题：异步，削峰，解耦
+    - 场景：秒杀，支付(支付失败，考虑延迟队列)，
+    - 关于消息队列的应该设置多少个分区，生产者和消费者的计算：
+        - max(发送者总速率/单一分区写入速率，发送者总速率/单一消费者总速率) + buffer
+    - 消息积压的问题：同一个分区，只能有一个消费者
+    - 消息有序执行的问题：同一个分区，保证消息的有序
+
+- ExecutePerformanceTask 添加了 debug 参数，允许开启或者关闭 Debug 模式
+- 去掉 omitempty，数据库存入 true、false 
+```shell
+Debug         bool       `bson:"debug"`
+``` 
+
+✈️计划重新完成架构图，做项目总结

@@ -9,6 +9,7 @@ import (
 	dao2 "github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
 	service2 "github.com/half-coconut/gocopilot/core-engine/interactive/service"
 	events "github.com/half-coconut/gocopilot/core-engine/internal/events/note"
+	reportEvt "github.com/half-coconut/gocopilot/core-engine/internal/events/report"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
@@ -57,7 +58,9 @@ func InitWebServer() *App {
 
 		// consumer
 		//events.NewInteractiveReadEventBatchConsumer,
-		events.NewKafkaProducer,
+		events.NewKafkaNoteProducer,
+		reportEvt.NewKafkaDebugLogProducer,
+		reportEvt.NewDebugLogEventConsumer,
 
 		dao.NewUserDAO,
 		dao.NewAPIDAO,
@@ -77,7 +80,7 @@ func InitWebServer() *App {
 		repository.NewAPIRepository,
 		repository.NewCacheTaskRepository,
 		repository.NewCacheCronJobRepository,
-		repository.NewCacheReportRepository,
+		repository.NewUncachedReportRepository,
 
 		service.NewUserService,
 		service.NewNoteService,

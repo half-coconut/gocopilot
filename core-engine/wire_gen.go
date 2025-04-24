@@ -13,6 +13,7 @@ import (
 	dao2 "github.com/half-coconut/gocopilot/core-engine/interactive/repository/dao"
 	service2 "github.com/half-coconut/gocopilot/core-engine/interactive/service"
 	note3 "github.com/half-coconut/gocopilot/core-engine/internal/events/note"
+	"github.com/half-coconut/gocopilot/core-engine/internal/events/report"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
@@ -55,8 +56,11 @@ func InitWebServer() *App {
 	taskRepository := repository.NewCacheTaskRepository(taskDAO, loggerV1, userRepository, apiRepository)
 	database := ioc.InitMongoDB()
 	reportDAO := dao.NewMongoDBReportDAO(database, loggerV1)
-	reportRepository := repository.NewCacheReportRepository(reportDAO, loggerV1)
-	reportService := core.NewReportService(loggerV1, reportRepository)
+	reportRepository := repository.NewUncachedReportRepository(reportDAO, loggerV1)
+	client := ioc.InitKafka()
+	syncProducer := ioc.NewSyncProducer(client)
+	debugLogProducer := report.NewKafkaDebugLogProducer(syncProducer)
+	reportService := core.NewReportService(loggerV1, reportRepository, debugLogProducer)
 	taskService := core.NewTaskService(taskRepository, reportService, loggerV1, httpService)
 	apiHandler := web.NewAPIHandler(apiService, taskService, userService, loggerV1)
 	taskHandler := web.NewTaskHandler(loggerV1, taskService, reportService)
@@ -65,10 +69,8 @@ func InitWebServer() *App {
 	readerDAO := note.NewNoteReaderDAO(loggerV1, db)
 	noteCache := cache.NewRedisNoteCache(cmdable)
 	noteRepository := note2.NewNoteRepository(noteDAO, userRepository, authorDAO, readerDAO, noteCache, loggerV1)
-	client := ioc.InitKafka()
-	syncProducer := ioc.NewSyncProducer(client)
-	producer := note3.NewKafkaProducer(syncProducer)
-	noteService := service.NewNoteService(noteRepository, loggerV1, producer)
+	noteProducer := note3.NewKafkaNoteProducer(syncProducer)
+	noteService := service.NewNoteService(noteRepository, loggerV1, noteProducer)
 	clientv3Client := ioc.InitEtcd()
 	interactiveServiceClient := ioc.InitIntrGRPCClientV1(clientv3Client)
 	noteHandler := web.NewNoteHandler(noteService, loggerV1, interactiveServiceClient)
@@ -77,7 +79,8 @@ func InitWebServer() *App {
 	cronJobService := service.NewCronJobService(loggerV1, cronJobRepository, taskService)
 	cronJobHandler := web.NewCronJobHandler(loggerV1, cronJobService, taskService)
 	engine := ioc.InitWebServer(v, aiHandler, userHandler, apiHandler, taskHandler, noteHandler, cronJobHandler)
-	v2 := ioc.NewConsumers()
+	debugLogEventConsumer := report.NewDebugLogEventConsumer(client, reportRepository, loggerV1)
+	v2 := ioc.NewConsumers(debugLogEventConsumer)
 	rankingLocalCache := cache.NewRankingLocalCache()
 	rankingRedisCache := cache.NewRankingRedisCache(cmdable)
 	rankingRepository := repository.NewCacheRankingRepository(rankingLocalCache, rankingRedisCache)

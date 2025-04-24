@@ -29,6 +29,7 @@ type HttpResult struct {
 	TaskId    int64         `json:"task_id"`
 	AId       int64         `json:"a_id"`
 	AName     string        `json:"a_name"`
+	TName     string        `json:"t_name"`
 	Code      int64         `json:"code"`
 	Error     string        `json:"error"`
 	Params    string        `json:"params"`
@@ -44,6 +45,11 @@ type HttpResult struct {
 }
 
 type Summary struct {
+	Id            int64
+	TaskId        int64
+	AIds          int64
+	TName         string
+	Debug         bool
 	Total         int
 	Rate          float64
 	Throughput    float64
@@ -57,7 +63,27 @@ type Summary struct {
 	P99           time.Duration
 	Ratio         float64
 	StatusCodes   string
+	TestStatus    TestStatus
 	Status        int
+}
+
+type Base struct {
+	TaskId          int64
+	TName           string
+	Codes           []int64
+	TotalRequest    int
+	SuccessRequests []int64
+	FailedRequests  []int64
+	TotalDuration   time.Duration
+	Durations       []time.Duration
+	TestStatus      TestStatus
+}
+
+type TestStatus struct {
+	Passed  int64
+	Failed  int64
+	Skipped int64
+	Errors  int64
 }
 
 const (

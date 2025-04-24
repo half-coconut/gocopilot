@@ -90,7 +90,7 @@ func (svc *CronJobServiceImpl) ExecOne(ctx *gin.Context, jid int64) error {
 				}
 			}()
 			if j.TaskId != 0 {
-				report := svc.taskSvc.ExecutePerformanceTask(ctx, j.TaskId)
+				report := svc.taskSvc.ExecutePerformanceTask(ctx, j.TaskId, false)
 				svc.l.Info(fmt.Sprintf("定时任务执行结果：%v", report))
 			}
 		}()

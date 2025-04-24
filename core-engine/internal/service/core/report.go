@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	events "github.com/half-coconut/gocopilot/core-engine/internal/events/report"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
@@ -17,18 +18,21 @@ import (
 type ReportService interface {
 	CreateDebugLog(ctx context.Context, debug bool, re *domain.HttpResult) (domain.DebugLog, error)
 	CreateDebugLogs(ctx context.Context, debug bool, res []*domain.HttpResult) ([]domain.DebugLog, error)
-	GenerateReport(begin time.Time, resCh chan []*domain.HttpResult) string
+	GenerateSummary(ctx context.Context, begin time.Time, resCh chan []*domain.HttpResult, debug bool) string
 }
 
 type reportServiceImpl struct {
-	l    logger.LoggerV1
-	repo repository.ReportRepository
+	l        logger.LoggerV1
+	repo     repository.ReportRepository
+	producer events.DebugLogProducer
 }
 
-func NewReportService(l logger.LoggerV1, repo repository.ReportRepository) ReportService {
+func NewReportService(l logger.LoggerV1, repo repository.ReportRepository, producer events.DebugLogProducer) ReportService {
 	return &reportServiceImpl{
-		l:    l,
-		repo: repo}
+		l:        l,
+		repo:     repo,
+		producer: producer,
+	}
 }
 
 func (svc *reportServiceImpl) CreateDebugLog(ctx context.Context, debug bool, res *domain.HttpResult) (domain.DebugLog, error) {
@@ -49,11 +53,18 @@ func (svc *reportServiceImpl) CreateDebugLog(ctx context.Context, debug bool, re
 			ClientIP: res.ClientIp,
 			Error:    res.Error,
 		}
-		rid, err := svc.repo.CreateDebugLog(ctx, logs)
-		if err != nil {
-			svc.l.Info(fmt.Sprintf("保存 Debug日志失败，rid: %v", rid), logger.Error(err))
-			return domain.DebugLog{}, err
-		}
+		go func() {
+			er := svc.producer.ProducerRecordDebugLogsEvent(ctx, logs)
+			if er != nil {
+				svc.l.Error("发送记录debug日志事件失败")
+			}
+		}()
+
+		//rid, err := svc.repo.CreateDebugLog(ctx, logs)
+		//if err != nil {
+		//	svc.l.Info(fmt.Sprintf("保存 Debug日志失败，rid: %v", rid), logger.Error(err))
+		//	return domain.DebugLog{}, err
+		//}
 		return logs, nil
 	}
 	return domain.DebugLog{}, nil
@@ -61,10 +72,10 @@ func (svc *reportServiceImpl) CreateDebugLog(ctx context.Context, debug bool, re
 
 func (svc *reportServiceImpl) CreateDebugLogs(ctx context.Context, debug bool, res []*domain.HttpResult) ([]domain.DebugLog, error) {
 	// 这里的res 是一次任务里包含的所有接口，如果 10-20,这里就是 10-20个的 debug 信息
-	// 存入数据库，还是一个任务，一个接口的存放
 	var err error
 	batchRes := make([]domain.DebugLog, 0)
 	if debug {
+		// 这里可以后期扩展为批量发送
 		for _, re := range res {
 			content, err := svc.CreateDebugLog(ctx, debug, re)
 			err = err
@@ -75,51 +86,26 @@ func (svc *reportServiceImpl) CreateDebugLogs(ctx context.Context, debug bool, r
 	return batchRes, err
 }
 
-func (svc *reportServiceImpl) GenerateReport(begin time.Time, resCh chan []*domain.HttpResult) string {
+func (svc *reportServiceImpl) GenerateSummary(ctx context.Context, begin time.Time, resCh chan []*domain.HttpResult, debug bool) string {
 	// 生成 Report String
-	var r Summary
-	b := r.generateBase(begin, resCh)
-	r.requests(&b)
-	r.latencies(&b)
-	return r.displayReport()
+	b := svc.generateBase(begin, resCh)
+	r := svc.requests(b)
+	svc.l.Info(fmt.Sprintf("svc 里打印 debug 是什么：%v", debug))
+	r.Debug = debug
+	r = svc.latencies(r, b)
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	summary, err := svc.repo.CreateSummary(ctxTimeout, *r)
+	if err != nil {
+		svc.l.Info(fmt.Sprintf("创建 summary 失败：%v，err: %v", summary, err))
+	}
+	cancel()
+	svc.l.Info(fmt.Sprintf("summary 结构体：%v", summary))
+	return svc.displayReport(r)
 }
 
-type Summary struct {
-	Total         int
-	Rate          float64
-	Throughput    float64
-	TotalDuration time.Duration
-	Min           time.Duration
-	Mean          time.Duration
-	Max           time.Duration
-	P50           time.Duration
-	P90           time.Duration
-	P95           time.Duration
-	P99           time.Duration
-	Ratio         float64
-	StatusCodes   string
-	TestStatus    TestStatus
-}
-
-type Base struct {
-	Codes           []int64
-	TotalRequest    int
-	SuccessRequests []int64
-	FailedRequests  []int64
-	TotalDuration   time.Duration
-	Durations       []time.Duration
-	TestStatus      TestStatus
-}
-
-type TestStatus struct {
-	Passed  int64
-	Failed  int64
-	Skipped int64
-	Errors  int64
-}
-
-func (r *Summary) generateBase(begin time.Time, resCh chan []*domain.HttpResult) Base {
-	var b Base
+func (svc *reportServiceImpl) generateBase(begin time.Time, resCh chan []*domain.HttpResult) *domain.Base {
+	var b domain.Base
 	b.Codes = make([]int64, 0)
 	b.SuccessRequests = make([]int64, 0)
 	b.FailedRequests = make([]int64, 0)
@@ -127,6 +113,8 @@ func (r *Summary) generateBase(begin time.Time, resCh chan []*domain.HttpResult)
 
 	for res := range resCh {
 		for _, re := range res {
+			b.TaskId = re.TaskId
+			b.TName = re.TName
 			// 暂定200为成功状态码
 			if re.Code == int64(200) {
 				b.SuccessRequests = append(b.SuccessRequests, re.Code)
@@ -146,10 +134,13 @@ func (r *Summary) generateBase(begin time.Time, resCh chan []*domain.HttpResult)
 	b.TotalDuration = time.Since(begin)
 
 	b.TotalRequest = len(b.Codes)
-	return b
+	return &b
 }
 
-func (r *Summary) requests(b *Base) {
+func (svc *reportServiceImpl) requests(b *domain.Base) *domain.Summary {
+	var r domain.Summary
+	r.TaskId = b.TaskId
+	r.TName = b.TName
 	r.Ratio = float64(len(b.SuccessRequests)) / float64(b.TotalRequest)
 	r.Total = b.TotalRequest
 	r.TotalDuration = b.TotalDuration
@@ -166,10 +157,10 @@ func (r *Summary) requests(b *Base) {
 	} else if len(b.SuccessRequests) == 0 && len(b.FailedRequests) != 0 {
 		r.StatusCodes = fmt.Sprintf(" %d...:%d", b.FailedRequests[0], len(b.FailedRequests))
 	}
-
+	return &r
 }
 
-func (r *Summary) latencies(b *Base) {
+func (svc *reportServiceImpl) latencies(r *domain.Summary, b *domain.Base) *domain.Summary {
 	sort.Slice(b.Durations, func(i, j int) bool {
 		return b.Durations[i] < b.Durations[j]
 	})
@@ -181,9 +172,10 @@ func (r *Summary) latencies(b *Base) {
 	r.P90 = timex.Index(90, b.Durations)
 	r.P95 = timex.Index(95, b.Durations)
 	r.P99 = timex.Index(99, b.Durations)
+	return r
 }
 
-func (r *Summary) displayReport() string {
+func (svc *reportServiceImpl) displayReport(r *domain.Summary) string {
 	return fmt.Sprintf(`
 +++ Requests +++
 [total 总请求数: %d]

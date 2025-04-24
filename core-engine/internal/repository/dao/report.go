@@ -44,8 +44,13 @@ func (m *MongoDBReportDAO) InsertDebugLog(ctx context.Context, log DebugLog) (in
 }
 
 func (m *MongoDBReportDAO) InsertSummary(ctx context.Context, s Summary) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	id := m.node.Generate().Int64()
+	s.Id = id
+	now := time.Now().UnixMilli()
+	s.Ctime = now
+	s.Utime = now
+	_, err := m.summary.InsertOne(ctx, s)
+	return id, err
 }
 
 func (m *MongoDBReportDAO) GetDebugLogsByTaskId(ctx context.Context, tid int64) ([]DebugLog, error) {
@@ -57,7 +62,7 @@ type DebugLog struct {
 	Id       int64       `gorm:"primaryKey,autoIncrement" bson:"id,omitempty"`
 	TaskId   int64       `gorm:"index" bson:"task_id,omitempty"`
 	AId      int64       `gorm:"index" bson:"a_id,omitempty"`
-	AName    string      `bson:"a_name,omitempty"`
+	AName    string      `bson:"a_name,omitempty"` // 接口名称
 	Request  RequestInfo `bson:"request,omitempty"`
 	Response interface{} `bson:"response,omitempty"`
 	ClientIP string      `bson:"client_ip,omitempty"`
@@ -75,27 +80,37 @@ type RequestInfo struct {
 }
 
 type Summary struct {
-	Id            string         `gorm:"primaryKey,autoIncrement" bson:"id,omitempty"` // 使用雪花算法生成的字符串ID
-	TaskId        int64          `gorm:"index" bson:"task_id,omitempty"`
-	AIds          int64          `gorm:"index" bson:"a_ids,omitempty"`
-	Name          string         `bson:"name,omitempty"` // 任务名称 (使用string, 空字符串表示null)
-	Total         int            `bson:"total,omitempty"`
-	Rate          float64        `bson:"rate,omitempty"`
-	Throughput    float64        `bson:"throughput,omitempty"`
-	TotalDuration int64          `bson:"total_duration,omitempty"`
-	Min           int64          `bson:"min,omitempty"`
-	Mean          int64          `bson:"mean,omitempty"`
-	Max           int64          `bson:"max,omitempty"`
-	P50           int64          `bson:"p50,omitempty"`
-	P90           int64          `bson:"p90,omitempty"`
-	P95           int64          `bson:"p95,omitempty"`
-	P99           int64          `bson:"p99,omitempty"`
-	Ratio         float64        `bson:"ratio,omitempty"`
-	StatusCodes   map[string]int `bson:"status_codes,omitempty"` // 存储状态码统计信息
+	Id            int64      `gorm:"primaryKey,autoIncrement" bson:"id,omitempty"` // 使用雪花算法生成的字符串ID
+	TaskId        int64      `gorm:"index" bson:"task_id,omitempty"`
+	AIds          int64      `gorm:"index" bson:"a_ids,omitempty"`
+	TName         string     `bson:"t_name,omitempty"` // 任务名称 (使用string, 空字符串表示null)
+	Debug         bool       `bson:"debug"`            // 开启或者关闭 Debug 模式
+	Total         int        `bson:"total,omitempty"`
+	Rate          float64    `bson:"rate,omitempty"`
+	Throughput    float64    `bson:"throughput,omitempty"`
+	TotalDuration int64      `bson:"total_duration,omitempty"`
+	Min           int64      `bson:"min,omitempty"`
+	Mean          int64      `bson:"mean,omitempty"`
+	Max           int64      `bson:"max,omitempty"`
+	P50           int64      `bson:"p50,omitempty"`
+	P90           int64      `bson:"p90,omitempty"`
+	P95           int64      `bson:"p95,omitempty"`
+	P99           int64      `bson:"p99,omitempty"`
+	Ratio         float64    `bson:"ratio,omitempty"`
+	StatusCodes   string     `bson:"status_codes,omitempty"` // 存储状态码统计信息
+	TestStatus    TestStatus `bson:"test_status,omitempty"`
 
 	Status int   `bson:"status,omitempty"`
 	Ctime  int64 `bson:"ctime,omitempty"`
 	Utime  int64 `bson:"utime,omitempty"`
+}
+
+// TestStatus 统计个数
+type TestStatus struct {
+	Passed  int64
+	Failed  int64
+	Skipped int64
+	Errors  int64
 }
 
 const (

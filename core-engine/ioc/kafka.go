@@ -2,6 +2,7 @@ package ioc
 
 import (
 	"github.com/IBM/sarama"
+	events "github.com/half-coconut/gocopilot/core-engine/internal/events/report"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/saramax"
 	"github.com/spf13/viper"
 	"log"
@@ -39,7 +40,9 @@ func NewSyncProducer(client sarama.Client) sarama.SyncProducer {
 	return res
 }
 
-// NewConsumers 面临的问题依旧是所有的 Consumer 在这里注册一下
-func NewConsumers() []saramax.Consumer {
-	return []saramax.Consumer{}
+// NewConsumers 注意：所有的 Consumer 在这里注册一下
+func NewConsumers(debugLog *events.DebugLogEventConsumer) []saramax.Consumer {
+	return []saramax.Consumer{
+		debugLog,
+	}
 }

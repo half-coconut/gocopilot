@@ -39,18 +39,18 @@ func (t *TaskHandler) RegisterRoutes(server *gin.Engine) {
 	// 创建任务
 	// 设置或者修改 rate 和 duration，并执行性能测试
 	task.POST("/edit", ginx.WrapToken[ijwt.UserClaims](t.Edit))
-
-	// Execute
-	// 执行性能测试， 按照持续时间和 rate limit 来执行
-	task.GET("/execute/:id", ginx.WrapToken[ijwt.UserClaims](t.Execute))
-	// Debug
-	// 执行一次性能测试，设置 rate 和 duration ，生成性能测试报告
-	task.GET("/debug/:id", ginx.WrapToken[ijwt.UserClaims](t.PerformanceDebug))
-	// 执行一次接口测试，某个任务的接口调试，生成接口测试报告
-	task.GET("/debug/interfaces/:id", ginx.WrapToken[ijwt.UserClaims](t.InterfaceDebug))
-
 	task.GET("/list", ginx.WrapToken[ijwt.UserClaims](t.List))
 	task.GET("/detail/:id", ginx.WrapToken[ijwt.UserClaims](t.Detail))
+
+	// 执行任务
+	task.GET("/execute/:id", ginx.WrapToken[ijwt.UserClaims](t.Execute))
+
+	debug := task.Group("/debug")
+	// debug 性能测试
+	debug.GET("/:id", ginx.WrapToken[ijwt.UserClaims](t.PerformanceDebug))
+	// debug 接口测试
+	debug.GET("/interfaces/:id", ginx.WrapToken[ijwt.UserClaims](t.InterfaceDebug))
+
 }
 
 func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
@@ -92,7 +92,8 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 	} else {
 		if (req.Id > 0) && (req.Execute) {
 
-			report := t.svc.ExecutePerformanceTask(ctx, req.Id)
+			// 注意：这里默认开启 debug 模式
+			report := t.svc.ExecutePerformanceTask(ctx, req.Id, true)
 
 			return ginx.Result{
 				Code:    1,
@@ -233,6 +234,9 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 
 func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
 	tid := ctx.Param("id")
+	debug := ctx.Query("debug")
+
+	t.l.Info(fmt.Sprintf("打印 debug 是什么：%v", debug))
 
 	type TaskReq struct {
 		tid int64 `json:"id"`
@@ -254,8 +258,11 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 			Message: "系统错误",
 		}, err
 	}
-
-	report := t.svc.ExecutePerformanceTask(ctx, req.tid)
+	dg, err := strconv.ParseBool(debug)
+	if err != nil {
+		fmt.Printf("转换 \"%s\" 失败: %v\n", debug, err)
+	}
+	report := t.svc.ExecutePerformanceTask(ctx, req.tid, dg)
 
 	return ginx.Result{
 		Code:    1,
@@ -295,14 +302,16 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	go t.svc.RunPerformanceWithDebug(ctx, req.tid, results, &wg)
+	// 注意这里默认开启 debug
+	debug := true
+	go t.svc.RunPerformanceWithDebug(ctx, req.tid, results, &wg, debug)
 
 	go func() {
 		wg.Wait()
 		close(results)
 	}()
 
-	content := t.reportSvc.GenerateReport(begin, results)
+	content := t.reportSvc.GenerateSummary(ctx, begin, results, debug)
 	return ginx.Result{
 		Code:    1,
 		Message: "OK",
