@@ -269,9 +269,12 @@ https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-producer
     - 消息有序执行的问题：同一个分区，保证消息的有序
 
 - ExecutePerformanceTask 添加了 debug 参数，允许开启或者关闭 Debug 模式
-- 去掉 omitempty，数据库存入 true、false 
+- 去掉 omitempty，数据库存入 true、false
+
 ```shell
 Debug         bool       `bson:"debug"`
 ``` 
 
-✈️计划重新完成架构图，做项目总结
+2025-04-25
+
+- 完成架构图，计划做项目总结

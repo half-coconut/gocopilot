@@ -14,6 +14,7 @@ import (
 	"github.com/half-coconut/gocopilot/core-engine/pkg/ginx/middlewares/ratelimit"
 	logger2 "github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -45,7 +46,7 @@ func InitMiddleware(redisClients redisv9.Cmdable, l logger2.LoggerV1, jwtHdl ijw
 			Help:       "统计 GIN 的 HTTP 接口",
 			InstanceId: "my-instance-1",
 		}).Builder(),
-
+		otelgin.Middleware("core-engine"),
 		middleware.NewLoginJWTMiddlewareBuilder(jwtHdl).
 			IgnorePath("/hello").
 			IgnorePath("/users/signup").

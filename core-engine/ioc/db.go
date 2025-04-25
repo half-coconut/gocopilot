@@ -14,6 +14,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	glogger "gorm.io/gorm/logger"
+	"gorm.io/plugin/opentelemetry/tracing"
 	"gorm.io/plugin/prometheus"
 	"time"
 )
@@ -84,6 +85,14 @@ func InitDB(l logger.LoggerV1) *gorm.DB {
 	pcb := newCallbacks()
 	//pcb.registerAll(db)
 	db.Use(pcb)
+
+	tracing.NewPlugin(tracing.WithDBSystem("coreengine"), tracing.WithQueryFormatter(func(query string) string {
+		l.Debug("", logger.String("query", query))
+		return query
+	}),
+	//tracing.WithoutMetrics(), // 不要记录 metrics 各种指标
+	//tracing.WithoutQueryVariables(), // 不要记录查询参数，线上
+	)
 
 	err = dao.InitTable(db)
 	if err != nil {

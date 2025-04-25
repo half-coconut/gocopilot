@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
@@ -296,7 +297,8 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 		}, err
 	}
 
-	t.svc.SetBegin(ctx)
+	ctxCancel, cancel := context.WithCancel(ctx)
+	t.svc.SetBegin(ctxCancel)
 	begin := time.Now()
 	results := make(chan []*domain.HttpResult)
 	var wg sync.WaitGroup
@@ -304,14 +306,15 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 	wg.Add(1)
 	// 注意这里默认开启 debug
 	debug := true
-	go t.svc.RunPerformanceWithDebug(ctx, req.tid, results, &wg, debug)
+	go t.svc.RunPerformanceWithDebug(ctxCancel, req.tid, results, &wg, debug)
 
 	go func() {
 		wg.Wait()
 		close(results)
+		cancel() // 这里取消 ctx
 	}()
 
-	content := t.reportSvc.GenerateSummary(ctx, begin, results, debug)
+	content := t.reportSvc.GenerateSummary(ctxCancel, begin, results, debug)
 	return ginx.Result{
 		Code:    1,
 		Message: "OK",
