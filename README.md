@@ -2,7 +2,7 @@
 
 ### Architecture
 
-![gocopilot drawio](https://github.com/user-attachments/assets/f76652c5-2787-4d6d-bf6b-5ec23cedacf5)
+![gocopilot drawioV2](https://github.com/user-attachments/assets/6d6629b7-4627-4385-96d9-3dee176dfcd5)
 
 
 - 微服务架构，新增缓存方案，消息队列，分布式任务调度等模块
