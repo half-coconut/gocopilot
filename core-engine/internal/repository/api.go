@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
@@ -18,18 +19,31 @@ type APIRepository interface {
 }
 
 type CacheAPIRepository struct {
-	dao      dao.APIDAO
-	l        logger.LoggerV1
-	userRepo UserRepository
+	dao       dao.APIDAO
+	cache     cache.APICache
+	userCache cache.UserCache
+	l         logger.LoggerV1
+	userRepo  UserRepository
 }
 
 func (c *CacheAPIRepository) FindByAId(ctx context.Context, aid int64) (domain.API, error) {
-	api, err := c.dao.FindByAId(ctx, aid)
+	api, err := c.cache.Get(ctx, aid)
+	if err == nil {
+		return api, nil
+	}
+
+	apiEntity, err := c.dao.FindByAId(ctx, aid)
 	if err != nil {
 		return domain.API{}, nil
 	}
-	creator, updater := c.findUserByAPI(ctx, api)
-	return c.entityToDomain(api, creator, updater), err
+	creator, updater := c.findUserByAPI(ctx, apiEntity)
+	apiDomain := c.entityToDomain(apiEntity, creator, updater)
+
+	err = c.cache.Set(ctx, apiDomain)
+	if err != nil {
+		c.l.Error("缓存API失败")
+	}
+	return apiDomain, err
 }
 
 func (c *CacheAPIRepository) FindByUId(ctx context.Context, uid int64) ([]domain.API, error) {
@@ -51,24 +65,47 @@ func (c *CacheAPIRepository) FindByUId(ctx context.Context, uid int64) ([]domain
 }
 
 func (c *CacheAPIRepository) findUserByAPI(ctx context.Context, api dao.API) (domain.User, domain.User) {
-	// 适合单体应用
-	creator, err := c.userRepo.FindById(ctx, api.CreatorId)
-	if err != nil {
-		c.l.Error("查询创建人失败", logger.Error(err))
-	}
+	select {
+	case <-ctx.Done():
+		return domain.User{}, domain.User{}
+	default:
+		cUid := api.CreatorId
+		uUid := api.UpdaterId
 
-	updater, err := c.userRepo.FindById(ctx, api.UpdaterId)
-	if err != nil {
-		c.l.Error("查询更新人失败", logger.Error(err))
+		creator, err := c.userCache.Get(ctx, cUid)
+		updater, err := c.userCache.Get(ctx, uUid)
+		if err == nil {
+			return creator, updater
+		}
+
+		creator, err = c.userRepo.FindById(ctx, api.CreatorId)
+		if err != nil {
+			c.l.Error("查询创建人失败", logger.Error(err))
+		}
+		err = c.userCache.Set(ctx, creator)
+		if err != nil {
+			return domain.User{}, domain.User{}
+		}
+
+		updater, err = c.userRepo.FindById(ctx, api.UpdaterId)
+		if err != nil {
+			c.l.Error("查询更新人失败", logger.Error(err))
+		}
+		err = c.userCache.Set(ctx, updater)
+		if err != nil {
+			return domain.User{}, domain.User{}
+		}
+		return creator, updater
 	}
-	return creator, updater
 }
 
-func NewAPIRepository(dao dao.APIDAO, l logger.LoggerV1, userRepo UserRepository) APIRepository {
+func NewAPIRepository(dao dao.APIDAO, cache cache.APICache, userCache cache.UserCache, l logger.LoggerV1, userRepo UserRepository) APIRepository {
 	return &CacheAPIRepository{
-		dao:      dao,
-		l:        l,
-		userRepo: userRepo,
+		dao:       dao,
+		cache:     cache,
+		userCache: userCache,
+		l:         l,
+		userRepo:  userRepo,
 	}
 }
 

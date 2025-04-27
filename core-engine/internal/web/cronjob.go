@@ -224,6 +224,7 @@ func (c *CronJobHandler) AddAll(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resu
 		Retry:       req.Retry,
 		MaxRetries:  req.MaxRetries,
 	}
+	c.l.Debug(fmt.Sprintf("打印 job 的结构体：%v", job))
 
 	Id, err := c.svc.Save(ctx, job, uc.Id)
 	if err != nil {

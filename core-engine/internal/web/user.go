@@ -11,6 +11,7 @@ import (
 	"github.com/half-coconut/gocopilot/core-engine/internal/service"
 	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
+	"go.opentelemetry.io/otel/trace"
 	"log"
 	"net/http"
 	"time"
@@ -95,6 +96,8 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 		Password: req.Password,
 	})
 	if errors.Is(err, service.ErrUserDuplicate) {
+		span := trace.SpanFromContext(ctx.Request.Context())
+		span.AddEvent("邮箱冲突")
 		ctx.JSON(http.StatusConflict, Result{Code: errs.UserInvalidOrPassword, Message: "邮箱冲突"})
 		u.l.Info("邮箱冲突", logger.Error(err), logger.String("email", req.Email))
 		return

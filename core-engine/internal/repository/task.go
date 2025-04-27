@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/ecodeclub/ekit/slice"
 	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
+	"github.com/half-coconut/gocopilot/core-engine/internal/repository/cache"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository/dao"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
@@ -19,29 +20,48 @@ type TaskRepository interface {
 }
 
 type CacheTaskRepository struct {
-	dao      dao.TaskDAO
-	l        logger.LoggerV1
-	userRepo UserRepository
-	apiRepo  APIRepository
+	dao       dao.TaskDAO
+	cache     cache.TaskCache
+	userCache cache.UserCache
+	l         logger.LoggerV1
+	userRepo  UserRepository
+	apiRepo   APIRepository
 }
 
 func (c *CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.Task, error) {
-	task, err := c.dao.FindByTId(ctx, tid)
-
-	if err != nil {
-		c.l.Error("FindByTId 失败：", logger.Error(err))
+	select {
+	case <-ctx.Done():
 		return domain.Task{}, nil
+	default:
+
+		task, err := c.cache.Get(ctx, tid)
+		if err == nil {
+			return task, nil
+		}
+
+		taskEntity, err := c.dao.FindByTId(ctx, tid)
+
+		if err != nil {
+			c.l.Error("查询任务失败：", logger.Error(err))
+			return domain.Task{}, nil
+		}
+
+		var apis []int64
+		apilist, err := c.findAPIListByAIds(ctx, jsonx.JsonUnmarshal(taskEntity.AIds.String, apis))
+		if err != nil {
+			c.l.Error("查询api失败", logger.Error(err))
+		}
+		creator, updater := c.findUserByUId(ctx, taskEntity)
+		taskDomain := c.entityToDomain(taskEntity, creator, updater, apilist)
+
+		err = c.cache.Set(ctx, taskDomain)
+		if err != nil {
+			c.l.Error("缓存任务失败", logger.Error(err))
+		}
+
+		return taskDomain, err
 	}
 
-	var apis []int64
-	apilist, err := c.findAPIListByAIds(ctx, jsonx.JsonUnmarshal(task.AIds.String, apis))
-	if err != nil {
-		c.l.Error("查询api失败", logger.Error(err))
-	}
-	creator, updater := c.findUserByUId(ctx, task)
-	taskDomain := c.entityToDomain(task, creator, updater, apilist)
-
-	return taskDomain, err
 }
 
 func (c *CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domain.Task, error) {
@@ -71,16 +91,39 @@ func (c *CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domai
 }
 
 func (c *CacheTaskRepository) findUserByUId(ctx context.Context, task dao.Task) (domain.User, domain.User) {
-	creator, err := c.userRepo.FindById(ctx, task.CreatorId)
-	if err != nil {
-		c.l.Error("查询创建人失败", logger.Error(err))
+	select {
+	case <-ctx.Done():
+		return domain.User{}, domain.User{}
+	default:
+		cUid := task.CreatorId
+		uUid := task.UpdaterId
+
+		creator, err := c.userCache.Get(ctx, cUid)
+		updater, err := c.userCache.Get(ctx, uUid)
+		if err == nil {
+			return creator, updater
+		}
+
+		creator, err = c.userRepo.FindById(ctx, task.CreatorId)
+		if err != nil {
+			c.l.Error("查询创建人失败", logger.Error(err))
+		}
+		err = c.userCache.Set(ctx, creator)
+		if err != nil {
+			c.l.Error("创建创建人缓存失败", logger.Error(err))
+		}
+
+		updater, err = c.userRepo.FindById(ctx, task.UpdaterId)
+		if err != nil {
+			c.l.Error("查询更新人失败", logger.Error(err))
+		}
+		err = c.userCache.Set(ctx, updater)
+		if err != nil {
+			c.l.Error("创建更新人缓存失败", logger.Error(err))
+		}
+		return creator, updater
 	}
 
-	updater, err := c.userRepo.FindById(ctx, task.UpdaterId)
-	if err != nil {
-		c.l.Error("查询更新人失败", logger.Error(err))
-	}
-	return creator, updater
 }
 
 func (c *CacheTaskRepository) findAPIListByAIds(ctx context.Context, aids []int64) ([]domain.API, error) {
@@ -104,12 +147,14 @@ func (c *CacheTaskRepository) Update(ctx context.Context, task domain.Task) erro
 	return c.dao.UpdateById(ctx, c.domainToEntity(task))
 }
 
-func NewCacheTaskRepository(dao dao.TaskDAO, l logger.LoggerV1, userRepo UserRepository, apiRepo APIRepository) TaskRepository {
+func NewCacheTaskRepository(dao dao.TaskDAO, cache cache.TaskCache, l logger.LoggerV1, userRepo UserRepository, apiRepo APIRepository, userCache cache.UserCache) TaskRepository {
 	return &CacheTaskRepository{
-		dao:      dao,
-		l:        l,
-		userRepo: userRepo,
-		apiRepo:  apiRepo,
+		dao:       dao,
+		cache:     cache,
+		userCache: userCache,
+		l:         l,
+		userRepo:  userRepo,
+		apiRepo:   apiRepo,
 	}
 }
 

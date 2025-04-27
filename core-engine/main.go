@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
-	"github.com/half-coconut/gocopilot/core-engine/ioc"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -12,13 +10,12 @@ import (
 	_ "go.uber.org/zap"
 	_ "gorm.io/driver/mysql"
 	"net/http"
-	"time"
 )
 
 func main() {
 	initViper()
 	initPrometheus()
-	closeFunc := ioc.InitOTEL()
+	//closeFunc := ioc.InitOTEL()
 
 	app := InitWebServer()
 	for _, c := range app.consumers {
@@ -33,9 +30,9 @@ func main() {
 	server := app.server
 	server.Run(":3002")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-	closeFunc(ctx)
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	//defer cancel()
+	//closeFunc(ctx)
 
 	//// 一分钟内要关完，要退出
 	//ctx, cancel := context.WithTimeout(context.Background(), time.Minute)

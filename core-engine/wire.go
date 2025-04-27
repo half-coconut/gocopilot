@@ -73,6 +73,8 @@ func InitWebServer() *App {
 
 		noteDao.NewNoteAuthorDAO,
 		noteDao.NewNoteReaderDAO,
+		cache.NewTaskCache,
+		cache.NewAPICache,
 		cache.NewUserCache,
 
 		repository.NewUserRepository,

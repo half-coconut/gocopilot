@@ -75,7 +75,7 @@ func (u *CacheUserRepository) FindById(ctx context.Context, id int64) (domain.Us
 	}
 	// 查库之后，set 进缓存
 	us := u.entityToDomain(user)
-	// 异步调用 cache
+	// 异步调用 userCache
 	//go func() {
 	//
 	//}()

@@ -8,7 +8,7 @@ import (
 )
 
 // InitUserHook 配合 PrometheusHook 使用
-func InitUserHook(client *redisv9.Client) cache.UserCache {
+func InitUserHook(client *redisv9.Client) cache.APICache {
 	client.AddHook(redisx.NewPrometheusHook(prometheus.SummaryOpts{
 		Namespace: "go_copilot",
 		Subsystem: "core_engine",

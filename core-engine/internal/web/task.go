@@ -237,8 +237,6 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	tid := ctx.Param("id")
 	debug := ctx.Query("debug")
 
-	t.l.Info(fmt.Sprintf("打印 debug 是什么：%v", debug))
-
 	type TaskReq struct {
 		tid int64 `json:"id"`
 	}

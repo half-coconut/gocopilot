@@ -278,3 +278,10 @@ Debug         bool       `bson:"debug"`
 2025-04-25
 
 - 完成架构图，计划做项目总结
+
+2025-04-27
+- 为项目添加 redis 缓存，UserCache, APICache, TaskCache
+```shell
+redis-cli get "user:info:123"
+
+```
