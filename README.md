@@ -61,6 +61,7 @@
         - Add Data rouece Prometheus     
         - 统计 HTTP 活跃请求数
         - 统计 Goroutine 数量等
+
 ![Screenshot 2025-04-27 at 4 20 14 PM](https://github.com/user-attachments/assets/a992928e-4adf-4cd2-b841-b52bfd80d249)
 
 - 数据存储优化：
