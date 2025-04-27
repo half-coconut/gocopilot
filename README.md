@@ -57,6 +57,12 @@
         - 统计 GIN 的 HTTP 接口
         - 统计 GORM 的 执行时间
         - 统计 HTTP 业务错误码
+    - 接入 Grafana 监控和告警
+        - Add Data rouece Prometheus     
+        - 统计 HTTP 活跃请求数
+        - 统计 Goroutine 数量等
+![Screenshot 2025-04-27 at 4 20 14 PM](https://github.com/user-attachments/assets/a992928e-4adf-4cd2-b841-b52bfd80d249)
+
 - 数据存储优化：
     - 根据数据特点选择合适的存储方案
     - 考虑使用NoSQL数据库存储非结构化数据
