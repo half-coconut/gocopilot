@@ -14,6 +14,7 @@ import { useCreateJob } from "./useCreateJob.js";
 import { useTasks } from "../tasks/useTasks.js";
 
 import Textarea from "../../ui/Textarea.jsx";
+import { useState } from "react";
 
 const StyledSelect = styled.select`
   font-size: 1.4rem;
@@ -39,10 +40,16 @@ function EditJob({ onCloseModal }) {
 
   const tasks = !isLoading
     ? taskItems.map((item) => ({
-        value: item.id,
+        value: Number(item.id),
         label: item.name,
       }))
     : [];
+
+  const [selectedTaskId, setSelectedTaskId] = useState(1);
+
+  const handleTaskChange = (event) => {
+    setSelectedTaskId(Number(event.target.value)); // Convert to number here
+  };
 
   const types = [
     { value: "scheduled", label: "Scheduled" },
@@ -69,9 +76,8 @@ function EditJob({ onCloseModal }) {
   const { errors } = formState;
 
   function onSubmit(data) {
-    console.log("onsubmit 的 data:", data);
     createJob(
-      { ...data },
+      { ...data, task_id: selectedTaskId },
       {
         onSuccess: () => {
           reset(), onCloseModal?.();
@@ -143,7 +149,11 @@ function EditJob({ onCloseModal }) {
         </FormRow>
 
         <FormRow label="Task" error={errors?.task_id?.message}>
-          <StyledSelect {...register("task_id")} id="task_id">
+          <StyledSelect
+            {...register("task_id")}
+            id="task_id"
+            onChange={handleTaskChange}
+          >
             {tasks.map((task) => (
               <option key={task.value} value={task.value}>
                 {task.label}
