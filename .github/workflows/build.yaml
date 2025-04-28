@@ -53,7 +53,7 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           version: v2.0
-          args: --config=./core-engine/.golangci.yaml ${{ GITHUB_WORKSPACE }}/core-engine/...
+          args: --config=./core-engine/.golangci.yaml ${{ env.GITHUB_WORKSPACE }}/core-engine/...
 
       - name: Run tests with coverage
         run: |
