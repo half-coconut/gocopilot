@@ -41,8 +41,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --config=.golangci.yml # 假设 .golangci.yml 也在 core-engine 目录下
-        working-directory: ./core-engine
+          args: --config=./core-engine/.golangci.yml
 
       - name: Run tests with coverage
         run: |
