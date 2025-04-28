@@ -26,8 +26,8 @@ jobs:
 
       - name: Install Docker Compose
         run: |
-          apt-get update
-          apt-get install -y docker-compose
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
       - name: Start Docker Compose (for testing)
         run: docker-compose up -d
