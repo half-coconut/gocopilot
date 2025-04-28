@@ -31,22 +31,26 @@ jobs:
 
       - name: Start Docker Compose (for testing)
         run: docker-compose up -d
-        working-directory: ./core-engine  # 确保在 core-engine 目录下启动
+        working-directory: ./core-engine
 
       - name: Wait for services to be ready
         run: |
           docker-compose ps -q | xargs -I {} docker inspect -f '{{.State.Health.Status}}' {}
           sleep 10
+        working-directory: ./core-engine
 
       - name: Format code
         run: go fmt ./...
         working-directory: ./core-engine
 
+      - name: Print GITHUB_WORKSPACE
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+
       - name: Lint code
         uses: golangci/golangci-lint-action@v7
         with:
           version: v2.0
-          args: --config=./core-engine/.golangci.yaml
+          args: --config=./core-engine/.golangci.yaml $(GITHUB_WORKSPACE)/core-engine
 
       - name: Run tests with coverage
         run: |
