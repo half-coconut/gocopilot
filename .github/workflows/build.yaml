@@ -43,7 +43,6 @@ jobs:
           version: latest
           args: --config=.golangci.yml # 假设 .golangci.yml 也在 core-engine 目录下
         working-directory: ./core-engine
-        run: golangci-lint run # 运行 golangci-lint
 
       - name: Run tests with coverage
         run: |
