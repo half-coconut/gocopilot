@@ -1,61 +1,7 @@
-# This file is for golangci-lint v1.50+
-# https://golangci-lint.run/usage/configuration/
+version: "2"
 
-run:
-  # Maximum issues count per linters.
-  max-issues-per-linter: 0
-
-  # Maximum issues count in total.
-  max-same-issues: 0
-
-  # Exit code when found issues.
-  exit-code: 1
-
-  # Which go version to use. By default, the latest version is used.
-  go: '1.24'
-
-  # Timeout for analysis, e.g. 30s, 5m. Default: 5m
-  timeout: 5m
-
-# Output configuration options
 output:
-  formats:
-    - colored-line-number
-
-  # Print all available error lines. Default: false
-  print-issued-lines: true
-
-
-
-# All available settings.
-linters-settings:
-  govet:
-    # Enable or disable specific vet checks.
-    enable:
-      - shadowing
-    # Settings per subcheck.
-    settings:
-      printf:
-        funcs:
-          - (github.com/golangci/golangci-lint/pkg/config).String
-  gofumpt:
-    lang-version: '1.21'
-
-# Enable all linters
-linters:
-  enable-all: true
-  disable:
-    - depguard
-    - exhaustruct
-#    - gomodguard
-
-
-# Define the exclude rules
-issues:
-  exclude-rules:
-    - path: _test\.go # Matches all files ending with `_test.go`
-      linters:
-        - gomnd # Matches `gomnd` linter
-  uniq-by-line: true
-
-  exclude-use-default: false
+  show-stats: true
+  sort-order:
+    - file
+    - linter

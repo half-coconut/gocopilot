@@ -13,16 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'  # 选择合适的 Go 版本
+          go-version: '1.24'
 
       - name: Install dependencies
         run: go mod download
-        working-directory: ./core-engine #core-engine需要下载依赖
+        working-directory: ./core-engine #core-engine 需要下载依赖
 
       - name: Install Docker Compose
         run: |
@@ -43,9 +43,9 @@ jobs:
         working-directory: ./core-engine
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v2.0
           args: --config=./core-engine/.golangci.yaml
 
       - name: Run tests with coverage
