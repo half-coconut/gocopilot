@@ -12,6 +12,7 @@ type ReportRepository interface {
 	CreateDebugLog(ctx context.Context, logs domain.DebugLog) (int64, error)
 	CreateSummary(ctx context.Context, s domain.Summary) (int64, error)
 	FindByTId(ctx context.Context, tid int64) (domain.Task, error)
+	FindByUId(ctx context.Context, uid int64) ([]domain.Task, error)
 }
 
 type UncachedReportRepository struct {
@@ -32,6 +33,11 @@ func (c *UncachedReportRepository) CreateDebugLog(ctx context.Context, logs doma
 }
 
 func (c *UncachedReportRepository) FindByTId(ctx context.Context, tid int64) (domain.Task, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *UncachedReportRepository) FindByUId(ctx context.Context, uid int64) ([]domain.Task, error) {
 	//TODO implement me
 	panic("implement me")
 }

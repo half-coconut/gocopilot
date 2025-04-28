@@ -28,35 +28,35 @@ type CacheTaskRepository struct {
 	apiRepo   APIRepository
 }
 
-func (c *CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.Task, error) {
+func (repo *CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.Task, error) {
 	select {
 	case <-ctx.Done():
 		return domain.Task{}, nil
 	default:
 
-		task, err := c.cache.Get(ctx, tid)
+		task, err := repo.cache.Get(ctx, tid)
 		if err == nil {
 			return task, nil
 		}
 
-		taskEntity, err := c.dao.FindByTId(ctx, tid)
+		taskEntity, err := repo.dao.FindByTId(ctx, tid)
 
 		if err != nil {
-			c.l.Error("查询任务失败：", logger.Error(err))
+			repo.l.Error("查询任务失败：", logger.Error(err))
 			return domain.Task{}, nil
 		}
 
 		var apis []int64
-		apilist, err := c.findAPIListByAIds(ctx, jsonx.JsonUnmarshal(taskEntity.AIds.String, apis))
+		apilist, err := repo.findAPIListByAIds(ctx, jsonx.JsonUnmarshal(taskEntity.AIds.String, apis))
 		if err != nil {
-			c.l.Error("查询api失败", logger.Error(err))
+			repo.l.Error("查询api失败", logger.Error(err))
 		}
-		creator, updater := c.findUserByUId(ctx, taskEntity)
-		taskDomain := c.entityToDomain(taskEntity, creator, updater, apilist)
+		creator, updater := repo.findUserByUId(ctx, taskEntity)
+		taskDomain := repo.entityToDomain(taskEntity, creator, updater, apilist)
 
-		err = c.cache.Set(ctx, taskDomain)
+		err = repo.cache.Set(ctx, taskDomain)
 		if err != nil {
-			c.l.Error("缓存任务失败", logger.Error(err))
+			repo.l.Error("缓存任务失败", logger.Error(err))
 		}
 
 		return taskDomain, err
@@ -64,25 +64,19 @@ func (c *CacheTaskRepository) FindByTId(ctx context.Context, tid int64) (domain.
 
 }
 
-func (c *CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domain.Task, error) {
-	var task []dao.Task
-	task, err := c.dao.FindByUId(ctx, uid)
+func (repo *CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domain.Task, error) {
+	var tasks []dao.Task
+	tasks, err := repo.dao.FindByUId(ctx, uid)
 	if err != nil {
 		return []domain.Task{}, err
 	}
 
 	taskList := make([]domain.Task, 0)
 
-	for _, t := range task {
-		var apis []int64
-		apilist, err := c.findAPIListByAIds(ctx, jsonx.JsonUnmarshal(t.AIds.String, apis))
+	for _, task := range tasks {
+		subTask, err := repo.FindByTId(ctx, task.Id)
 		if err != nil {
-			c.l.Error("查询api失败", logger.Error(err))
-		}
-		creator, updater := c.findUserByUId(ctx, t)
-		subTask := c.entityToDomain(t, creator, updater, apilist)
-		if err != nil {
-			c.l.Error("查询api失败", logger.Error(err))
+			return []domain.Task{}, err
 		}
 		taskList = append(taskList, subTask)
 	}
@@ -90,7 +84,7 @@ func (c *CacheTaskRepository) FindByUId(ctx context.Context, uid int64) ([]domai
 	return taskList, err
 }
 
-func (c *CacheTaskRepository) findUserByUId(ctx context.Context, task dao.Task) (domain.User, domain.User) {
+func (repo *CacheTaskRepository) findUserByUId(ctx context.Context, task dao.Task) (domain.User, domain.User) {
 	select {
 	case <-ctx.Done():
 		return domain.User{}, domain.User{}
@@ -98,40 +92,40 @@ func (c *CacheTaskRepository) findUserByUId(ctx context.Context, task dao.Task) 
 		cUid := task.CreatorId
 		uUid := task.UpdaterId
 
-		creator, err := c.userCache.Get(ctx, cUid)
-		updater, err := c.userCache.Get(ctx, uUid)
+		creator, err := repo.userCache.Get(ctx, cUid)
+		updater, err := repo.userCache.Get(ctx, uUid)
 		if err == nil {
 			return creator, updater
 		}
 
-		creator, err = c.userRepo.FindById(ctx, task.CreatorId)
+		creator, err = repo.userRepo.FindById(ctx, task.CreatorId)
 		if err != nil {
-			c.l.Error("查询创建人失败", logger.Error(err))
+			repo.l.Error("查询创建人失败", logger.Error(err))
 		}
-		err = c.userCache.Set(ctx, creator)
+		err = repo.userCache.Set(ctx, creator)
 		if err != nil {
-			c.l.Error("创建创建人缓存失败", logger.Error(err))
+			repo.l.Error("创建创建人缓存失败", logger.Error(err))
 		}
 
-		updater, err = c.userRepo.FindById(ctx, task.UpdaterId)
+		updater, err = repo.userRepo.FindById(ctx, task.UpdaterId)
 		if err != nil {
-			c.l.Error("查询更新人失败", logger.Error(err))
+			repo.l.Error("查询更新人失败", logger.Error(err))
 		}
-		err = c.userCache.Set(ctx, updater)
+		err = repo.userCache.Set(ctx, updater)
 		if err != nil {
-			c.l.Error("创建更新人缓存失败", logger.Error(err))
+			repo.l.Error("创建更新人缓存失败", logger.Error(err))
 		}
 		return creator, updater
 	}
 
 }
 
-func (c *CacheTaskRepository) findAPIListByAIds(ctx context.Context, aids []int64) ([]domain.API, error) {
+func (repo *CacheTaskRepository) findAPIListByAIds(ctx context.Context, aids []int64) ([]domain.API, error) {
 	var apiList []domain.API
 	for _, aid := range aids {
-		subApi, err := c.apiRepo.FindByAId(ctx, aid)
+		subApi, err := repo.apiRepo.FindByAId(ctx, aid)
 		if err != nil {
-			c.l.Error("查询api失败", logger.Error(err))
+			repo.l.Error("查询api失败", logger.Error(err))
 			return []domain.API{}, err
 		}
 		apiList = append(apiList, subApi)
@@ -139,12 +133,12 @@ func (c *CacheTaskRepository) findAPIListByAIds(ctx context.Context, aids []int6
 	return apiList, nil
 }
 
-func (c *CacheTaskRepository) Create(ctx context.Context, task domain.Task) (int64, error) {
-	return c.dao.Insert(ctx, c.domainToEntity(task))
+func (repo *CacheTaskRepository) Create(ctx context.Context, task domain.Task) (int64, error) {
+	return repo.dao.Insert(ctx, repo.domainToEntity(task))
 }
 
-func (c *CacheTaskRepository) Update(ctx context.Context, task domain.Task) error {
-	return c.dao.UpdateById(ctx, c.domainToEntity(task))
+func (repo *CacheTaskRepository) Update(ctx context.Context, task domain.Task) error {
+	return repo.dao.UpdateById(ctx, repo.domainToEntity(task))
 }
 
 func NewCacheTaskRepository(dao dao.TaskDAO, cache cache.TaskCache, l logger.LoggerV1, userRepo UserRepository, apiRepo APIRepository, userCache cache.UserCache) TaskRepository {
@@ -158,7 +152,7 @@ func NewCacheTaskRepository(dao dao.TaskDAO, cache cache.TaskCache, l logger.Log
 	}
 }
 
-func (c *CacheTaskRepository) domainToEntity(task domain.Task) dao.Task {
+func (repo *CacheTaskRepository) domainToEntity(task domain.Task) dao.Task {
 	return dao.Task{
 		Id: task.Id,
 		Name: sql.NullString{
@@ -180,7 +174,7 @@ func (c *CacheTaskRepository) domainToEntity(task domain.Task) dao.Task {
 	}
 }
 
-func (c *CacheTaskRepository) entityToDomain(task dao.Task, creator, updater domain.User, apilist []domain.API) domain.Task {
+func (repo *CacheTaskRepository) entityToDomain(task dao.Task, creator, updater domain.User, apilist []domain.API) domain.Task {
 	var (
 		Body   map[string]interface{}
 		Header map[string]string

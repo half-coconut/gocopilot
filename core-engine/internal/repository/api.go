@@ -48,20 +48,22 @@ func (c *CacheAPIRepository) FindByAId(ctx context.Context, aid int64) (domain.A
 
 func (c *CacheAPIRepository) FindByUId(ctx context.Context, uid int64) ([]domain.API, error) {
 	// 直接查库
-	var api []dao.API
-	api, err := c.dao.FindByUId(ctx, uid)
+	var apis []dao.API
+	apis, err := c.dao.FindByUId(ctx, uid)
 	if err != nil {
 		return []domain.API{}, err
 	}
-	apiResp := make([]domain.API, 0)
+	apiList := make([]domain.API, 0)
 
-	for _, a := range api {
-		creator, updater := c.findUserByAPI(ctx, a)
-		aResp := c.entityToDomain(a, creator, updater)
-		apiResp = append(apiResp, aResp)
+	for _, api := range apis {
+		subAPI, err := c.FindByAId(ctx, api.Id)
+		if err != nil {
+			return []domain.API{}, err
+		}
+		apiList = append(apiList, subAPI)
 	}
 
-	return apiResp, err
+	return apiList, err
 }
 
 func (c *CacheAPIRepository) findUserByAPI(ctx context.Context, api dao.API) (domain.User, domain.User) {

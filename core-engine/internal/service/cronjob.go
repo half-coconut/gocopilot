@@ -18,6 +18,8 @@ type CronJobService interface {
 	Release(ctx context.Context, jid int64) error
 	ExecOne(ctx *gin.Context, jid int64) error
 	StopOne(ctx *gin.Context, jid int64) error
+
+	List(ctx context.Context, uid int64) ([]domain.CronJob, error)
 }
 
 type CronJobServiceImpl struct {
@@ -46,6 +48,10 @@ const (
 	// 暂停调度
 	cronjobStatusPaused
 )
+
+func (svc *CronJobServiceImpl) List(ctx context.Context, uid int64) ([]domain.CronJob, error) {
+	return svc.repo.FindByUId(ctx, uid)
+}
 
 func (svc *CronJobServiceImpl) StopOne(ctx *gin.Context, jid int64) error {
 	return svc.repo.Stop(ctx, jid)
@@ -104,7 +110,7 @@ func (svc *CronJobServiceImpl) Release(ctx context.Context, jid int64) error {
 }
 
 func (svc *CronJobServiceImpl) ResetNextTime(ctx context.Context, jid int64) error {
-	j, err := svc.repo.GetJobById(ctx, jid)
+	j, err := svc.repo.FindByJId(ctx, jid)
 	if err != nil {
 		svc.l.Error("通过 jid，获取 job 失败")
 	}

@@ -110,18 +110,6 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 }
 
 func (t *TaskHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
-	type ListReq struct {
-		Id int64
-	}
-	var req ListReq
-	err := ctx.Bind(&req)
-	if err != nil {
-		return ginx.Result{
-			Code:    errs.TaskInternalServerError,
-			Message: "系统错误",
-		}, err
-	}
-
 	tasks, err := t.svc.List(ctx, uc.Id)
 
 	if err != nil {

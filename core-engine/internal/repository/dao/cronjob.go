@@ -14,7 +14,8 @@ type CronJobDAO interface {
 	PreemptByJId(ctx context.Context, jid int64) (CronJob, error)
 	Insert(ctx context.Context, job CronJob) (int64, error)
 	UpdateById(ctx context.Context, job CronJob) error
-	GetJobById(ctx context.Context, jid int64) (CronJob, error)
+	GetJobByJId(ctx context.Context, jid int64) (CronJob, error)
+	GetJobByUId(ctx context.Context, uid int64) ([]CronJob, error)
 	GetJobStatusById(ctx context.Context, jid int64) (int, error)
 	UpdateNextTime(ctx context.Context, id int64, next time.Time) error
 	Stop(ctx context.Context, id int64) error
@@ -36,9 +37,15 @@ func (dao *GORMCronJobDAO) GetJobStatusById(ctx context.Context, jid int64) (int
 	err := dao.db.WithContext(ctx).Where("id=?", jid).Find(&job).Error
 	return job.Status, err
 }
-func (dao *GORMCronJobDAO) GetJobById(ctx context.Context, jid int64) (CronJob, error) {
+func (dao *GORMCronJobDAO) GetJobByJId(ctx context.Context, jid int64) (CronJob, error) {
 	var job CronJob
 	err := dao.db.WithContext(ctx).Where("id=?", jid).Find(&job).Error
+	return job, err
+}
+
+func (dao *GORMCronJobDAO) GetJobByUId(ctx context.Context, uid int64) ([]CronJob, error) {
+	var job []CronJob
+	err := dao.db.WithContext(ctx).Where("creator_id=?", uid).Find(&job).Error
 	return job, err
 }
 

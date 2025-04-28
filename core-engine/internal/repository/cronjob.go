@@ -16,7 +16,8 @@ type CronJobRepository interface {
 	Create(ctx context.Context, job domain.CronJob) (int64, error)
 	Update(ctx context.Context, job domain.CronJob) error
 	UpdateNextTime(ctx context.Context, id int64, next time.Time) error
-	GetJobById(ctx context.Context, jid int64) (domain.CronJob, error)
+	FindByJId(ctx context.Context, jid int64) (domain.CronJob, error)
+	FindByUId(ctx context.Context, uid int64) ([]domain.CronJob, error)
 	GetJobStatusById(ctx context.Context, jid int64) (int, error)
 	Stop(ctx context.Context, id int64) error
 	Release(ctx context.Context, id int64) error
@@ -55,8 +56,24 @@ func (repo *CachedCronJobRepository) GetJobStatusById(ctx context.Context, jid i
 	return repo.dao.GetJobStatusById(ctx, jid)
 }
 
-func (repo *CachedCronJobRepository) GetJobById(ctx context.Context, jid int64) (domain.CronJob, error) {
-	job, err := repo.dao.GetJobById(ctx, jid)
+func (repo *CachedCronJobRepository) FindByUId(ctx context.Context, uid int64) ([]domain.CronJob, error) {
+	jobs, err := repo.dao.GetJobByUId(ctx, uid)
+	if err != nil {
+		return []domain.CronJob{}, err
+	}
+	jobList := make([]domain.CronJob, 0)
+	for _, job := range jobs {
+		subJob, err := repo.FindByJId(ctx, job.Id)
+		if err != nil {
+			return []domain.CronJob{}, err
+		}
+		jobList = append(jobList, subJob)
+	}
+	return jobList, nil
+}
+
+func (repo *CachedCronJobRepository) FindByJId(ctx context.Context, jid int64) (domain.CronJob, error) {
+	job, err := repo.dao.GetJobByJId(ctx, jid)
 	if err != nil {
 		return domain.CronJob{}, err
 	}

@@ -29,6 +29,7 @@ const queryClient = new QueryClient({
     queries: {
       // 数据自动刷新的时间 5min
       staleTime: 1000 * 60 * 5,
+      // staleTime: 1000,
       // 缓存时间 10min
       cacheTime: 1000 * 60 * 10,
     },

@@ -285,3 +285,14 @@ Debug         bool       `bson:"debug"`
 redis-cli get "user:info:123"
 
 ```
+
+2025-04-28
+- 增加 cronjob 返回值，web list 接口
+- Github Action
+
+```shell
+docker login -u halfcoconut
+dckr_pat_GRL-0AzjtcHBH23J0JQkOb2vpr4
+
+lpczvgtsckesbeih
+```

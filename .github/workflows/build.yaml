@@ -1,0 +1,93 @@
+name: build
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  DOCKERHUB_USERNAME: halfcoconut
+
+jobs:
+  build:
+    runs-on: ubuntu:24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'  # 选择合适的 Go 版本
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./core-engine #core-engine需要下载依赖
+
+      - name: Start Docker Compose (for testing)
+        run: docker-compose up -d
+        working-directory: ./core-engine  # 确保在 core-engine 目录下启动
+
+      - name: Wait for services to be ready
+        run: |
+          docker-compose ps -q | xargs -I {} docker inspect -f '{{.State.Health.Status}}' {}
+          sleep 10
+
+      - name: Format code
+        run: go fmt ./...
+        working-directory: ./core-engine
+
+      - name: Lint code
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --config=.golangci.yml # 假设 .golangci.yml 也在 core-engine 目录下
+        working-directory: ./core-engine
+        run: golangci-lint run # 运行 golangci-lint
+
+      - name: Run tests with coverage
+        run: |
+          go test -v ./... -coverprofile=coverage.out
+          go tool cover -func=coverage.out
+        working-directory: ./core-engine
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./core-engine/coverage.out # 指定 coverage.out 的路径
+          fail_ci_if_error: true
+
+      - name: Stop Docker Compose (after testing)
+        if: always()
+        run: docker-compose down
+        working-directory: ./core-engine
+
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build backend and push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./core-engine
+          push: true
+          tags: ${{ env.DOCKERHUB_USERNAME }}/core-engine:${{ steps.vars.outputs.sha_short }}
+
+      # - name: Build frontend and push  # 注释掉 frontend 构建
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     context: ./frontend
+      #     push: true
+      #     tags: ${{ env.DOCKERHUB_USERNAME }}/frontend:${{ steps.vars.outputs.sha_short }}

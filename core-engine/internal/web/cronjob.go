@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"github.com/ecodeclub/ekit/slice"
 	"github.com/gin-gonic/gin"
 	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	"github.com/half-coconut/gocopilot/core-engine/internal/errs"
@@ -9,6 +10,7 @@ import (
 	"github.com/half-coconut/gocopilot/core-engine/internal/service/core"
 	ijwt "github.com/half-coconut/gocopilot/core-engine/internal/web/jwt"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/ginx"
+	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"strconv"
 	"time"
@@ -28,13 +30,16 @@ func NewCronJobHandler(l logger.LoggerV1, svc service.CronJobService, taskSvc co
 
 func (c *CronJobHandler) RegisterRoutes(server *gin.Engine) {
 	job := server.Group("/job")
-	job.POST("/add", ginx.WrapToken[ijwt.UserClaims](c.AddAll))
-	job.POST("/add/task", ginx.WrapToken[ijwt.UserClaims](c.AddInternalTask))
-	job.POST("/add/http", ginx.WrapToken[ijwt.UserClaims](c.AddHttpMode))
-
 	// 开启就是执行
 	job.GET("/open/:id", ginx.WrapToken[ijwt.UserClaims](c.Open))
 	job.GET("/close/:id", ginx.WrapToken[ijwt.UserClaims](c.Close))
+	job.GET("/list", ginx.WrapToken[ijwt.UserClaims](c.List))
+	job.POST("/add", ginx.WrapToken[ijwt.UserClaims](c.AddAll))
+
+	add := job.Group("/add")
+	add.POST("/task", ginx.WrapToken[ijwt.UserClaims](c.AddInternalTask))
+	add.POST("/http", ginx.WrapToken[ijwt.UserClaims](c.AddHttpMode))
+
 }
 
 func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
@@ -47,7 +52,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.TaskInvalidInput,
+			Code:    errs.CronJobInvalidInput,
 			Message: "输入格式不正确",
 		}, err
 	}
@@ -55,7 +60,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	if err != nil {
 		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    errs.JobInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -63,7 +68,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	err = c.svc.Release(ctx, req.jid)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.JobInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -71,7 +76,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	err = c.svc.ResetNextTime(ctx, req.jid)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.JobInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -95,7 +100,7 @@ func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resul
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.TaskInvalidInput,
+			Code:    errs.CronJobInvalidInput,
 			Message: "输入格式不正确",
 		}, err
 	}
@@ -103,7 +108,7 @@ func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resul
 	if err != nil {
 		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
-			Code:    errs.JobInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -112,7 +117,7 @@ func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resul
 	if err != nil {
 		c.l.Error(fmt.Sprintf("暂停任务失败: %v", err))
 		return ginx.Result{
-			Code:    errs.JobInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -129,7 +134,7 @@ func (c *CronJobHandler) AddHttpMode(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.JobInvalidInput,
+			Code:    errs.CronJobInvalidInput,
 			Message: "用户输入格式不正确",
 		}, err
 	}
@@ -151,7 +156,7 @@ func (c *CronJobHandler) AddHttpMode(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 	if err != nil {
 		c.l.Info(fmt.Sprintf("创建 Job 失败，用户 Id：%v", uc.Id), logger.Error(err))
 		return ginx.Result{
-			Code:    errs.TaskInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -168,7 +173,7 @@ func (c *CronJobHandler) AddInternalTask(ctx *gin.Context, uc ijwt.UserClaims) (
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.JobInvalidInput,
+			Code:    errs.CronJobInvalidInput,
 			Message: "用户输入格式不正确",
 		}, err
 	}
@@ -188,7 +193,7 @@ func (c *CronJobHandler) AddInternalTask(ctx *gin.Context, uc ijwt.UserClaims) (
 	if err != nil {
 		c.l.Info(fmt.Sprintf("创建 Job 失败，用户 Id：%v", uc.Id), logger.Error(err))
 		return ginx.Result{
-			Code:    errs.TaskInternalServerError,
+			Code:    errs.CronJobInternalServerError,
 			Message: "系统错误",
 		}, err
 	}
@@ -205,7 +210,7 @@ func (c *CronJobHandler) AddAll(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resu
 	err := ctx.Bind(&req)
 	if err != nil {
 		return ginx.Result{
-			Code:    errs.JobInvalidInput,
+			Code:    errs.CronJobInvalidInput,
 			Message: "用户输入格式不正确",
 		}, err
 	}
@@ -239,4 +244,50 @@ func (c *CronJobHandler) AddAll(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resu
 		Message: "OK",
 		Data:    Id,
 	}, nil
+}
+
+func (c *CronJobHandler) List(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, error) {
+	jobs, err := c.svc.List(ctx, uc.Id)
+
+	if err != nil {
+		c.l.Info("用户校验，系统错误", logger.Error(err), logger.Int64("Id", uc.Id))
+		return ginx.Result{
+			Code:    errs.CronJobInternalServerError,
+			Message: "系统错误",
+		}, err
+	}
+	job0List := slice.Map[domain.CronJob, CronJob0](jobs,
+		func(idx int, src domain.CronJob) CronJob0 {
+
+			return CronJob0{
+				Id:          src.Id,
+				Name:        src.Name,
+				Description: src.Description,
+				Type:        src.Type,
+				Cron:        src.Cron,
+				HttpCfg:     src.HttpCfg,
+				TaskId:      src.TaskId,
+				TimeZone:    src.TimeZone,
+				Duration:    jsonx.JsonMarshal(src.Duration),
+				Retry:       src.Retry,
+				MaxRetries:  src.MaxRetries,
+				NextTime:    src.NextTime.Format(time.DateTime),
+				Status:      src.Status,
+
+				Creator: src.Creator.Name,
+				Ctime:   src.Ctime.Format(time.DateTime),
+				Utime:   src.Utime.Format(time.DateTime),
+			}
+		})
+
+	response := CronJobListResponse{
+		Cronjob: job0List,
+		Total:   len(jobs),
+	}
+
+	return ginx.Result{
+		Code:    1,
+		Message: "OK",
+		Data:    response}, nil
+
 }

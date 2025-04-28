@@ -28,11 +28,11 @@ const (
 	TaskInvalidOrNotExist   = 403002
 )
 
-// Job模块
+// CronJob模块
 const (
-	JobInvalidInput        = 404001
-	JobInternalServerError = 504001
-	JobInvalidOrNotExist   = 404002
+	CronJobInvalidInput        = 404001
+	CronJobInternalServerError = 504001
+	CronJobInvalidOrNotExist   = 404002
 )
 
 var (
