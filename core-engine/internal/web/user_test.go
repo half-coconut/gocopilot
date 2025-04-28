@@ -2,12 +2,14 @@ package web
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	"github.com/half-coconut/gocopilot/core-engine/internal/service"
 	svcmocks "github.com/half-coconut/gocopilot/core-engine/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"go.uber.org/mock/gomock"
 	"net/http"
 	"net/http/httptest"
@@ -42,7 +44,7 @@ func TestUserHandler_Signup(t *testing.T) {
 }
 `,
 			wantCode: http.StatusOK,
-			wantBody: "注册成功",
+			wantBody: "注册成功！",
 		},
 	}
 	for _, tc := range testCases {
@@ -50,7 +52,6 @@ func TestUserHandler_Signup(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			server := gin.Default()
-			// 用不上 codeSvc
 			h := NewUserHandler(tc.mock(ctrl), nil, nil)
 			h.RegisterRoutes(server)
 
@@ -68,7 +69,23 @@ func TestUserHandler_Signup(t *testing.T) {
 			server.ServeHTTP(resp, req)
 
 			assert.Equal(t, tc.wantCode, resp.Code)
-			assert.Equal(t, tc.wantBody, resp.Body.String())
+
+			type Response struct {
+				Code    int    `json:"code"`
+				Message string `json:"message"`
+				Data    string `json:"data"`
+			}
+			var res Response
+
+			// 将 JSON 字符串解析到 Response 变量中
+			err = jsonx.Unmarshal([]byte(resp.Body.String()), &res)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+
+			// 访问 "message" 字段
+			assert.Equal(t, tc.wantBody, res.Message)
 		})
 	}
 }
