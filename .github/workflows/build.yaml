@@ -34,8 +34,8 @@ jobs:
         working-directory: ./core-engine
 
       - name: Wait for services to be ready
-        run: |
-          docker-compose ps -q | xargs -I {} docker inspect -f '{{.State.Health.Status}}' {}
+        run:
+#          docker-compose ps -q | xargs -I {} docker inspect -f '{{.State.Health.Status}}' {}
           sleep 10
         working-directory: ./core-engine
 
