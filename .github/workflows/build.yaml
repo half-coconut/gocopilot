@@ -46,7 +46,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --config=./core-engine/.golangci.yml
+          args: --config=./core-engine/.golangci.yaml
 
       - name: Run tests with coverage
         run: |
