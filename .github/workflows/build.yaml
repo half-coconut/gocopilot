@@ -24,6 +24,11 @@ jobs:
         run: go mod download
         working-directory: ./core-engine #core-engine需要下载依赖
 
+      - name: Install Docker Compose
+        run: |
+          apt-get update
+          apt-get install -y docker-compose
+
       - name: Start Docker Compose (for testing)
         run: docker-compose up -d
         working-directory: ./core-engine  # 确保在 core-engine 目录下启动
