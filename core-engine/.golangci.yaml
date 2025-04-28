@@ -19,14 +19,13 @@ run:
 
 # Output configuration options
 output:
-  # Format: colored-line-number|line-number|json|sarif
-  format: colored-line-number
+  formats:
+    - colored-line-number
 
   # Print all available error lines. Default: false
   print-issued-lines: true
 
-  # Make issues output unique by line. Default: true
-  uniq-by-line: true
+
 
 # All available settings.
 linters-settings:
@@ -47,13 +46,9 @@ linters:
   enable-all: true
   disable:
     - depguard
-    - deadcode
-    - structcheck
-    - varcheck
-    - maligned
-    - ifshort
-    - interfacer
     - exhaustruct
+#    - gomodguard
+
 
 # Define the exclude rules
 issues:
@@ -61,5 +56,6 @@ issues:
     - path: _test\.go # Matches all files ending with `_test.go`
       linters:
         - gomnd # Matches `gomnd` linter
+  uniq-by-line: true
 
   exclude-use-default: false

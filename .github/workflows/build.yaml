@@ -81,7 +81,7 @@ jobs:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build backend and push
+      - name: Build core-engine and push
         uses: docker/build-push-action@v3
         with:
           context: ./core-engine
