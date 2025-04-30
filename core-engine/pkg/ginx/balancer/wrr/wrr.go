@@ -1,7 +1,6 @@
 package wrr
 
 import (
-	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )
@@ -18,8 +17,7 @@ func (p *PickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 			cc: sc,
 		}
 
-		md := sci.Address.Attributes
-		md = attributes.New("weight", 10)
+		md := sci.Address.Attributes.WithValue("weight", 10)
 
 		weightVal := md.Value("weight")
 		weight, _ := weightVal.(float64)

@@ -95,6 +95,7 @@ func NewNoteService(repo note.NoteRepository, l logger.LoggerV1, producer events
 func NewNoteServiceV2(repo note.NoteRepository, l logger.LoggerV1, producer events.NoteProducer) NoteService {
 	ch := make(chan readInfo, 10)
 	go func() {
+	timeout:
 		for {
 			uids := make([]int64, 0, 10)
 			nids := make([]int64, 0, 10)
@@ -109,7 +110,7 @@ func NewNoteServiceV2(repo note.NoteRepository, l logger.LoggerV1, producer even
 					uids = append(uids, info.uid)
 					nids = append(nids, info.uid)
 				case <-ctx.Done():
-					break
+					goto timeout
 				}
 			}
 			cancel()

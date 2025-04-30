@@ -92,7 +92,7 @@ func (repo *CacheTaskRepository) findUserByUId(ctx context.Context, task dao.Tas
 		cUid := task.CreatorId
 		uUid := task.UpdaterId
 
-		creator, err := repo.userCache.Get(ctx, cUid)
+		creator, _ := repo.userCache.Get(ctx, cUid)
 		updater, err := repo.userCache.Get(ctx, uUid)
 		if err == nil {
 			return creator, updater

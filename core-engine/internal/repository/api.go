@@ -75,7 +75,7 @@ func (c *CacheAPIRepository) findUserByAPI(ctx context.Context, api dao.API) (do
 		cUid := api.CreatorId
 		uUid := api.UpdaterId
 
-		creator, err := c.userCache.Get(ctx, cUid)
+		creator, _ := c.userCache.Get(ctx, cUid)
 		updater, err := c.userCache.Get(ctx, uUid)
 		if err == nil {
 			return creator, updater

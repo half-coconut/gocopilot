@@ -58,6 +58,7 @@ func (s *Server) register() error {
 	s.key = key
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	// 租期可以配置
 	var ttl int64 = 30
 	leaseResp, err := client.Grant(ctx, ttl)

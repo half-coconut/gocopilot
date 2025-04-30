@@ -63,6 +63,9 @@ func (c *CacheNoteRepository) GetPublishedById(ctx context.Context, id int64) (d
 	}
 	// 适合单体应用
 	user, err := c.userRepo.FindById(ctx, note.AuthorId)
+	if err != nil {
+		return domain.Note{}, nil
+	}
 	res := domain.Note{
 		Id:      note.Id, // 用于鉴别是新增还是修改
 		Title:   note.Title,
