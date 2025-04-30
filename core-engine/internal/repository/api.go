@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=api.go -package=mocks -destination=mocks/api.mock.go APIRepository
 type APIRepository interface {
 	Create(ctx context.Context, api domain.API) (int64, error)
 	Update(ctx context.Context, api domain.API) error

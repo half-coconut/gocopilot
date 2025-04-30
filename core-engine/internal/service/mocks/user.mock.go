@@ -6,9 +6,9 @@ package mocks
 
 import (
 	context "context"
-	domain "github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	reflect "reflect"
 
+	domain "github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	gomock "go.uber.org/mock/gomock"
 )
 

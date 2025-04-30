@@ -7,6 +7,7 @@ import (
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 )
 
+//go:generate mockgen -source=api.go -package=mocks -destination=mocks/api.mock.go APIService
 type APIService interface {
 	Save(ctx context.Context, api domain.API, uid int64) (int64, error)
 	List(ctx context.Context, uid int64) ([]domain.API, error)
