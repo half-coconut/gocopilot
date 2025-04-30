@@ -98,7 +98,7 @@ func (t *TaskHandler) Edit(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, e
 
 			return ginx.Result{
 				Code:    1,
-				Message: fmt.Sprintf("OK"),
+				Message: "OK",
 				Data:    report,
 			}, nil
 		}
@@ -253,7 +253,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 
 	return ginx.Result{
 		Code:    1,
-		Message: fmt.Sprintf("OK"),
+		Message: "OK",
 		Data:    report,
 	}, nil
 }
@@ -313,7 +313,7 @@ func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 	tid := ctx.Param("id")
 
 	type TaskReq struct {
-		tid int64 `json:"id"`
+		Tid int64 `json:"id"`
 	}
 	var req TaskReq
 
@@ -324,7 +324,7 @@ func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 			Message: "系统错误",
 		}, err
 	}
-	req.tid, err = strconv.ParseInt(tid, 10, 64)
+	req.Tid, err = strconv.ParseInt(tid, 10, 64)
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -333,7 +333,7 @@ func (t *TaskHandler) InterfaceDebug(ctx *gin.Context, uc ijwt.UserClaims) (ginx
 		}, err
 	}
 
-	debug := t.svc.GetAPIDebugLogs(ctx, req.tid)
+	debug := t.svc.GetAPIDebugLogs(ctx, req.Tid)
 
 	return ginx.Result{
 		Code:    1,

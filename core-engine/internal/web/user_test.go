@@ -78,7 +78,7 @@ func TestUserHandler_Signup(t *testing.T) {
 			var res Response
 
 			// 将 JSON 字符串解析到 Response 变量中
-			err = jsonx.Unmarshal([]byte(resp.Body.String()), &res)
+			err = jsonx.Unmarshal(resp.Body.Bytes(), &res)
 			if err != nil {
 				fmt.Println("Error:", err)
 				return

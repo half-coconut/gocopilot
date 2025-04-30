@@ -91,16 +91,14 @@ func (svc *reportServiceImpl) GenerateSummary(ctx context.Context, begin time.Ti
 	r.Debug = debug
 	r = svc.latencies(r, b)
 
-	var summary domain.Summary
-	select {
 	// 监听取消了，再记录 summary
-	case <-ctx.Done():
-		ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-		summary, err := svc.repo.CreateSummary(ctxTimeout, *r)
-		if err != nil {
-			svc.l.Info(fmt.Sprintf("创建 summary 失败：%v，err: %v", summary, err))
-		}
+	<-ctx.Done()
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	summary, err := svc.repo.CreateSummary(ctxTimeout, *r)
+	if err != nil {
+		svc.l.Info(fmt.Sprintf("创建 summary 失败：%v，err: %v", summary, err))
 	}
 
 	svc.l.Info(fmt.Sprintf("summary 结构体：%v", summary))

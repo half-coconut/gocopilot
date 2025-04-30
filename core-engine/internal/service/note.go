@@ -110,7 +110,6 @@ func NewNoteServiceV2(repo note.NoteRepository, l logger.LoggerV1, producer even
 					nids = append(nids, info.uid)
 				case <-ctx.Done():
 					break
-
 				}
 			}
 			cancel()

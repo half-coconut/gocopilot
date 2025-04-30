@@ -128,7 +128,12 @@ func (wc *WebsocketContent) LongConnectionRequestV1(message string) {
 	if err != nil {
 		log.Fatal("Dial error:", err)
 	}
-	defer conn.Close()
+	defer func(conn *websocket.Conn) {
+		err := conn.Close()
+		if err != nil {
+			log.Printf("Connection close error: %v", err)
+		}
+	}(conn)
 	fmt.Println("Connected to the server!")
 
 	// 启动一个 goroutine 用于接收消息

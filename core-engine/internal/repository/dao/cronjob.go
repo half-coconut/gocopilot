@@ -51,29 +51,27 @@ func (dao *GORMCronJobDAO) GetJobByUId(ctx context.Context, uid int64) ([]CronJo
 
 func (dao *GORMCronJobDAO) PreemptByJId(ctx context.Context, jid int64) (CronJob, error) {
 	db := dao.db.WithContext(ctx)
-	for {
-		now := time.Now().UnixMilli()
-		var j CronJob
-		err := db.Model(&CronJob{}).Where("id = ? AND status = ? AND next_time <= ?", jid, cronjobStatusWaiting, now).
-			First(&j).Error
-		if err != nil {
-			return CronJob{}, err
-		}
-		// 使用乐观锁
-		res := db.Where("id =? AND version=?", jid, j.Version).Model(&CronJob{}).
-			Updates(map[string]any{
-				"status":  cronjobStatusRunning,
-				"version": j.Version + 1,
-				"utime":   now,
-			})
-		if res.Error != nil {
-			return CronJob{}, err
-		}
-		if res.RowsAffected == 0 {
-			return CronJob{}, errors.New("没抢到")
-		}
-		return j, err
+	now := time.Now().UnixMilli()
+	var j CronJob
+	err := db.Model(&CronJob{}).Where("id = ? AND status = ? AND next_time <= ?", jid, cronjobStatusWaiting, now).
+		First(&j).Error
+	if err != nil {
+		return CronJob{}, err
 	}
+	// 使用乐观锁
+	res := db.Where("id =? AND version=?", jid, j.Version).Model(&CronJob{}).
+		Updates(map[string]any{
+			"status":  cronjobStatusRunning,
+			"version": j.Version + 1,
+			"utime":   now,
+		})
+	if res.Error != nil {
+		return CronJob{}, err
+	}
+	if res.RowsAffected == 0 {
+		return CronJob{}, errors.New("没抢到")
+	}
+	return j, err
 
 }
 

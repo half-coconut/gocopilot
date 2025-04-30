@@ -53,7 +53,7 @@ func InitIntrGRPCClientV1(client *clientv3.Client) intrv1.InteractiveServiceClie
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	cc, err := grpc.Dial("etcd:///service/"+cfg.Name, opts...)
+	cc, err := grpc.NewClient("etcd:///service/"+cfg.Name, opts...)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +80,7 @@ func InitIntrGRPCClient(svc service.InteractiveService) intrv1.InteractiveServic
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	cc, err := grpc.Dial(cfg.Addr, opts...)
+	cc, err := grpc.NewClient(cfg.Addr, opts...)
 	if err != nil {
 		panic(err)
 	}

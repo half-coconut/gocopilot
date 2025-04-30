@@ -139,7 +139,6 @@ func (u *UserHandler) LoginSession(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, Result{Code: 1, Message: "登录成功", Data: user})
 	fmt.Printf("%v\n", user)
-	return
 }
 
 func (u *UserHandler) LoginJWT(ctx *gin.Context) {
@@ -171,7 +170,6 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, Result{Code: 1, Message: "登录成功", Data: user})
-	return
 }
 
 func (u *UserHandler) Logout(ctx *gin.Context) {
@@ -184,7 +182,6 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 		u.l.Info("session 保存失败", logger.Error(err))
 	}
 	ctx.JSON(http.StatusOK, Result{Code: 1, Message: "退出登录成功"})
-	return
 }
 
 func (u *UserHandler) LogoutJWT(ctx *gin.Context) {
@@ -260,7 +257,7 @@ func (u *UserHandler) EditJWT(ctx *gin.Context) {
 
 func (u *UserHandler) ProfileJWT(ctx *gin.Context) {
 	type ProfileReq struct {
-		id int64 `json:"id"`
+		Id int64 `json:"id"`
 	}
 	var req ProfileReq
 	err := ctx.Bind(&req)

@@ -111,6 +111,6 @@ func (s *Server) Close() error {
 			return err
 		}
 	}
-	s.Server.GracefulStop()
+	s.GracefulStop()
 	return nil
 }

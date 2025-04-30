@@ -69,7 +69,7 @@ func (h *httpService) Send(s *Subtask) *domain.HttpResult {
 	if _, err = io.Copy(&buf, body); err != nil {
 		h.l.Error("响应 body 复制异常", logger.Error(err))
 	}
-	res.Resp = string(buf.Bytes())
+	res.Resp = buf.String()
 
 	if res.Code = int64(uint16(r.StatusCode)); res.Code < 200 || res.Code >= 400 {
 		res.Error = r.Status
