@@ -8,6 +8,7 @@ import (
 	intrv1 "github.com/half-coconut/gocopilot/core-engine/api/proto/gen/intr/v1"
 	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
 	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
+	"log"
 	"math"
 	"time"
 )
@@ -48,7 +49,10 @@ func (svc *BatchRankingService) TopN(ctx context.Context) error {
 		return err
 	}
 	// 在这里，存起来
-	svc.repo.ReplaceTopN(ctx, notes)
+	err = svc.repo.ReplaceTopN(ctx, notes)
+	if err != nil {
+		log.Printf("ReplaceTopN 失败：%v", err)
+	}
 	return nil
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/half-coconut/gocopilot/core-engine/pkg/jsonx"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/half-coconut/gocopilot/core-engine/pkg/timex"
-	"log"
 	"sort"
 	"time"
 )
@@ -77,9 +76,8 @@ func (svc *reportServiceImpl) CreateDebugLogs(ctx context.Context, debug bool, r
 	if debug {
 		// 这里可以后期扩展为批量发送
 		for _, re := range res {
-			content, err := svc.CreateDebugLog(ctx, debug, re)
-			err = err
-			log.Println(content)
+			var content domain.DebugLog
+			content, err = svc.CreateDebugLog(ctx, debug, re)
 			batchRes = append(batchRes, content)
 		}
 	}

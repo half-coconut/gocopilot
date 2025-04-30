@@ -28,7 +28,10 @@ func main() {
 	//app.cron.Start()
 
 	server := app.server
-	server.Run(":3002")
+	err := server.Run(":3002")
+	if err != nil {
+		panic(err)
+	}
 
 	//ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	//defer cancel()
@@ -52,7 +55,10 @@ func main() {
 func initPrometheus() {
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(":8081", nil)
+		err := http.ListenAndServe(":8081", nil)
+		if err != nil {
+			panic(err)
+		}
 	}()
 }
 

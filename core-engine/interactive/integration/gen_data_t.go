@@ -22,7 +22,12 @@ func TestGenSQL(t *testing.T) {
 	file, err := os.OpenFile("data.sql",
 		os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC, 0666)
 	require.NoError(t, err)
-	defer file.Close()
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			t.Log(err)
+		}
+	}(file)
 
 	// 创建数据库和数据表的语句，防止还没初始化
 	_, err = file.WriteString(initSQL)
@@ -36,32 +41,74 @@ func TestGenSQL(t *testing.T) {
 
 	for i := 0; i < rowNum; i++ {
 		if i > 0 {
-			file.Write([]byte{',', '\n'})
+			_, err = file.Write([]byte{',', '\n'})
+			if err != nil {
+				t.Log(err)
+			}
 		}
-		file.Write([]byte{'('})
+		_, err = file.Write([]byte{'('})
+		if err != nil {
+			t.Log(err)
+		}
 		// biz_id
-		file.WriteString(strconv.Itoa(i + 1))
+		_, err = file.WriteString(strconv.Itoa(i + 1))
+		if err != nil {
+			t.Log(err)
+		}
 		// biz
-		file.WriteString(`,"test",`)
+		_, err = file.WriteString(`,"test",`)
+		if err != nil {
+			t.Log(err)
+		}
 		// read_cnt
-		file.WriteString(strconv.Itoa(int(rand.Int31n(10000))))
-		file.Write([]byte{','})
+		_, err = file.WriteString(strconv.Itoa(int(rand.Int31n(10000))))
+		if err != nil {
+			t.Log(err)
+		}
+		_, err = file.Write([]byte{','})
+		if err != nil {
+			t.Log(err)
+		}
 
 		// collect_cnt
-		file.WriteString(strconv.Itoa(int(rand.Int31n(10000))))
-		file.Write([]byte{','})
+		_, err = file.WriteString(strconv.Itoa(int(rand.Int31n(10000))))
+		if err != nil {
+			t.Log(err)
+		}
+		_, err = file.Write([]byte{','})
+		if err != nil {
+			t.Log(err)
+		}
 		// like_cnt
-		file.WriteString(strconv.Itoa(int(rand.Int31n(10000))))
-		file.Write([]byte{','})
+		_, err = file.WriteString(strconv.Itoa(int(rand.Int31n(10000))))
+		if err != nil {
+			t.Log(err)
+		}
+		_, err = file.Write([]byte{','})
+		if err != nil {
+			t.Log(err)
+		}
 
 		// ctime
-		file.WriteString(strconv.FormatInt(now, 10))
-		file.Write([]byte{','})
+		_, err = file.WriteString(strconv.FormatInt(now, 10))
+		if err != nil {
+			t.Log(err)
+		}
+		_, err = file.Write([]byte{','})
+		if err != nil {
+			t.Log(err)
+		}
 
 		// utime
-		file.WriteString(strconv.FormatInt(now, 10))
+		_, err = file.WriteString(strconv.FormatInt(now, 10))
+		if err != nil {
+			t.Log(err)
+		}
 
-		file.Write([]byte{')'})
+		_, err = file.Write([]byte{')'})
+		if err != nil {
+			t.Log(err)
+		}
 	}
 }
 

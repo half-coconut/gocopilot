@@ -84,7 +84,10 @@ func InitDB(l logger.LoggerV1) *gorm.DB {
 	// 或者 table 就是主表，A JOIN B，记录的就是 A
 	pcb := newCallbacks()
 	//pcb.registerAll(db)
-	db.Use(pcb)
+	err = db.Use(pcb)
+	if err != nil {
+		panic(err)
+	}
 
 	tracing.NewPlugin(tracing.WithDBSystem("coreengine"), tracing.WithQueryFormatter(func(query string) string {
 		l.Debug("", logger.String("query", query))

@@ -8,7 +8,12 @@ func GetOutBoundIP() string {
 	if err != nil {
 		return ""
 	}
-	defer conn.Close()
+	defer func(conn net.Conn) {
+		err = conn.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(conn)
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP.String()

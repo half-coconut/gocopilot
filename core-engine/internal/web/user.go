@@ -133,7 +133,10 @@ func (u *UserHandler) LoginSession(ctx *gin.Context) {
 		// 过期时间 30min
 		MaxAge: 60 * 30,
 	})
-	sess.Save()
+	err = sess.Save()
+	if err != nil {
+		u.l.Info("session 保存失败", logger.Error(err))
+	}
 	ctx.JSON(http.StatusOK, Result{Code: 1, Message: "登录成功", Data: user})
 	fmt.Printf("%v\n", user)
 	return
@@ -176,7 +179,10 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 	sess.Options(sessions.Options{
 		MaxAge: -1,
 	})
-	sess.Save()
+	err := sess.Save()
+	if err != nil {
+		u.l.Info("session 保存失败", logger.Error(err))
+	}
 	ctx.JSON(http.StatusOK, Result{Code: 1, Message: "退出登录成功"})
 	return
 }

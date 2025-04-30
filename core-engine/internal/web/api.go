@@ -222,7 +222,7 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 	aid := ctx.Param("id")
 
 	type APIReq struct {
-		aid int64 `json:"id"`
+		Aid int64 `json:"id"`
 	}
 	var req APIReq
 	err := ctx.Bind(&req)
@@ -232,7 +232,7 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 			Message: "系统错误",
 		}, err
 	}
-	req.aid, err = strconv.ParseInt(aid, 10, 64)
+	req.Aid, err = strconv.ParseInt(aid, 10, 64)
 	if err != nil {
 		a.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -240,7 +240,7 @@ func (a *APIHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result, 
 			Message: "系统错误",
 		}, err
 	}
-	detail, err := a.svc.Detail(ctx, req.aid)
+	detail, err := a.svc.Detail(ctx, req.Aid)
 	if err != nil {
 		return ginx.Result{}, err
 	}

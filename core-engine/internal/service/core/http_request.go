@@ -57,7 +57,12 @@ func (h *httpService) Send(s *Subtask) *domain.HttpResult {
 	if err != nil {
 		h.l.Error("发送请求异常", logger.Error(err))
 	}
-	defer r.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			h.l.Error("Body 关闭异常", logger.Error(err))
+		}
+	}(r.Body)
 
 	body := io.Reader(r.Body)
 	var buf bytes.Buffer

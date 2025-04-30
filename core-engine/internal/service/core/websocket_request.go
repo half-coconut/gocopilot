@@ -38,7 +38,12 @@ func (wc *WebsocketContent) ShortConnectionRequest(message string) {
 	if err != nil {
 		log.Fatal("Dial error:", err)
 	}
-	defer conn.Close()
+	defer func(conn *websocket.Conn) {
+		err = conn.Close()
+		if err != nil {
+			log.Fatal("Connection close error:", err)
+		}
+	}(conn)
 	fmt.Println("Connected to the server!")
 
 	err = conn.WriteMessage(websocket.TextMessage, []byte(message))
@@ -91,7 +96,10 @@ func (wc *WebsocketContent) LongConnectionRequest(message string) {
 			}
 			select {
 			case <-ctx.Done():
-				conn.Close()
+				err = conn.Close()
+				if err != nil {
+					log.Printf("Connection closed error: %v", err)
+				}
 				fmt.Println("Connection closed.")
 				return
 			case <-ticker.C:

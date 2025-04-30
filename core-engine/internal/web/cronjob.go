@@ -46,7 +46,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	jid := ctx.Param("id")
 
 	type JobReq struct {
-		jid int64 `json:"id"`
+		Jid int64 `json:"id"`
 	}
 	var req JobReq
 	err := ctx.Bind(&req)
@@ -56,7 +56,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 			Message: "输入格式不正确",
 		}, err
 	}
-	req.jid, err = strconv.ParseInt(jid, 10, 64)
+	req.Jid, err = strconv.ParseInt(jid, 10, 64)
 	if err != nil {
 		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -65,7 +65,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 		}, err
 	}
 	// 先释放任务
-	err = c.svc.Release(ctx, req.jid)
+	err = c.svc.Release(ctx, req.Jid)
 	if err != nil {
 		return ginx.Result{
 			Code:    errs.CronJobInternalServerError,
@@ -73,7 +73,7 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 		}, err
 	}
 
-	err = c.svc.ResetNextTime(ctx, req.jid)
+	err = c.svc.ResetNextTime(ctx, req.Jid)
 	if err != nil {
 		return ginx.Result{
 			Code:    errs.CronJobInternalServerError,
@@ -81,7 +81,12 @@ func (c *CronJobHandler) Open(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 		}, err
 	}
 	// 异步调用执行定时任务
-	go c.svc.ExecOne(ctx, req.jid)
+	go func() {
+		err = c.svc.ExecOne(ctx, req.Jid)
+		if err != nil {
+			c.l.Error("执行报错", logger.Error(err))
+		}
+	}()
 
 	return ginx.Result{
 		Code:    1,
@@ -94,7 +99,7 @@ func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resul
 	jid := ctx.Param("id")
 
 	type JobReq struct {
-		jid int64 `json:"id"`
+		Jid int64 `json:"id"`
 	}
 	var req JobReq
 	err := ctx.Bind(&req)
@@ -104,7 +109,7 @@ func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resul
 			Message: "输入格式不正确",
 		}, err
 	}
-	req.jid, err = strconv.ParseInt(jid, 10, 64)
+	req.Jid, err = strconv.ParseInt(jid, 10, 64)
 	if err != nil {
 		c.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -113,7 +118,7 @@ func (c *CronJobHandler) Close(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Resul
 		}, err
 	}
 
-	err = c.svc.StopOne(ctx, req.jid)
+	err = c.svc.StopOne(ctx, req.Jid)
 	if err != nil {
 		c.l.Error(fmt.Sprintf("暂停任务失败: %v", err))
 		return ginx.Result{

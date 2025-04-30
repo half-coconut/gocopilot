@@ -162,7 +162,7 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 	tid := ctx.Param("id")
 
 	type TaskReq struct {
-		tid int64 `json:"id"`
+		Tid int64 `json:"id"`
 	}
 	var req TaskReq
 
@@ -173,7 +173,7 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 			Message: "系统错误",
 		}, err
 	}
-	req.tid, err = strconv.ParseInt(tid, 10, 64)
+	req.Tid, err = strconv.ParseInt(tid, 10, 64)
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -182,7 +182,7 @@ func (t *TaskHandler) Detail(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result,
 		}, err
 	}
 
-	tasks, err := t.svc.GetDetailByTid(ctx, req.tid)
+	tasks, err := t.svc.GetDetailByTid(ctx, req.Tid)
 
 	if err != nil {
 		t.l.Info("用户校验，系统错误", logger.Error(err), logger.Int64("Id", uc.Id))
@@ -226,7 +226,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	debug := ctx.Query("debug")
 
 	type TaskReq struct {
-		tid int64 `json:"id"`
+		Tid int64 `json:"id"`
 	}
 	var req TaskReq
 
@@ -237,7 +237,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 			Message: "系统错误",
 		}, err
 	}
-	req.tid, err = strconv.ParseInt(tid, 10, 64)
+	req.Tid, err = strconv.ParseInt(tid, 10, 64)
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -249,7 +249,7 @@ func (t *TaskHandler) Execute(ctx *gin.Context, uc ijwt.UserClaims) (ginx.Result
 	if err != nil {
 		fmt.Printf("转换 \"%s\" 失败: %v\n", debug, err)
 	}
-	report := t.svc.ExecutePerformanceTask(ctx, req.tid, dg)
+	report := t.svc.ExecutePerformanceTask(ctx, req.Tid, dg)
 
 	return ginx.Result{
 		Code:    1,
@@ -263,7 +263,7 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 	tid := ctx.Param("id")
 
 	type TaskReq struct {
-		tid int64 `json:"id"`
+		Tid int64 `json:"id"`
 	}
 	var req TaskReq
 
@@ -274,7 +274,7 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 			Message: "系统错误",
 		}, err
 	}
-	req.tid, err = strconv.ParseInt(tid, 10, 64)
+	req.Tid, err = strconv.ParseInt(tid, 10, 64)
 	if err != nil {
 		t.l.Error(fmt.Sprintf("Error converting string to int64: %v", err))
 		return ginx.Result{
@@ -292,7 +292,7 @@ func (t *TaskHandler) PerformanceDebug(ctx *gin.Context, uc ijwt.UserClaims) (gi
 	wg.Add(1)
 	// 注意这里默认开启 debug
 	debug := true
-	go t.svc.RunPerformanceWithDebug(ctxCancel, req.tid, results, &wg, debug)
+	go t.svc.RunPerformanceWithDebug(ctxCancel, req.Tid, results, &wg, debug)
 
 	go func() {
 		wg.Wait()
