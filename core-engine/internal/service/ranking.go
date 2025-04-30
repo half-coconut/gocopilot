@@ -113,7 +113,7 @@ func (svc *BatchRankingService) topN(ctx context.Context) ([]domain.Note, error)
 				// 要求 topN 已经满了
 				val, _ := topN.Dequeue()
 				if val.score < score {
-					err = topN.Enqueue(Score{
+					_ = topN.Enqueue(Score{
 						note:  note,
 						score: score,
 					})

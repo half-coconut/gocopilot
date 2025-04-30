@@ -41,7 +41,7 @@ func (h HttpExecutor) Exec(ctx context.Context, j domain.Job) error {
 	if err != nil {
 		return err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, _ := http.DefaultClient.Do(req)
 	if resp.StatusCode != http.StatusOK {
 		return errors.New("执行失败")
 	}
