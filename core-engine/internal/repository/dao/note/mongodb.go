@@ -11,8 +11,8 @@ import (
 )
 
 type MongoDBDAO struct {
-	client *mongo.Client
-	db     *mongo.Database
+	//client *mongo.Client
+	//db *mongo.Database
 
 	col     *mongo.Collection // 制作库
 	liveCol *mongo.Collection // 线上库

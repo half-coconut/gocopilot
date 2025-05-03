@@ -15,7 +15,7 @@ type ReportDAO interface {
 }
 
 type MongoDBReportDAO struct {
-	client    *mongo.Client
+	//client    *mongo.Client
 	db        *mongo.Database
 	l         logger.LoggerV1
 	node      *snowflake.Node
@@ -26,6 +26,7 @@ type MongoDBReportDAO struct {
 func NewMongoDBReportDAO(db *mongo.Database, l logger.LoggerV1) ReportDAO {
 	node, _ := snowflake.NewNode(1) // 线上环境从环境变量中获取
 	return &MongoDBReportDAO{
+		db:        db,
 		debugLogs: db.Collection("debug_logs"),
 		summary:   db.Collection("summary"),
 		node:      node,

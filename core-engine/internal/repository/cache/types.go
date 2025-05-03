@@ -18,8 +18,8 @@ type RedisCache struct {
 }
 
 type DoubleCache struct {
-	local Cache
-	redis Cache
+	//local Cache
+	//redis Cache
 }
 
 func (d DoubleCache) Set(ctx context.Context, key string, val any, exp time.Duration) error {

@@ -10,14 +10,8 @@ import (
 
 type JobService interface {
 	Preempt(ctx context.Context) (domain.Job, error)
-	// 返回一个释放的方法，然后调用者去调用
-	PreemptV1(ctx context.Context) (domain.Job, func(), error)
 	ResetNextTime(ctx context.Context, j domain.Job) error
-}
-
-func (p *cronJobService) PreemptV1(ctx context.Context) (domain.Job, func(), error) {
-	//TODO implement me
-	panic("implement me")
+	// 返回一个释放的方法，然后调用者去调用
 }
 
 func (p *cronJobService) ResetNextTime(ctx context.Context, j domain.Job) error {
@@ -33,6 +27,10 @@ type cronJobService struct {
 	repo            repository.JobRepository
 	refreshInterval time.Duration
 	l               logger.LoggerV1
+}
+
+func newCronJobService(repo repository.JobRepository, refreshInterval time.Duration, l logger.LoggerV1) JobService {
+	return &cronJobService{repo: repo, refreshInterval: refreshInterval, l: l}
 }
 
 func (p *cronJobService) Preempt(ctx context.Context) (domain.Job, error) {

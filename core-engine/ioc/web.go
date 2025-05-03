@@ -2,7 +2,6 @@ package ioc
 
 import (
 	"context"
-	"errors"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/half-coconut/gocopilot/core-engine/internal/web"
@@ -15,10 +14,7 @@ import (
 	logger2 "github.com/half-coconut/gocopilot/core-engine/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	"go.uber.org/zap"
-	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	redisv9 "github.com/redis/go-redis/v9"
@@ -140,27 +136,26 @@ func parameterExamples(server *gin.Engine) {
 }
 
 // 仅供实验
-func initLogger() {
-	l, err := zap.NewDevelopment()
-	if err != nil {
-		panic(err)
-	}
-	log.Printf("这是标准日志输出")
-	// 打印不出来
-	zap.L().Error("之前：有问题")
-	zap.ReplaceGlobals(l)
-	zap.L().Error("之后：有问题")
-
-	zap.L().Info("这是实验数据",
-		zap.Error(errors.New("这个一个 error")),
-		zap.String("key", "1"),
-		zap.Int64("Id", 123))
-
-}
+//func initLogger() {
+//	l, err := zap.NewDevelopment()
+//	if err != nil {
+//		panic(err)
+//	}
+//	log.Printf("这是标准日志输出")
+//	// 打印不出来
+//	zap.L().Error("之前：有问题")
+//	zap.ReplaceGlobals(l)
+//	zap.L().Error("之后：有问题")
+//
+//	zap.L().Info("这是实验数据",
+//		zap.Error(errors.New("这个一个 error")),
+//		zap.String("key", "1"),
+//		zap.Int64("Id", 123))
+//}
 
 // 仅供实验
-func initLog() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	// 使用 go 标准输出到控制台
-	log.SetOutput(os.Stdout)
-}
+//func initLog() {
+//	log.SetFlags(log.LstdFlags | log.Lshortfile)
+//	// 使用 go 标准输出到控制台
+//	log.SetOutput(os.Stdout)
+//}

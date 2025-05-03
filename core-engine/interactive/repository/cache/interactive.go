@@ -106,7 +106,7 @@ func (r *RedisInteractiveCache) Set(ctx context.Context, biz string, bizId int64
 	if err != nil {
 		return err
 	}
-	return r.client.Expire(ctx, key, time.Minute*15).Err()
+	return r.client.Expire(ctx, key, r.expiration).Err()
 }
 
 func (r *RedisInteractiveCache) key(biz string, bizId int64) string {
@@ -115,6 +115,7 @@ func (r *RedisInteractiveCache) key(biz string, bizId int64) string {
 
 func NewRedisInteractiveCache(client redis.Cmdable) InteractiveCache {
 	return &RedisInteractiveCache{
-		client: client,
+		client:     client,
+		expiration: time.Minute * 15,
 	}
 }

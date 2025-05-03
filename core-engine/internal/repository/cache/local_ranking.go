@@ -52,7 +52,7 @@ func (r RankingLocalCache) ForceGet(ctx context.Context) ([]domain.Note, error) 
 	return notes, nil
 }
 
-type item struct {
-	notes []domain.Note
-	ddl   time.Time
-}
+//type item struct {
+//	notes []domain.Note
+//	ddl   time.Time
+//}

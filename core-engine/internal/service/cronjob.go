@@ -42,11 +42,11 @@ func NewCronJobService(l logger.LoggerV1, repo repository.CronJobRepository, tas
 
 const (
 	// 等待，准备进入
-	cronjobStatusWaiting = iota
+	//cronjobStatusWaiting int = 0
 	// 执行中
-	cronjobStatusRunning
+	//cronjobStatusRunning int = 1
 	// 暂停调度
-	cronjobStatusPaused
+	cronjobStatusPaused int = 2
 )
 
 func (svc *CronJobServiceImpl) List(ctx context.Context, uid int64) ([]domain.CronJob, error) {

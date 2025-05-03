@@ -1,3 +1,7 @@
+.PHONY: tidy
+tidy:
+	@go mod tidy -v
+
 .PHONY: docker
 docker:
 	@rm core-engine || true
