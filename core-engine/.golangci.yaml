@@ -5,3 +5,27 @@ output:
   sort-order:
     - file
     - linter
+
+linters-settings:
+  unused:
+    # 忽略未使用的参数（适用于函数参数）
+    check-parameters: false
+    # 忽略未使用的变量（适用于局部变量）
+    check-shadowing: false
+
+linters:
+  enable:
+    - unused
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  # 忽略所有 unused 警告
+  exclude:
+    - path: _test\.go
+      linters:
+        - unused
+    - text: "is unused"
+      linters:
+        - unused
