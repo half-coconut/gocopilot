@@ -16,16 +16,3 @@ linters-settings:
 linters:
   enable:
     - unused
-
-issues:
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  # 忽略所有 unused 警告
-  exclude:
-    - path: _test\.go
-      linters:
-        - unused
-    - text: "is unused"
-      linters:
-        - unused

@@ -4,15 +4,24 @@ on:
   push:
     branches:
       - 'main'
+  workflow_dispatch: # 允许手动触发
+    inputs:
+      build:
+        description: '是否执行 build job（默认 false）'
+        required: false
+        type: boolean
+      build_docker:
+        description: '是否执行 docker job（默认 false）'
+        required: false
+        type: boolean
 
 env:
   DOCKERHUB_USERNAME: halfcoconut
-  BUILD: 'false'         # 默认不执行 build job
-  BUILD_DOCKER: 'false'  # 新增 docker 构建开关
+
 
 jobs:
   build:
-    if: ${{ env.BUILD == 'true' }}
+    if: ${{ inputs.build == true }}  # 直接使用输入参数
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -70,7 +79,7 @@ jobs:
         working-directory: ./core-engine
 
   docker:
-    if: ${{ env.BUILD_DOCKER == 'true' }}
+    if: ${{ inputs.build_docker == true }}  # 直接使用输入参数
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
