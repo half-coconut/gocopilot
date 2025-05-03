@@ -5,7 +5,3 @@ output:
   sort-order:
     - file
     - linter
-
-linters:
-  enable:
-    - unused
