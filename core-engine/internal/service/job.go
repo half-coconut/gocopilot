@@ -1,20 +1,11 @@
 package service
 
-//
-//import (
-//	"context"
-//	"github.com/half-coconut/gocopilot/core-engine/internal/domain"
-//	"github.com/half-coconut/gocopilot/core-engine/internal/repository"
-//	"github.com/half-coconut/gocopilot/core-engine/pkg/logger"
-//	"time"
-//)
-//
-//type JobService interface {
-//	Preempt(ctx context.Context) (domain.Job, error)
-//	ResetNextTime(ctx context.Context, j domain.Job) error
-//	// 返回一个释放的方法，然后调用者去调用
-//}
-//
+type JobService interface {
+	//Preempt(ctx context.Context) (domain.Job, error)
+	//ResetNextTime(ctx context.Context, j domain.Job) error
+	// 返回一个释放的方法，然后调用者去调用
+}
+
 //func (p *cronJobService) ResetNextTime(ctx context.Context, j domain.Job) error {
 //	next := j.NextTime()
 //	if next.IsZero() {
@@ -23,17 +14,13 @@ package service
 //	}
 //	return p.repo.UpdateNextTime(ctx, j.Id, next)
 //}
-//
+
 //type cronJobService struct {
 //	repo            repository.JobRepository
 //	refreshInterval time.Duration
 //	l               logger.LoggerV1
 //}
-//
-//func newCronJobService(repo repository.JobRepository, refreshInterval time.Duration, l logger.LoggerV1) JobService {
-//	return &cronJobService{repo: repo, refreshInterval: refreshInterval, l: l}
-//}
-//
+
 //func (p *cronJobService) Preempt(ctx context.Context) (domain.Job, error) {
 //	j, err := p.repo.Preempt(ctx)
 //
@@ -68,7 +55,7 @@ package service
 //	}
 //	return j, err
 //}
-//
+
 //func (p *cronJobService) Refresh(id int64) {
 //	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 //	defer cancel()
