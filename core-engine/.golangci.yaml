@@ -6,13 +6,6 @@ output:
     - file
     - linter
 
-linters-settings:
-  unused:
-    # 忽略未使用的参数（适用于函数参数）
-    check-parameters: false
-    # 忽略未使用的变量（适用于局部变量）
-    check-shadowing: false
-
 linters:
   enable:
     - unused
