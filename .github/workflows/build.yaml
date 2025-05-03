@@ -7,8 +7,8 @@ on:
 
 env:
   DOCKERHUB_USERNAME: halfcoconut
-  BUILD: false
-  BUILD_DOCKER: false
+  BUILD: 'false'         # 默认不执行 build job
+  BUILD_DOCKER: 'false'  # 新增 docker 构建开关
 
 jobs:
   build:

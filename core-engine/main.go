@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -9,7 +10,9 @@ import (
 	_ "github.com/spf13/viper/remote"
 	_ "go.uber.org/zap"
 	_ "gorm.io/driver/mysql"
+	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -24,8 +27,8 @@ func main() {
 			panic(err)
 		}
 	}
-	// 定时任务的开启
-	//app.cron.Start()
+	//定时任务的开启
+	app.cron.Start()
 
 	server := app.server
 	err := server.Run(":3002")
@@ -37,18 +40,18 @@ func main() {
 	//defer cancel()
 	//closeFunc(ctx)
 
-	//// 一分钟内要关完，要退出
-	//ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	//defer cancel()
-	//log.Println(ctx)
-	//// 等待运行完毕
-	//ctx = app.cron.Stop()
-	//// 超时强制退出，防止有些任务执行时间过长
-	//tm := time.NewTimer(time.Minute * 10)
-	//select {
-	//case <-tm.C:
-	//case <-ctx.Done():
-	//}
+	// 一分钟内要关完，要退出
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	log.Println(ctx)
+	// 等待运行完毕
+	ctx = app.cron.Stop()
+	// 超时强制退出，防止有些任务执行时间过长
+	tm := time.NewTimer(time.Minute * 10)
+	select {
+	case <-tm.C:
+	case <-ctx.Done():
+	}
 
 }
 
